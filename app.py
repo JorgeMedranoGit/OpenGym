@@ -4,11 +4,14 @@ from flask_sqlalchemy import SQLAlchemy
 
 import os
 
+from database import init_db, db
+
 app = Flask(__name__)
 app.secret_key = "hello"
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://quantumcoders_user:YFq8LXNKyaDgSJkFc0OGk9GwgfGTOlsj@dpg-cs2hv4bqf0us73a8h0fg-a.virginia-postgres.render.com/quantumcoders"
 
 app.permanent_session_lifetime = timedelta(minutes=5)
+
+init_db(app)
 
 db = SQLAlchemy(app)
 
