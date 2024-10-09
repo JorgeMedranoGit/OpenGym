@@ -3,3 +3,4 @@ Gunicorn
 packaging
 sqlalchemy
 flask_sqlalchemy
+pgsycopg2-binary
