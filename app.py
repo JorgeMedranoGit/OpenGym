@@ -36,6 +36,20 @@ class Productos(db.Model):
         self.stock = stock
     def __repr__(self):
         return f'<Producto {self.nombre}, Precio: {self.previov}, Stock: {self.stock}>'
+class Proveedores(db.Model):
+    __tablename__ = 'proveedores'  # Nombre de la tabla en la base de datos
+
+    _id = db.Column("idproveedor", db.Integer, primary_key=True, autoincrement=True)  # Columna de identificación
+    nombre = db.Column(db.String(30), nullable=False)  # Nombre del producto
+    telefono = db.Column(db.String(9), nullable=False)  # Precio de venta, tipo decimal
+    correo = db.Column(db.String(50), nullable=False)  # Stock disponible
+
+    def __init__(self, nombre, precio, stock):
+        self.nombre = nombre
+        self.telefono = precio
+        self.correo = stock
+    def __repr__(self):
+        return f'<Proveedor {self.nombre}, Telefono: {self.telefono}, Correo: {self.correo}>'
 # Crear las tablas antes de que arranque la aplicación
 
 @app.route("/")
@@ -129,7 +143,6 @@ def productosCrud():
 
     productos = Productos.query.all()
     return render_template("productos.html", productos=productos)
- 
 
 @app.route("/productos/editar/<int:id>", methods=["GET"])
 def editarProducto(id):
@@ -144,7 +157,42 @@ def eliminarProducto(id):
     db.session.commit()
     flash("Producto eliminado exitosamente!")
     return redirect("/productos")
-
+#Proveedores (Pagina Principal)
+@app.route("/proveedores", methods=["POST", "GET"])
+def proveedoresCrud():
+    if request.method == "POST":
+        nombre = request.form['nombreProovedor']
+        telefono = Decimal(request.form['precioProduc'])  
+        correo = int(request.form['stockProduc']) 
+        proveedor_id = request.form.get('proveedor_id')  
+        if proveedor_id: 
+            proveedor = Proveedores.query.get(proveedor_id)
+            proveedor.nombre = nombre
+            proveedor.telefono = telefono
+            proveedor.correo = correo
+            db.session.commit() 
+            flash("Producto editado exitosamente!")
+        else:
+            nuevo_proveedor = Proveedores(nombre, telefono, correo)
+            db.session.add(nuevo_proveedor)
+            db.session.commit() 
+            flash("Proveedor añadido exitosamente!")
+        return redirect("/proveedores")  
+    proveedores = Proveedores.query.all()
+    return render_template("proveedores.html", proveedores=proveedores)
+#Proveedores (Edicion)
+@app.route("/proveedores/editar/<int:id>", methods=["GET"])
+def editarProveedor(id):
+    proveedor = Proveedores.query.get(id) 
+    return render_template("proveedores.html", proveedor=proveedor, proveedores=Proveedores.query.all())
+#Proveedores (Eliminar)
+@app.route("/proveedores/eliminar/<int:id>", methods=["POST"])
+def eliminarProducto(id):
+    proveedor = Proveedores.query.get(id)
+    db.session.delete(proveedor)
+    db.session.commit()
+    flash("Proveedor eliminado exitosamente!")
+    return redirect("/proveedores")
 
 
 if __name__ == "__main__":

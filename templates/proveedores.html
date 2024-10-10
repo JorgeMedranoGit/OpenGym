@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Proveedores{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor%}
+    {% endif %}
+{% endwith %}
+
+<form action="/proveedores" method="post">
+    <input type="hidden" name="proveedor_id" value="{{ proveedor._id if proveedor else '' }}">
+    <input type="text" name="nombreProveedor" placeholder="Nombre del Proveedor" value="{{ proveedor.nombre if proveedor else '' }}" required>
+    <input type="text" name="telefonoProveedor" placeholder="Telefono del Proveedor" value="{{ proveedor.telefono if proveedor else '' }}" required>
+    <input type="number" name="correoProveedor" placeholder="Correo del Proveedor" value="{{ proveedor.correo if proveedor else '' }}" required>
+    <input type="submit" value="{{ 'Actualizar' if proveedor else 'Añadir' }}"/>
+</form>
+
+
+<table border="1" cellpadding="10">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Telefono</th>
+            <th>Correo</th>
+            <th>Opciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for proveedor in proveedores %}
+        <tr>
+            <td>{{ proveedor._id }}</td>
+            <td>{{ proveedor.nombre }}</td>
+            <td>{{ proveedor.telefono }}</td>
+            <td>{{ proveedor.correo }}</td>
+            <td>
+                
+                <a href="/proveedor/editar/{{ proveedor._id }}">Editar</a>
+                <form action="/proveedor/eliminar/{{ proveedor._id }}" method="post" style="display:inline;">
+                    <button type="submit">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
