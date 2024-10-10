@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Empleados{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+<br><br>
+<form action="/empleados" method="post" class="form mt-3">
+    <input type="hidden" name="empleado_id" class="form-control mt-2" value="{{ empleado.idempleado if empleado else '' }}">
+    <input type="text" name="nombre" class="form-control mt-2" placeholder="Nombre" value="{{ empleado.nombre if empleado else '' }}" required>
+    <input type="text" name="apellido" class="form-control mt-2" placeholder="Apellido" value="{{ empleado.apellido if empleado else '' }}" required>
+    <input type="text" name="direccion" class="form-control mt-2" placeholder="Dirección" value="{{ empleado.direccion if empleado else '' }}">
+    <input type="text" name="carnet" class="form-control mt-2" placeholder="Carnet" value="{{ empleado.carnet if empleado else '' }}" required>
+    <input type="text" name="telefono" class="form-control mt-2" placeholder="Teléfono" value="{{ empleado.telefono if empleado else '' }}">
+    <input type="number" step="0.01" name="sueldo" class="form-control mt-2" placeholder="Sueldo" value="{{ empleado.sueldo if empleado else '' }}">
+    <input type="submit" class="btn btn-success mt-2" value="{{ 'Actualizar' if empleado else 'Añadir' }}"/>
+</form>
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Dirección</th>
+            <th>Carnet</th>
+            <th>Teléfono</th>
+            <th>Sueldo</th>
+            <th>Opciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for empleado in empleados %}
+        <tr>
+            <td>{{ empleado.idempleado }}</td>
+            <td>{{ empleado.nombre }}</td>
+            <td>{{ empleado.apellido }}</td>
+            <td>{{ empleado.direccion }}</td>
+            <td>{{ empleado.carnet }}</td>
+            <td>{{ empleado.telefono }}</td>
+            <td>{{ empleado.sueldo }}</td>
+            <td>
+                <a href="/empleados/editar/{{ empleado.idempleado }}" class="btn btn-dark">Editar</a>
+                <form action="/empleados/eliminar/{{ empleado.idempleado }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
