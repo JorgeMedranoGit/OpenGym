@@ -157,6 +157,7 @@ def eliminarProducto(id):
     db.session.commit()
     flash("Producto eliminado exitosamente!")
     return redirect("/productos")
+
 #Proveedores (Pagina Principal)
 @app.route("/proveedores", methods=["POST", "GET"])
 def proveedoresCrud():
@@ -171,7 +172,7 @@ def proveedoresCrud():
             proveedor.telefono = telefono
             proveedor.correo = correo
             db.session.commit() 
-            flash("Producto editado exitosamente!")
+            flash("Proveedor editado exitosamente!")
         else:
             nuevo_proveedor = Proveedores(nombre, telefono, correo)
             db.session.add(nuevo_proveedor)
@@ -185,15 +186,14 @@ def proveedoresCrud():
 def editarProveedor(id):
     proveedor = Proveedores.query.get(id) 
     return render_template("proveedores.html", proveedor=proveedor, proveedores=Proveedores.query.all())
-#Proveedores (Eliminar)
+
 @app.route("/proveedores/eliminar/<int:id>", methods=["POST"])
-def eliminarProducto(id):
+def eliminarProveedor(id):
     proveedor = Proveedores.query.get(id)
     db.session.delete(proveedor)
     db.session.commit()
     flash("Proveedor eliminado exitosamente!")
     return redirect("/proveedores")
-
 
 if __name__ == "__main__":
     app.run(debug=True)
