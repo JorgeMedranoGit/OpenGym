@@ -9,16 +9,16 @@
     {% endif %}
 {% endwith %}
 
-<form action="/proveedores" method="post">
-    <input type="hidden" name="proveedor_id" value="{{ proveedor._id if proveedor else '' }}">
-    <input type="text" name="nombreProveedor" placeholder="Nombre del Proveedor" value="{{ proveedor.nombre if proveedor else '' }}" required>
-    <input type="text" name="telefonoProveedor" placeholder="Telefono del Proveedor" value="{{ proveedor.telefono if proveedor else '' }}" required>
-    <input type="text" name="correoProveedor" placeholder="Correo del Proveedor" value="{{ proveedor.correo if proveedor else '' }}" required>
-    <input type="submit" value="{{ 'Actualizar' if proveedor else 'Añadir' }}"/>
+<form action="/proveedores" method="post" class="form mt-3">
+    <input class="form-control mt-2" type="hidden" name="proveedor_id" value="{{ proveedor._id if proveedor else '' }}">
+    <input class="form-control mt-2" type="text" name="nombreProveedor" placeholder="Nombre del Proveedor" value="{{ proveedor.nombre if proveedor else '' }}" required>
+    <input class="form-control mt-2" type="text" name="telefonoProveedor" placeholder="Telefono del Proveedor" value="{{ proveedor.telefono if proveedor else '' }}" required>
+    <input class="form-control mt-2" type="text" name="correoProveedor" placeholder="Correo del Proveedor" value="{{ proveedor.correo if proveedor else '' }}" required>
+    <input class="btn btn-success mt-2" type="submit" value="{{ 'Actualizar' if proveedor else 'Añadir' }}"/>
 </form>
 
 
-<table border="1" cellpadding="10">
+<table class="table table-striped mt-3">
     <thead>
         <tr>
             <th>ID</th>
@@ -37,9 +37,9 @@
             <td>{{ proveedor.correo }}</td>
             <td>
                 
-                <a href="/proveedores/editar/{{ proveedor._id }}">Editar</a>
+                <a href="/proveedores/editar/{{ proveedor._id }}" class="btn btn-dark">Editar</a>
                 <form action="/proveedores/eliminar/{{ proveedor._id }}" method="post" style="display:inline;">
-                    <button type="submit">Eliminar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
                 </form>
             </td>
         </tr>
