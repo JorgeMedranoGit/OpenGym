@@ -8,17 +8,17 @@
         {% endfor%}
     {% endif %}
 {% endwith %}
-
-<form action="/productos" method="post">
-    <input type="hidden" name="producto_id" value="{{ producto._id if producto else '' }}">
-    <input type="text" name="nombreProduc" placeholder="Nombre del Producto" value="{{ producto.nombre if producto else '' }}" required>
-    <input type="text" name="precioProduc" placeholder="Precio del Producto" value="{{ producto.preciov if producto else '' }}" required>
-    <input type="number" name="stockProduc" placeholder="Stock del Producto" value="{{ producto.stock if producto else '' }}" required>
-    <input type="submit" value="{{ 'Actualizar' if producto else 'Añadir' }}"/>
+<br><br>
+<form action="/productos" method="post" class="form mt-3">
+    <input type="hidden" name="producto_id" class="form-control mt-2" value="{{ producto._id if producto else '' }}">
+    <input type="text" name="nombreProduc" class="form-control mt-2" placeholder="Nombre del Producto" value="{{ producto.nombre if producto else '' }}" required>
+    <input type="text" name="precioProduc" class="form-control mt-2" placeholder="Precio del Producto" value="{{ producto.preciov if producto else '' }}" required>
+    <input type="number" name="stockProduc"  class="form-control mt-2" placeholder="Stock del Producto" value="{{ producto.stock if producto else '' }}" required>
+    <input type="submit" class="btn btn-success mt-2" value="{{ 'Actualizar' if producto else 'Añadir' }}"/>
 </form>
 
 
-<table border="1" cellpadding="10">
+<table class="table table-striped mt-3">
     <thead>
         <tr>
             <th>ID</th>
@@ -37,9 +37,9 @@
             <td>{{ producto.stock }}</td>
             <td>
                 
-                <a href="/productos/editar/{{ producto._id }}">Editar</a>
+                <a href="/productos/editar/{{ producto._id }}" class="btn btn-dark">Editar</a>
                 <form action="/productos/eliminar/{{ producto._id }}" method="post" style="display:inline;">
-                    <button type="submit">Eliminar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
                 </form>
             </td>
         </tr>
