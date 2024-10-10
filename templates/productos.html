@@ -10,8 +10,8 @@
 {% endwith %}
 
 <form action="/productos" method="post">
-    <input type="hidden" name="proveedor_id" value="{{ producto._id if producto else '' }}">
-    <input type="text" name="nombreProveedor" placeholder="Nombre del Producto" value="{{ producto.nombre if producto else '' }}" required>
+    <input type="hidden" name="producto_id" value="{{ producto._id if producto else '' }}">
+    <input type="text" name="nombreProduc" placeholder="Nombre del Producto" value="{{ producto.nombre if producto else '' }}" required>
     <input type="text" name="precioProduc" placeholder="Precio del Producto" value="{{ producto.preciov if producto else '' }}" required>
     <input type="number" name="stockProduc" placeholder="Stock del Producto" value="{{ producto.stock if producto else '' }}" required>
     <input type="submit" value="{{ 'Actualizar' if producto else 'Añadir' }}"/>

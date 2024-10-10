@@ -162,9 +162,9 @@ def eliminarProducto(id):
 @app.route("/proveedores", methods=["POST", "GET"])
 def proveedoresCrud():
     if request.method == "POST":
-        nombre = request.form['nombreProovedor']
-        telefono = Decimal(request.form['precioProduc'])  
-        correo = int(request.form['stockProduc']) 
+        nombre = request.form['nombreProveedor']
+        telefono = request.form['telefonoProveedor']  
+        correo = request.form['correoProveedor']
         proveedor_id = request.form.get('proveedor_id')  
         if proveedor_id: 
             proveedor = Proveedores.query.get(proveedor_id)
@@ -178,7 +178,7 @@ def proveedoresCrud():
             db.session.add(nuevo_proveedor)
             db.session.commit() 
             flash("Proveedor añadido exitosamente!")
-        return redirect("/proveedores")  
+        return redirect("/proveedores")
     proveedores = Proveedores.query.all()
     return render_template("proveedores.html", proveedores=proveedores)
 #Proveedores (Edicion)
