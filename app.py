@@ -199,6 +199,46 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
+@app.route('/empleados')
+def listar_empleados():
+    empleados = obtener_todos_los_empleados()  # Implementar esta función para obtener los empleados de la BD
+    return render_template('empleados.html', empleados=empleados)
+
+
+@app.route('/empleados', methods=['POST'])
+def agregar_actualizar_empleado():
+    empleado_id = request.form.get('empleado_id')
+    nombre = request.form.get('nombre')
+    apellido = request.form.get('apellido')
+    direccion = request.form.get('direccion')
+    carnet = request.form.get('carnet')
+    telefono = request.form.get('telefono')
+    sueldo = request.form.get('sueldo')
+    
+    if empleado_id:  # Actualizar empleado
+        actualizar_empleado(empleado_id, nombre, apellido, direccion, carnet, telefono, sueldo)
+        flash('Empleado actualizado correctamente')
+    else:  # Agregar nuevo empleado
+        agregar_empleado(nombre, apellido, direccion, carnet, telefono, sueldo)
+        flash('Empleado añadido correctamente')
+    
+    return redirect('/empleados')
+
+
+@app.route('/empleados/editar/<int:empleado_id>')
+def editar_empleado(empleado_id):
+    empleado = obtener_empleado_por_id(empleado_id)  # Implementar esta función
+    return render_template('empleados.html', empleado=empleado)
+
+
+@app.route('/empleados/eliminar/<int:empleado_id>', methods=['POST'])
+def eliminar_empleado(empleado_id):
+    eliminar_empleado_por_id(empleado_id)  # Implementar esta función
+    flash('Empleado eliminado correctamente')
+    return redirect('/empleados')
+
+
+
 
 
 
