@@ -1,17 +1,15 @@
-from flask import Flask, redirect, url_for, render_template, request, session, flash
+from flask import Flask, redirect, url_for, render_template, request, session, flash, jsonify
 from datetime import timedelta
+from decimal import Decimal
 from flask_sqlalchemy import SQLAlchemy 
 
 import os
 
-from database import init_db, db
-
 app = Flask(__name__)
 app.secret_key = "hello"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://quantumcoders_user:YFq8LXNKyaDgSJkFc0OGk9GwgfGTOlsj@dpg-cs2hv4bqf0us73a8h0fg-a.virginia-postgres.render.com/quantumcoders"
 
 app.permanent_session_lifetime = timedelta(minutes=5)
-
-init_db(app)
 
 db = SQLAlchemy(app)
 
@@ -24,7 +22,20 @@ class users(db.Model):
         self.name = name
         self.email = email
 
+class Productos(db.Model):
+    __tablename__ = 'productos'  # Nombre de la tabla en la base de datos
 
+    _id = db.Column("idp", db.Integer, primary_key=True, autoincrement=True)  # Columna de identificación
+    nombre = db.Column(db.String(100), nullable=False)  # Nombre del producto
+    preciov = db.Column(db.Numeric(10, 2), nullable=False)  # Precio de venta, tipo decimal
+    stock = db.Column(db.Integer, nullable=False)  # Stock disponible
+
+    def __init__(self, nombre, precio, stock):
+        self.nombre = nombre
+        self.preciov = precio
+        self.stock = stock
+    def __repr__(self):
+        return f'<Producto {self.nombre}, Precio: {self.previov}, Stock: {self.stock}>'
 # Crear las tablas antes de que arranque la aplicación
 
 @app.route("/")
@@ -87,5 +98,59 @@ def logout():
 def test():
     return render_template("new.html")
 
+
+
+
+
+# RUTAS DE LOS CRUDS
+
+@app.route("/productos", methods=["POST", "GET"])
+def productosCrud():
+    if request.method == "POST":
+        nombre = request.form['nombreProduc']
+        precioVenta = Decimal(request.form['precioProduc'])  
+        stock = int(request.form['stockProduc']) 
+        
+        producto_id = request.form.get('producto_id')  
+        if producto_id: 
+            producto = Productos.query.get(producto_id)
+            producto.nombre = nombre
+            producto.preciov = precioVenta
+            producto.stock = stock
+            db.session.commit() 
+            flash("Producto editado exitosamente!")
+        else:
+            nuevo_producto = Productos(nombre, precioVenta, stock)
+            db.session.add(nuevo_producto)
+            db.session.commit() 
+            flash("Producto añadido exitosamente!")
+
+        return redirect("/productos")  
+
+    productos = Productos.query.all()
+    return render_template("productos.html", productos=productos)
+ 
+
+@app.route("/productos/editar/<int:id>", methods=["GET"])
+def editarProducto(id):
+    producto = Productos.query.get(id) 
+    return render_template("productos.html", producto=producto, productos=Productos.query.all())
+
+
+@app.route("/productos/eliminar/<int:id>", methods=["POST"])
+def eliminarProducto(id):
+    producto = Productos.query.get(id)
+    db.session.delete(producto)
+    db.session.commit()
+    flash("Producto eliminado exitosamente!")
+    return redirect("/productos")
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
+
+
