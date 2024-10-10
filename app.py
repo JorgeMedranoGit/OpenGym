@@ -199,6 +199,21 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
+class Empleado(db.Model):
+    __tablename__ = 'empleados'  # Nombre de la tabla en la base de datos
+
+    idempleado = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nombre = db.Column(db.String(50), nullable=False)
+    apellido = db.Column(db.String(50), nullable=False)
+    direccion = db.Column(db.String(100), nullable=True)
+    carnet = db.Column(db.String(20), nullable=False)
+    telefono = db.Column(db.String(15), nullable=True)
+    sueldo = db.Column(db.Numeric(10, 2), nullable=True)
+
+    def __repr__(self):
+        return f'<Empleado {self.nombre} {self.apellido}>'
+
+
 @app.route('/empleados')
 def listar_empleados():
     empleados = obtener_todos_los_empleados()  # Implementar esta función para obtener los empleados de la BD
