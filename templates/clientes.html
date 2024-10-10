@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Clientes{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p>{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+ 
+<!-- Formulario para crear o actualizar clientes -->
+<form action="/clientes" method="post" class="form mt-3">
+    <input class="form-control mt-2" type="hidden" name="cliente_id" value="{{ cliente._id if cliente else '' }}">
+    <input class="form-control mt-2" type="text" name="nombre_cliente" placeholder="Nombre del Cliente" value="{{ cliente.nombre if cliente else '' }}" required>
+    <input class="form-control mt-2" type="text" name="apellido_cliente" placeholder="Apellido del Cliente" value="{{ cliente.apellido if cliente else '' }}" required>
+    <input class="form-control mt-2" type="text" name="carnet_cliente" placeholder="Carnet de Identidad" value="{{ cliente.carnet if cliente else '' }}" required>
+    <input class="form-control mt-2" type="text" name="telefono_cliente" placeholder="Teléfono del Cliente" value="{{ cliente.telefono if cliente else '' }}">
+    <input class="form-control mt-2" type="text" name="tipocliente_cliente" placeholder="Tipo de Cliente" value="{{ cliente.tipocliente if cliente else '' }}" required>
+    <input class="btn btn-success mt-2" type="submit" value="{{ 'Actualizar' if cliente else 'Añadir' }}"/>
+</form>
+ 
+<!-- Tabla de clientes -->
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Carnet</th>
+            <th>Teléfono</th>
+            <th>Tipo de Cliente</th>
+            <th>Opciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cliente in clientes %}
+        <tr>
+            <td>{{ cliente._id }}</td>
+            <td>{{ cliente.nombre }}</td>
+            <td>{{ cliente.apellido }}</td>
+            <td>{{ cliente.carnet }}</td>
+            <td>{{ cliente.telefono }}</td>
+            <td>{{ cliente.tipocliente }}</td>
+            <td>
+                <a href="/clientes/editar/{{ cliente._id }}" class="btn btn-dark">Editar</a>
+                <form action="/clientes/eliminar/{{ cliente._id }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

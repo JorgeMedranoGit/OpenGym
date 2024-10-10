@@ -50,6 +50,30 @@ class Proveedores(db.Model):
         self.correo = stock
     def __repr__(self):
         return f'<Proveedor {self.nombre}, Telefono: {self.telefono}, Correo: {self.correo}>'
+    
+
+
+class Clientes(db.Model):
+    __tablename__ = 'clientes'
+ 
+    _id = db.Column("idcliente", db.Integer, primary_key=True, autoincrement=True)
+    nombre = db.Column(db.String(50), nullable=False)
+    apellido = db.Column(db.String(50), nullable=False)
+    carnet = db.Column(db.String(20), nullable=False)
+    telefono = db.Column(db.String(15), nullable=True)
+    tipocliente = db.Column(db.String(50), nullable=False)
+    activo = db.Column(db.Boolean, nullable=False, default=True)
+ 
+    def __init__(self, nombre, apellido, carnet, telefono, tipocliente, activo=True):
+        self.nombre = nombre
+        self.apellido = apellido
+        self.carnet = carnet
+        self.telefono = telefono
+        self.tipocliente = tipocliente
+        self.activo = activo
+ 
+    def __repr__(self):
+        return f'<Cliente {self.nombre} {self.apellido}, Tipo: {self.tipocliente}, Activo: {self.activo}>'
 # Crear las tablas antes de que arranque la aplicación
 
 @app.route("/")
@@ -195,8 +219,7 @@ def eliminarProveedor(id):
     flash("Proveedor eliminado exitosamente!")
     return redirect("/proveedores")
 
-if __name__ == "__main__":
-    app.run(debug=True)
+
 
 class Empleado(db.Model):
     __tablename__ = 'empleados'
@@ -275,3 +298,60 @@ def eliminar_empleado_por_id(empleado_id):
     empleado = Empleado.query.get(empleado_id)
     db.session.delete(empleado)
     db.session.commit()
+
+
+
+@app.route("/clientes", methods=["POST", "GET"])
+def clientesCrud():
+    if request.method == "POST":
+        nombre = request.form['nombre_cliente']
+        apellido = request.form['apellido_cliente']
+        carnet = request.form['carnet_cliente']
+        telefono = request.form['telefono_cliente']
+        tipocliente = request.form['tipocliente_cliente']
+        cliente_id = request.form.get('cliente_id')  
+        #Editar cliente
+        if cliente_id:
+            cliente = Clientes.query.get(cliente_id)
+            cliente.nombre = nombre
+            cliente.apellido = apellido
+            cliente.carnet = carnet
+            cliente.telefono = telefono
+            cliente.tipocliente = tipocliente
+            db.session.commit()
+            flash("Cliente editado exitosamente!")
+        else:  
+            nuevo_cliente = Clientes(nombre, apellido, carnet, telefono, tipocliente)
+            db.session.add(nuevo_cliente)
+            db.session.commit()
+            flash("Cliente añadido exitosamente!")
+        return redirect("/clientes")
+    # Obtener datos
+    clientes = Clientes.query.all()
+    return render_template("clientes.html", clientes=clientes)
+
+
+@app.route("/clientes/editar/<int:id>", methods=["GET"])
+def editarCliente(id):
+    cliente = Clientes.query.get(id)
+    return render_template("clientes.html", cliente=cliente, clientes=Clientes.query.all())
+ 
+@app.route("/clientes/eliminar/<int:id>", methods=["POST"])
+def eliminarCliente(id):
+    cliente = Clientes.query.get(id)
+    db.session.delete(cliente)
+    db.session.commit()
+    flash("Cliente eliminado exitosamente!")
+    return redirect("/clientes")
+ 
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
