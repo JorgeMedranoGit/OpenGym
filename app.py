@@ -253,6 +253,49 @@ def eliminar_empleado(empleado_id):
     return redirect('/empleados')
 
 
+def obtener_todos_los_empleados():
+    return Empleado.query.all()
+
+def obtener_empleado_por_id(empleado_id):
+    return Empleado.query.get(empleado_id)
+
+def agregar_empleado(nombre, apellido, direccion, carnet, telefono, sueldo):
+    nuevo_empleado = Empleado(nombre=nombre, apellido=apellido, direccion=direccion, carnet=carnet, telefono=telefono, sueldo=sueldo)
+    db.session.add(nuevo_empleado)
+    db.session.commit()
+
+def actualizar_empleado(empleado_id, nombre, apellido, direccion, carnet, telefono, sueldo):
+    empleado = Empleado.query.get(empleado_id)
+    empleado.nombre = nombre
+    empleado.apellido = apellido
+    empleado.direccion = direccion
+    empleado.carnet = carnet
+    empleado.telefono = telefono
+    empleado.sueldo = sueldo
+    db.session.commit()
+
+def eliminar_empleado_por_id(empleado_id):
+    empleado = Empleado.query.get(empleado_id)
+    db.session.delete(empleado)
+    db.session.commit()
+
+@app.route('/empleados', methods=['GET', 'POST'])
+def empleadosCrud():
+    if request.method == 'POST':
+        return agregar_actualizar_empleado()
+    empleados = obtener_todos_los_empleados()
+    return render_template('empleados.html', empleados=empleados)
+
+@app.route('/empleados/editar/<int:empleado_id>', methods=['GET'])
+def editar_empleado(empleado_id):
+    empleado = obtener_empleado_por_id(empleado_id)
+    return render_template('empleados.html', empleado=empleado, empleados=obtener_todos_los_empleados())
+
+@app.route('/empleados/eliminar/<int:empleado_id>', methods=['POST'])
+def eliminar_empleado(empleado_id):
+    eliminar_empleado_por_id(empleado_id)
+    flash('Empleado eliminado correctamente')
+    return redirect('/empleados')
 
 
 
