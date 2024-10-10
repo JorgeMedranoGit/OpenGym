@@ -198,9 +198,8 @@ def eliminarProveedor(id):
 if __name__ == "__main__":
     app.run(debug=True)
 
-
 class Empleado(db.Model):
-    __tablename__ = 'empleados'  # Nombre de la tabla en la base de datos
+    __tablename__ = 'empleados'
 
     idempleado = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(50), nullable=False)
@@ -214,41 +213,39 @@ class Empleado(db.Model):
         return f'<Empleado {self.nombre} {self.apellido}>'
 
 
-@app.route('/empleados')
-def listar_empleados():
-    empleados = obtener_todos_los_empleados()  # Implementar esta función para obtener los empleados de la BD
+@app.route('/empleados', methods=['GET', 'POST'])
+def empleadosCrud():
+    if request.method == 'POST':
+        empleado_id = request.form.get('empleado_id')
+        nombre = request.form.get('nombre')
+        apellido = request.form.get('apellido')
+        direccion = request.form.get('direccion')
+        carnet = request.form.get('carnet')
+        telefono = request.form.get('telefono')
+        sueldo = request.form.get('sueldo')
+        
+        if empleado_id:  # Actualizar empleado
+            actualizar_empleado(empleado_id, nombre, apellido, direccion, carnet, telefono, sueldo)
+            flash('Empleado actualizado correctamente')
+        else:  # Agregar nuevo empleado
+            agregar_empleado(nombre, apellido, direccion, carnet, telefono, sueldo)
+            flash('Empleado añadido correctamente')
+        
+        return redirect('/empleados')
+
+    empleados = obtener_todos_los_empleados()
     return render_template('empleados.html', empleados=empleados)
 
 
-@app.route('/empleados', methods=['POST'])
-def agregar_actualizar_empleado():
-    empleado_id = request.form.get('empleado_id')
-    nombre = request.form.get('nombre')
-    apellido = request.form.get('apellido')
-    direccion = request.form.get('direccion')
-    carnet = request.form.get('carnet')
-    telefono = request.form.get('telefono')
-    sueldo = request.form.get('sueldo')
-    
-    if empleado_id:  # Actualizar empleado
-        actualizar_empleado(empleado_id, nombre, apellido, direccion, carnet, telefono, sueldo)
-        flash('Empleado actualizado correctamente')
-    else:  # Agregar nuevo empleado
-        agregar_empleado(nombre, apellido, direccion, carnet, telefono, sueldo)
-        flash('Empleado añadido correctamente')
-    
-    return redirect('/empleados')
-
-
-@app.route('/empleados/editar/<int:empleado_id>')
+@app.route('/empleados/editar/<int:empleado_id>', methods=['GET'])
 def editar_empleado(empleado_id):
-    empleado = obtener_empleado_por_id(empleado_id)  # Implementar esta función
-    return render_template('empleados.html', empleado=empleado)
+    empleado = obtener_empleado_por_id(empleado_id)
+    return render_template('empleados.html', empleado=empleado, empleados=obtener_todos_los_empleados())
 
 
 @app.route('/empleados/eliminar/<int:empleado_id>', methods=['POST'])
 def eliminar_empleado(empleado_id):
-    eliminar_empleado_por_id(empleado_id)  # Implementar esta función
+    eliminar_empleado_por_id(empleado_id)
     flash('Empleado eliminado correctamente')
     return redirect('/empleados')
 
@@ -278,25 +275,3 @@ def eliminar_empleado_por_id(empleado_id):
     empleado = Empleado.query.get(empleado_id)
     db.session.delete(empleado)
     db.session.commit()
-
-@app.route('/empleados', methods=['GET', 'POST'])
-def empleadosCrud():
-    if request.method == 'POST':
-        return agregar_actualizar_empleado()
-    empleados = obtener_todos_los_empleados()
-    return render_template('empleados.html', empleados=empleados)
-
-@app.route('/empleados/editar/<int:empleado_id>', methods=['GET'])
-def editar_empleado(empleado_id):
-    empleado = obtener_empleado_por_id(empleado_id)
-    return render_template('empleados.html', empleado=empleado, empleados=obtener_todos_los_empleados())
-
-@app.route('/empleados/eliminar/<int:empleado_id>', methods=['POST'])
-def eliminar_empleado(empleado_id):
-    eliminar_empleado_por_id(empleado_id)
-    flash('Empleado eliminado correctamente')
-    return redirect('/empleados')
-
-
-
-
