@@ -20,6 +20,7 @@ from routes.main import main_blueprint
 # Inicialización de la app.
 app = Flask(__name__)
 # -- Configuración de la base de datos mediante Config() donde se encuentra la base de datos
+app.secret_key = "qc2024"
 app.config.from_object(Config.Config()) 
 
 init_app(app)
@@ -31,10 +32,6 @@ app.register_blueprint(productos_blueprint)
 app.register_blueprint(proveedores_blueprint)
 app.register_blueprint(main_blueprint)
 
-
-@app.route("/")
-def home():
-    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

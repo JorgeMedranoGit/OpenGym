@@ -8,6 +8,10 @@ from database import db
 main_blueprint = Blueprint('main_blueprint', __name__)
 
 
+@main_blueprint.route("/")
+def home():
+    return render_template("index.html")
+
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
 def login():
     if request.method == "POST":
