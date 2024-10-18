@@ -23,4 +23,6 @@ Con este sistema se espera optimizar, regular y monitorizar los procesos de comp
 - PostgreSQL: Es un gestor de bases de datos relaciones que extiende SQL, conocido por su fiabilidad robustez y conformidad con los estándares SQL.
 
 ## Diagrama DB
+![OpenGym (1)](https://github.com/user-attachments/assets/a16849b6-a641-4a6b-b7b2-c24a4d21c27e)
+
 
