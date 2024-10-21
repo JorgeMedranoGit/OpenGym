@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Compras{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor%}
+    {% endif %}
+{% endwith %}
+<br><br>
+<a class="btn btn-success mt-2" href="/compras/agregar">Registrar compra</a>
+<table class="table table-striped mt-3 responsive">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Fecha Compra</th>
+            <th>Hora Compra</th>
+            <th>Metodo de pago</th>
+            <th>Empleado</th>
+            <th>Cliente</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for compra in compras %}
+        <tr>
+            <td>{{ compra.idcompra }}</td>
+            <td>{{ compra.fechacompra }}</td>
+            <td>{{ compra.horacompra }}</td>
+            <td>{{ compra.metodopago }}</td>
+            <td>{{ compra.nombreempleado }}</td>
+            <td>{{ compra.nombrecliente }}</td>
+            <td>bs. {{ compra.total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

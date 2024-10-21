@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Agregar Compra{% endblock %}
+{% block content %}
+<form action="/compras/agregar" method="POST" class="form mt-3">
+    <input type="datetime-local" name="fechacompra" class="form-control mt-2" placeholder="Fecha" required />
+    <input type="text" name="metodopago" class="form-control mt-2" placeholder="Metodo de pago" required />
+    <input type="number" name="idempleado" class="form-control mt-2" placeholder="Empleado" required />
+    <input type="number" name="idcliente" class="form-control mt-2" placeholder="Cliente" required />
+
+    <h2>Productos</h2>
+    <h3>Total: <span id="total">0</span></h3>
+    <div id="productos"></div>
+
+
+    <button type="button" class="btn btn-success" id="agregarProducto">Agregar Producto</button>
+    <input type="submit" value="Finalizar" class="btn btn-dark mt-2" />
+</form>
+
+<script>
+    let subtotal = 0;
+    let total = 0;
+
+    document.getElementById('agregarProducto').onclick = function () {
+        const div = document.createElement('div');
+        div.className = 'producto';
+        div.innerHTML = `
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+                <input type="number" name="producto[]" class="form-control mt-2" required onchange="actualizarPrecio(this)" placeholder="Producto">
+            </div>
+            <div class="col-auto">
+                <input type="number" name="cantidad[]" class="form-control mt-2" min="1" required onchange="actualizarPrecio(this)" placeholder="Cantidad">
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger mt-2" onclick="eliminarProducto(this)">Eliminar</button>
+            </div>
+            <div class="col-auto">
+                <h4>Precio: <span class="precio">0</span></h4>
+            </div>
+            <div class="col-auto">
+                <h4>Subtotal: <span class="subtotal">0</span></h4>
+            </div>
+        </div>
+        `;
+        document.getElementById('productos').appendChild(div);
+    };
+
+    function eliminarProducto(element) {
+        const divProducto = element.closest('.producto');
+        const subtotalElement = divProducto.querySelector('.subtotal');
+
+        // Resta el subtotal de este producto del subtotal total
+        subtotal -= parseFloat(subtotalElement.innerText);
+
+        // Elimina el div del producto
+        divProducto.remove();
+
+        // Actualiza el total después de eliminar el producto
+        actualizarTotal();
+    }
+
+    function actualizarPrecio(element) {
+        const divProducto = element.closest('.producto');
+        const idproducto = divProducto.querySelector('input[name="producto[]"]').value;
+        const cCantidad = divProducto.querySelector('input[name="cantidad[]"]').value;
+
+        if (idproducto && cCantidad) {
+            fetch(`/compras/obtenerPrecioProducto/${idproducto}`)
+                .then(response => response.json())
+                .then(data => {
+                    const precio = parseFloat(data.precio);
+                    if (!isNaN(precio)) {
+                        divProducto.querySelector('.precio').innerText = precio.toFixed(2);
+                        const subtotalForProduct = precio * cCantidad;
+                        divProducto.querySelector('.subtotal').innerText = subtotalForProduct.toFixed(2);
+
+                        // Actualiza subtotal total
+                        subtotal = 0; // Reinicia subtotal antes de recalcular
+                        const subtotales = document.querySelectorAll('.subtotal');
+                        subtotales.forEach(sub => {
+                            subtotal += parseFloat(sub.innerText);
+                        });
+
+                        actualizarTotal();
+                    } 
+                })
+        }
+    }
+
+    function actualizarTotal() {
+        document.getElementById('total').innerText = (subtotal + total).toFixed(2);
+    }
+</script>
+{% endblock %}
