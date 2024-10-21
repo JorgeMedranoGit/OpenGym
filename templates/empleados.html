@@ -48,6 +48,12 @@
                 <form action="/empleados/eliminar/{{ empleado.idempleado }}" method="post" style="display:inline;">
                     <button type="submit" class="btn btn-danger">Eliminar</button>
                 </form>
+
+                {% if empleado.idrol is not none %}
+                    <a href="/empleados/actualizar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Actualizar rol</a>
+                {% else %}
+                    <a href="/empleados/asignar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Asignar rol</a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

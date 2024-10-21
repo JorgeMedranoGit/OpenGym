@@ -4,6 +4,7 @@ from decimal import Decimal
 from flask_sqlalchemy import SQLAlchemy 
 from models.empleados import Empleado
 from database import db
+from models.empleados import Rol
 
 
 empleados_blueprint = Blueprint('empleados_blueprint', __name__)
@@ -70,4 +71,41 @@ def eliminar_empleado_por_id(empleado_id):
     empleado = Empleado.query.get(empleado_id)
     db.session.delete(empleado)
     db.session.commit()
+
+def obtener_todos_los_roles():
+    return Rol.query.all()
+
+
+@empleados_blueprint.route('/empleados/asignar_rol/<int:empleado_id>', methods=['GET', 'POST'])
+def asignar_rol(empleado_id):
+    empleado = obtener_empleado_por_id(empleado_id)
+
+    if request.method == 'POST':
+        idrol = request.form.get('idrol')
+        empleado.idrol = idrol
+        db.session.commit()
+        flash('Rol asignado correctamente')
+        return redirect('/empleados')
+
+    roles = obtener_todos_los_roles()  # Aquí obtienes todos los roles
+    return render_template('asignar_rol.html', empleado=empleado, roles=roles)
+
+
+@empleados_blueprint.route('/empleados/actualizar_rol/<int:empleado_id>', methods=['GET', 'POST'])
+def actualizar_rol(empleado_id):
+    empleado = obtener_empleado_por_id(empleado_id)
+    
+    if request.method == 'POST':
+        idrol = request.form.get('idrol')
+        empleado.idrol = idrol
+        db.session.commit()
+        flash('Rol actualizado correctamente')
+        return redirect('/empleados')
+
+    roles = obtener_todos_los_roles()
+    return render_template('actualizar_rol.html', empleado=empleado, roles=roles)
+
+
+
+
 

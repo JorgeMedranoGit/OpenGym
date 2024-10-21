@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Actualizar Rol{% endblock %}
+{% block content %}
+    <h2>Actualizar Rol de {{ empleado.nombre }} {{ empleado.apellido }}</h2>
+    <form action="" method="post">
+        <label for="idrol">Selecciona un rol:</label>
+        <select name="idrol" id="idrol" class="form-control">
+            {% for rol in roles %}
+                <option value="{{ rol.idrol }}" {% if empleado.idrol == rol.idrol %} selected {% endif %}>{{ rol.descripcion }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <input type="submit" class="btn btn-primary" value="Actualizar Rol">
+    </form>
+{% endblock %}

@@ -21,5 +21,17 @@ class Empleado(db.Model):
     telefono = db.Column(db.String(15), nullable=True)
     sueldo = db.Column(db.Numeric(10, 2), nullable=True)
 
+    idrol = db.Column(db.Integer, db.ForeignKey('roles.idrol'), nullable=True)
+    rol = db.relationship('Rol', backref='empleados')
+    
     def __repr__(self):
         return f'<Empleado {self.nombre} {self.apellido}>'
+
+class Rol(db.Model):
+    __tablename__ = 'roles'
+
+    idrol = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    descripcion = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        return f'<Rol {self.descripcion}>'
