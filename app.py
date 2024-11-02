@@ -14,6 +14,7 @@ from routes.clientes_routes import cliente_blueprint
 from routes.empleados_routes import empleados_blueprint
 from routes.productos_routes import productos_blueprint
 from routes.proveedores_routes import proveedores_blueprint
+from routes.compras_routes import compras_blueprint
 from routes.main import main_blueprint
 
 
@@ -30,6 +31,7 @@ app.register_blueprint(cliente_blueprint)
 app.register_blueprint(empleados_blueprint)
 app.register_blueprint(productos_blueprint)
 app.register_blueprint(proveedores_blueprint)
+app.register_blueprint(compras_blueprint)
 app.register_blueprint(main_blueprint)
 
 
