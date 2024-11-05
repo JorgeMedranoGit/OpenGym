@@ -19,6 +19,8 @@ class Empleado(db.Model):
     direccion = db.Column(db.String(100), nullable=True)
     carnet = db.Column(db.String(20), nullable=False)
     telefono = db.Column(db.String(15), nullable=True)
+    email = db.Column(db.String(100), nullable=True)
+    password = db.Column(db.String(255), nullable=True)
     sueldo = db.Column(db.Numeric(10, 2), nullable=True)
 
     idrol = db.Column(db.Integer, db.ForeignKey('roles.idrol'), nullable=True)
