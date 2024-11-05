@@ -15,8 +15,9 @@ from routes.empleados_routes import empleados_blueprint
 from routes.productos_routes import productos_blueprint
 from routes.proveedores_routes import proveedores_blueprint
 from routes.compras_routes import compras_blueprint
+from routes.entregas_routes import entregas_blueprint
+from routes.estados_routes import estados_blueprint
 from routes.main import main_blueprint
-
 
 # Inicialización de la app.
 app = Flask(__name__)
@@ -32,6 +33,8 @@ app.register_blueprint(empleados_blueprint)
 app.register_blueprint(productos_blueprint)
 app.register_blueprint(proveedores_blueprint)
 app.register_blueprint(compras_blueprint)
+app.register_blueprint(entregas_blueprint)
+app.register_blueprint(estados_blueprint)
 app.register_blueprint(main_blueprint)
 
 

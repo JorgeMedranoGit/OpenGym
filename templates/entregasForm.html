@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Agregar Entrega{% endblock %}
+{% block content %}
+<form action="/entregas/agregar" method="POST" class="form mt-3">
+    <input type="datetime-local" name="fechapedido" class="form-control mt-2" placeholder="Fecha" required />
+    <input type="text" name="metodopago" class="form-control mt-2" placeholder="Metodo de pago" required />
+    <select type="number" name="idproveedor" class="form-control mt-2" placeholder="Proveedor" required>
+        <option selected disabled>Selecciona un proveedor</option>
+        {% for proveedor in proveedores %}
+            <option value="{{ proveedor._id }}">{{ proveedor.nombre }}</option>
+        {% endfor %}
+    </select>
+
+    <h2>Productos</h2>
+    <h3>Total: <span id="total">0</span></h3>
+    <div id="productos"></div>
+
+    <button type="button" class="btn btn-success" id="agregarProducto">Agregar Producto</button>
+    <input type="submit" value="Finalizar" class="btn btn-dark mt-2" />
+</form>
+
+<script>
+    let total = 0;
+
+    document.getElementById('agregarProducto').onclick = function () {
+        const div = document.createElement('div');
+        div.className = 'producto';
+        div.innerHTML = `
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+                <select type="number" name="idp[]" class="form-control mt-2" placeholder="Producto" required>
+                    <option selected disabled>Selecciona un producto</option>
+                    {% for producto in productos %}
+                        <option value="{{ producto._id }}">{{ producto.nombre }}</option>
+                    {% endfor %}
+                </select>
+
+            </div>
+            <div class="col-auto">
+                <input type="number" name="cantidad[]" class="form-control mt-2" min="1" required onchange="actualizarSubtotal(this)" placeholder="Cantidad">
+            </div>
+            <div class="col-auto">
+                <input type="number" name="precio[]" class="form-control mt-2" min="0" required onchange="actualizarSubtotal(this)" placeholder="Precio Unitario">
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger mt-2" onclick="eliminarProducto(this)">Eliminar</button>
+            </div>
+            <div class="col-auto">
+                <h4>Subtotal: <span class="subtotal">0</span></h4>
+            </div>
+        </div>
+        `;
+        document.getElementById('productos').appendChild(div);
+    };
+
+    function eliminarProducto(element) {
+        const divProducto = element.closest('.producto');
+        const subtotalElement = divProducto.querySelector('.subtotal');
+
+        // Resta el subtotal de este producto del total
+        total -= parseFloat(subtotalElement.innerText);
+
+        // Elimina el div del producto
+        divProducto.remove();
+
+        // Actualiza el total después de eliminar el producto
+        actualizarTotal();
+    }
+
+    function actualizarSubtotal(element) {
+        const divProducto = element.closest('.producto');
+        const cantidad = divProducto.querySelector('input[name="cantidad[]"]').value;
+        const precio = divProducto.querySelector('input[name="precio[]"]').value;
+
+        if (cantidad && precio) {
+            const subtotalForProduct = cantidad * precio;
+            divProducto.querySelector('.subtotal').innerText = subtotalForProduct.toFixed(2);
+
+            // Actualiza el total
+            total = 0; // Reinicia el total antes de recalcular
+            const subtotales = document.querySelectorAll('.subtotal');
+            subtotales.forEach(sub => {
+                total += parseFloat(sub.innerText);
+            });
+
+            actualizarTotal();
+        }
+    }
+
+    function actualizarTotal() {
+        document.getElementById('total').innerText = total.toFixed(2);
+    }
+</script>
+{% endblock %}

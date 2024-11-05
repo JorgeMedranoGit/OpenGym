@@ -11,6 +11,9 @@ empleados_blueprint = Blueprint('empleados_blueprint', __name__)
 
 @empleados_blueprint.route('/empleados', methods=['GET', 'POST'])
 def empleadosCrud():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     if request.method == 'POST':
         empleado_id = request.form.get('empleado_id')
         nombre = request.form.get('nombre')
@@ -35,12 +38,18 @@ def empleadosCrud():
 
 @empleados_blueprint.route('/empleados/editar/<int:empleado_id>', methods=['GET'])
 def editar_empleado(empleado_id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     empleado = obtener_empleado_por_id(empleado_id)
     return render_template('empleados.html', empleado=empleado, empleados=obtener_todos_los_empleados())
 
 
 @empleados_blueprint.route('/empleados/eliminar/<int:empleado_id>', methods=['POST'])
 def eliminar_empleado(empleado_id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     eliminar_empleado_por_id(empleado_id)
     flash('Empleado eliminado correctamente')
     return redirect('/empleados')
@@ -78,6 +87,9 @@ def obtener_todos_los_roles():
 
 @empleados_blueprint.route('/empleados/asignar_rol/<int:empleado_id>', methods=['GET', 'POST'])
 def asignar_rol(empleado_id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     empleado = obtener_empleado_por_id(empleado_id)
 
     if request.method == 'POST':
@@ -93,6 +105,9 @@ def asignar_rol(empleado_id):
 
 @empleados_blueprint.route('/empleados/actualizar_rol/<int:empleado_id>', methods=['GET', 'POST'])
 def actualizar_rol(empleado_id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     empleado = obtener_empleado_por_id(empleado_id)
     
     if request.method == 'POST':

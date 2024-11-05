@@ -4,8 +4,16 @@
 <form action="/compras/agregar" method="POST" class="form mt-3">
     <input type="datetime-local" name="fechacompra" class="form-control mt-2" placeholder="Fecha" required />
     <input type="text" name="metodopago" class="form-control mt-2" placeholder="Metodo de pago" required />
-    <input type="number" name="idempleado" class="form-control mt-2" placeholder="Empleado" required />
-    <input type="number" name="idcliente" class="form-control mt-2" placeholder="Cliente" required />
+    <select type="number" name="idempleado" class="form-control mt-2" placeholder="Empleado" required >
+        {% for empleado in empleados %}
+            <option value="{{empleado.idempleado}}">{{empleado.nombre}}</option>
+        {% endfor %}
+    </select>
+    <select type="number" name="idcliente" class="form-control mt-2" placeholder="Cliente" required>
+        {% for cliente in clientes %}
+            <option value="{{cliente._id}}">{{cliente.nombre}}</option>
+        {% endfor %}
+    </select>
 
     <h2>Productos</h2>
     <h3>Total: <span id="total">0</span></h3>

@@ -7,11 +7,17 @@ from models.detalleCompra import DetalleCompras
 from models.productos import Productos
 from database import db
 from sqlalchemy import text
+from routes.empleados_routes import obtener_todos_los_empleados
+from routes.clientes_routes import obtener_todos_los_clientes
+from routes.productos_routes import obtenerTodoslosProductos
 
 compras_blueprint = Blueprint('compras_blueprint', __name__)
 
-@compras_blueprint.route("/compras", methods=['GET', 'POST'])
+@compras_blueprint.route("/compras" , methods=['GET', 'POST'])
 def compraCrud():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     compras = obtenerCompras()
     for compra in compras:
         id = compra['idcompra']
@@ -21,8 +27,13 @@ def compraCrud():
 
 @compras_blueprint.route("/compras/agregar", methods=['GET', 'POST'])
 def formCompra():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     if request.method == 'GET':
-        return render_template("comprasForm.html")
+        empleados = obtener_todos_los_empleados()
+        clientes = obtener_todos_los_clientes()
+        return render_template("comprasForm.html", clientes = clientes, empleados = empleados)
     if request.method == 'POST':
         fechacompra = request.form['fechacompra']
         metodopago = request.form['metodopago']
@@ -66,6 +77,9 @@ def obtenerCompras():
 
 @compras_blueprint.route('/compras/obtenerPrecioProducto/<int:product_id>', methods=['GET'])
 def obtenerPrecioProducto(product_id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     producto = Productos.query.get(product_id)
     if producto:
         return jsonify({'precio': str(producto.preciov)})  # Asegúrate de convertir a string si es necesario

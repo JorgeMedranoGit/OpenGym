@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Entregas{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor%}
+    {% endif %}
+{% endwith %}
+<br><br>
+<a class="btn btn-success mt-2" href="/entregas/agregar">Registrar entrega</a>
+<table class="table table-striped mt-3 responsive">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Fecha Pedido</th>
+            <th>Hora Pedido</th>
+            <th>Metodo de pago</th>
+            <th>Proveedor</th>
+            <th>Estado</th>
+            <th>Fecha cambio</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entrega in entregas %}
+        <tr>
+            <td>{{ entrega.identrega }}</td>
+            <td>{{ entrega.fechaentrega }}</td>
+            <td>{{ entrega.horaentrega }}</td>
+            <td>{{ entrega.metodopago }}</td>
+            <td>{{ entrega.proveedor }}</td>
+            <td>
+                {% if entrega.estado == "Pendiente" %}
+                    <form method="POST" action="/entregas/cambiar_estado">
+                        <input type="hidden" name="entrega_id" value="{{ entrega.identrega }}">
+                        <select name="estado_id" class="form-control" style="width: 200px; margin: 0px;" onchange="this.form.submit()">
+                            {% for estado in estados %}
+                                <option value="{{ estado.idestado }}" {% if estado.estado == entrega.estado %}selected{% endif %}>
+                                    {{ estado.estado }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                {% else %}
+                    {{ entrega.estado }}
+                {% endif %}
+            </td>
+            <td>
+                {% if entrega.estado != "Pendiente" %}
+                    {{ entrega.fechaestado }}
+                {% else %}
+                    - -
+                {% endif %}
+            </td>
+            <td>bs. {{ entrega.total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    
+</table>
+{% endblock %}

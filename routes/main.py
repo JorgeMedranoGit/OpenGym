@@ -1,8 +1,9 @@
 from flask import Blueprint,Flask, redirect, url_for, render_template, request, session, flash, jsonify
+from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import timedelta
 from decimal import Decimal
 from flask_sqlalchemy import SQLAlchemy 
-from models.users import users
+from models.empleados import Empleado
 from database import db
 
 main_blueprint = Blueprint('main_blueprint', __name__)
@@ -16,54 +17,46 @@ def home():
 def login():
     if request.method == "POST":
         session.permanent = True
-        user = request.form["nm"]
-        session["user"] = user
+        email = request.form["email"]
+        password = request.form["password"]
+        
 
-        found_user = users.query.filter_by(name=user).first()
+        found_user = Empleado.query.filter_by(email=email).first()
         
         if found_user:
-            session["email"] = found_user.email
+            if check_password_hash(found_user.password, password):
+                session["email"] = found_user.email
+                session["usuario"] = found_user.nombre + " " +  found_user.apellido
+                flash("Inicio de sesión correcto" )
+                return redirect("/")
+            else:
+                flash("Contraseña incorrecta"+ found_user.password + " " + generate_password_hash(password))
+                return redirect("home")
         else:
-            usr = users(user, "")
-            db.session.add(usr)
-            db.session.commit() 
+            flash("Usuario no encontrado")
+            return redirect("login") 
 
-        flash("Login successful")
-        return redirect(url_for("user"))
     else:
-        if "user" in session:
-            flash("Already logged in!")
-            return redirect(url_for("user"))
-        return render_template("login.html")
+        if "email" in session: 
+            flash("Ya iniciaste sesión!")
+            return redirect("home")
 
-@main_blueprint.route("/user", methods=["POST", "GET"])
-def user():
-    email = None
-    if "user" in session:
-        user = session["user"]
+    return render_template("login.html")
 
-        if request.method == "POST":
-            email = request.form["email"]
-            session["email"] = email
-            found_user = users.query.filter_by(name=user).first()
-            found_user.email = email
-            db.session.commit() 
-            flash("Email was saved")
-        else:
-            if "email" in session:
-                email = session["email"]
-        return render_template("user.html", email=email)
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("login"))
+
+
 
 @main_blueprint.route("/logout")
 def logout():
     flash("You have been logged out!", "info")
-    session.pop("user", None)
+    session.pop("nombre", None)
     session.pop("email", None)
-    return redirect(url_for("login"))
+    return redirect("login")
 
 @main_blueprint.route("/test")
 def test():
     return render_template("new.html")
+
+@main_blueprint.route("/inicio")
+def inicio():
+    return render_template("inicio.html")

@@ -10,6 +10,9 @@ productos_blueprint = Blueprint('productos_blueprint', __name__)
 
 @productos_blueprint.route("/productos", methods=["POST", "GET"])
 def productosCrud():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     if request.method == "POST":
         nombre = request.form['nombreProduc']
         precioVenta = Decimal(request.form['precioProduc'])  
@@ -36,14 +39,23 @@ def productosCrud():
 
 @productos_blueprint.route("/productos/editar/<int:id>", methods=["GET"])
 def editarProducto(id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     producto = Productos.query.get(id) 
     return render_template("productos.html", producto=producto, productos=Productos.query.all())
 
 
 @productos_blueprint.route("/productos/eliminar/<int:id>", methods=["POST"])
 def eliminarProducto(id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     producto = Productos.query.get(id)
     db.session.delete(producto)
     db.session.commit()
     flash("Producto eliminado exitosamente!")
     return redirect("/productos")
+
+def obtenerTodoslosProductos():
+    return Productos.query.all()

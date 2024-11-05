@@ -10,6 +10,9 @@ proveedores_blueprint = Blueprint('proveedores_blueprint', __name__)
 
 @proveedores_blueprint.route("/proveedores", methods=["POST", "GET"])
 def proveedoresCrud():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     if request.method == "POST":
         nombre = request.form['nombreProveedor']
         telefono = request.form['telefonoProveedor']  
@@ -33,14 +36,23 @@ def proveedoresCrud():
 #Proveedores (Edicion)
 @proveedores_blueprint.route("/proveedores/editar/<int:id>", methods=["GET"])
 def editarProveedor(id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     proveedor = Proveedores.query.get(id) 
     return render_template("proveedores.html", proveedor=proveedor, proveedores=Proveedores.query.all())
 
 @proveedores_blueprint.route("/proveedores/eliminar/<int:id>", methods=["POST"])
 def eliminarProveedor(id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     proveedor = Proveedores.query.get(id)
     db.session.delete(proveedor)
     db.session.commit()
     flash("Proveedor eliminado exitosamente!")
     return redirect("/proveedores")
+
+def obtenerTodoslosProveedores():
+    return Proveedores.query.all()
 

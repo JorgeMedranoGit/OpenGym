@@ -9,6 +9,9 @@ cliente_blueprint = Blueprint('cliente_blueprint', __name__)
 
 @cliente_blueprint.route("/clientes", methods=["POST", "GET"])
 def clientesCrud():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     if request.method == "POST":
         nombre = request.form['nombre_cliente']
         apellido = request.form['apellido_cliente']
@@ -39,14 +42,23 @@ def clientesCrud():
 
 @cliente_blueprint.route("/clientes/editar/<int:id>", methods=["GET"])
 def editarCliente(id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     cliente = Clientes.query.get(id)
     return render_template("clientes.html", cliente=cliente, clientes=Clientes.query.all())
  
 @cliente_blueprint.route("/clientes/eliminar/<int:id>", methods=["POST"])
 def eliminarCliente(id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
     cliente = Clientes.query.get(id)
     db.session.delete(cliente)
     db.session.commit()
     flash("Cliente eliminado exitosamente!")
     return redirect("/clientes")
- 
+
+
+def obtener_todos_los_clientes():
+    return Clientes.query.all()
