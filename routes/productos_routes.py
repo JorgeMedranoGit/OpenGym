@@ -48,7 +48,7 @@ def editarProducto(id):
 
 @productos_blueprint.route("/productos/eliminar/<int:id>", methods=["POST"])
 def eliminarProducto(id):
-    if "usuario" not in session:
+    if "email" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
     producto = Productos.query.get(id)

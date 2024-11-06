@@ -18,7 +18,7 @@ entregas_blueprint = Blueprint('entregas_blueprint', __name__)
 
 @entregas_blueprint.route("/entregas" , methods=['GET', 'POST'])
 def entregaCrud():
-    if "usuario" not in session:
+    if "email" not in session:
        flash("Debes iniciar sesión")
        return redirect("/login")
     entregas = obtenerEntregas()

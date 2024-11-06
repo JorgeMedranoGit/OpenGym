@@ -44,7 +44,7 @@ def editarProveedor(id):
 
 @proveedores_blueprint.route("/proveedores/eliminar/<int:id>", methods=["POST"])
 def eliminarProveedor(id):
-    if "usuario" not in session:
+    if "email" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
     proveedor = Proveedores.query.get(id)
