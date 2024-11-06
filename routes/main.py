@@ -2,9 +2,9 @@ from flask import Blueprint,Flask, redirect, url_for, render_template, request, 
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import timedelta
 from decimal import Decimal
-from flask_sqlalchemy import SQLAlchemy 
 from models.empleados import Empleado
 from database import db
+
 
 main_blueprint = Blueprint('main_blueprint', __name__)
 
@@ -91,4 +91,5 @@ def password():
         else:
             flash("Empleado no encontrado", "danger")
             return redirect(url_for("main_blueprint.login"))
+
 

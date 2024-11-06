@@ -4,7 +4,7 @@ from decimal import Decimal
 from models.empleados import Empleado
 from database import db
 from models.empleados import Rol
-
+from werkzeug.security import generate_password_hash
 
 empleados_blueprint = Blueprint('empleados_blueprint', __name__)
 
@@ -21,12 +21,13 @@ def empleadosCrud():
         carnet = request.form.get('carnet')
         telefono = request.form.get('telefono')
         sueldo = request.form.get('sueldo')
+        email = request.form.get('email')
         
         if empleado_id:  # Actualizar empleado
-            actualizar_empleado(empleado_id, nombre, apellido, direccion, carnet, telefono, sueldo)
+            actualizar_empleado(empleado_id, nombre, apellido, direccion, carnet, telefono, sueldo, email)
             flash('Empleado actualizado correctamente')
         else:  # Agregar nuevo empleado
-            agregar_empleado(nombre, apellido, direccion, carnet, telefono, sueldo)
+            agregar_empleado(nombre, apellido, direccion, carnet, telefono, sueldo, email)
             flash('Empleado añadido correctamente')
         
         return redirect('/empleados')
@@ -60,12 +61,12 @@ def obtener_todos_los_empleados():
 def obtener_empleado_por_id(empleado_id):
     return Empleado.query.get(empleado_id)
 
-def agregar_empleado(nombre, apellido, direccion, carnet, telefono, sueldo):
-    nuevo_empleado = Empleado(nombre=nombre, apellido=apellido, direccion=direccion, carnet=carnet, telefono=telefono, sueldo=sueldo)
+def agregar_empleado(nombre, apellido, direccion, carnet, telefono, sueldo, email):
+    nuevo_empleado = Empleado(nombre=nombre, apellido=apellido, direccion=direccion, carnet=carnet, telefono=telefono, sueldo=sueldo, email=email, password=encriptar_contrasena_defecto(),cambiopassword=False)
     db.session.add(nuevo_empleado)
     db.session.commit()
 
-def actualizar_empleado(empleado_id, nombre, apellido, direccion, carnet, telefono, sueldo):
+def actualizar_empleado(empleado_id, nombre, apellido, direccion, carnet, telefono, sueldo, email):
     empleado = Empleado.query.get(empleado_id)
     empleado.nombre = nombre
     empleado.apellido = apellido
@@ -73,6 +74,7 @@ def actualizar_empleado(empleado_id, nombre, apellido, direccion, carnet, telefo
     empleado.carnet = carnet
     empleado.telefono = telefono
     empleado.sueldo = sueldo
+    empleado.email = email
     db.session.commit()
 
 def eliminar_empleado_por_id(empleado_id):
@@ -118,6 +120,11 @@ def actualizar_rol(empleado_id):
 
     roles = obtener_todos_los_roles()
     return render_template('actualizar_rol.html', empleado=empleado, roles=roles)
+
+
+
+def encriptar_contrasena_defecto():
+    return generate_password_hash("123456")
 
 
 

@@ -10,9 +10,9 @@ class Empleado(db.Model):
     carnet = db.Column(db.String(20), nullable=False)
     telefono = db.Column(db.String(15), nullable=True)
     email = db.Column(db.String(100), nullable=True)
-    password = db.Column(db.String(255), nullable=True)
+    password = db.Column(db.String(255), nullable=True, default='123456')
     sueldo = db.Column(db.Numeric(10, 2), nullable=True)
-    cambiopassword = db.Column(db.Boolean, nullable=True)
+    cambiopassword = db.Column(db.Boolean, nullable=True, default=False)
 
     idrol = db.Column(db.Integer, db.ForeignKey('roles.idrol'), nullable=True)
     rol = db.relationship('Rol', backref='empleados')
