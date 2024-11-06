@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Tareas{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="alert alert-success">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<h1>Gestión de Tareas</h1>
+
+<a href="{{ url_for('tareas_blueprint.ver_comentarios') }}" class="btn btn-info mt-3">Ver Tareas y Comentarios</a>
+
+<form method="POST" action="{{ url_for('tareas_blueprint.tareas_crud') }}" class="form mt-3">
+    <input type="text" name="titulo" class="form-control mt-2" placeholder="Título" required>
+    <input type="text" name="descripcion" class="form-control mt-2" placeholder="Descripción">
+    <select name="idempleado" class="form-control mt-2">
+        <option value="">Asignar a Empleado</option>
+        {% for empleado in empleados %}
+            <option value="{{ empleado.idempleado }}">{{ empleado.nombre }} {{ empleado.apellido }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-success mt-2">Agregar Tarea</button>
+</form>
+
+<h2 class="mt-4">Lista de Tareas</h2>
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Empleado Asignado</th> <!-- Nueva columna para mostrar el empleado -->
+            <th>Opciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tarea in tareas %}
+        <tr>
+            <td>{{ tarea.idtarea }}</td>
+            <td>{{ tarea.titulo }}</td>
+            <td>{{ tarea.descripcion }}</td>
+            <td>{{ 'Completada' if tarea.estado else 'Pendiente' }}</td>
+            <td>{{ tarea.empleado.nombre }} {{ tarea.empleado.apellido if tarea.empleado else 'Sin asignar' }}</td> <!-- Mostrar empleado asignado -->
+            <td>
+                <a href="{{ url_for('tareas_blueprint.editar_tarea', tarea_id=tarea.idtarea) }}" class="btn btn-dark btn-sm">Editar</a>
+                <form action="{{ url_for('tareas_blueprint.eliminar_tarea', tarea_id=tarea.idtarea) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

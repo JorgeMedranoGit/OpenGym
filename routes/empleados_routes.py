@@ -1,7 +1,6 @@
 from flask import Blueprint,Flask, redirect, url_for, render_template, request, session, flash, jsonify
 from datetime import timedelta
 from decimal import Decimal
-from flask_sqlalchemy import SQLAlchemy 
 from models.empleados import Empleado
 from database import db
 from models.empleados import Rol

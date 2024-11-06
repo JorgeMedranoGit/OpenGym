@@ -18,6 +18,9 @@ from routes.compras_routes import compras_blueprint
 from routes.entregas_routes import entregas_blueprint
 from routes.estados_routes import estados_blueprint
 from routes.main import main_blueprint
+from routes.tareas_routes import tareas_blueprint
+from routes.tareas_asignadas import tareas_asignadas_blueprint
+
 
 # Inicialización de la app.
 app = Flask(__name__)
@@ -36,6 +39,8 @@ app.register_blueprint(compras_blueprint)
 app.register_blueprint(entregas_blueprint)
 app.register_blueprint(estados_blueprint)
 app.register_blueprint(main_blueprint)
+app.register_blueprint(tareas_blueprint)
+app.register_blueprint(tareas_asignadas_blueprint)
 
 
 if __name__ == "__main__":
