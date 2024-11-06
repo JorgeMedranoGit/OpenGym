@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Tareas{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="alert alert-success">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<h2>Tareas Asignadas</h2>
+
+{% if tareas %}
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Nombre de la Tarea</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Comentarios</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tarea in tareas %}
+                <tr>
+                    <td>{{ tarea.titulo }}</td>
+                    <td>{{ tarea.descripcion }}</td>
+                    <td>{{ 'Completada' if tarea.estado else 'Pendiente' }}</td>
+                    <td>
+                        {% if tarea.comentario %}
+                            <p>{{ tarea.comentario }}</p>  <!-- Mostrar comentario existente -->
+                        {% else %}
+                            {% if tarea.estado %}
+                                <!-- Si la tarea está completada y no tiene comentario, mostrar el formulario -->
+                                <form action="{{ url_for('tareas_asignadas_blueprint.completar_tarea', tarea_id=tarea.idtarea) }}" method="POST">
+                                    <textarea name="comentario" placeholder="Escribe un comentario" required></textarea><br>
+                                    <button type="submit" class="btn btn-success">Agregar comentario</button>
+                                </form>
+                            {% else %}
+                                <p>No puedes agregar un comentario hasta que completes la tarea.</p>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not tarea.estado %}
+                            <form action="{{ url_for('tareas_asignadas_blueprint.completar_tarea', tarea_id=tarea.idtarea) }}" method="POST">
+                                <button type="submit" class="btn btn-success">Marcar como completada</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No tienes tareas asignadas.</p>
+{% endif %}
+
+{% endblock %}

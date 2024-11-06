@@ -17,6 +17,7 @@
     <input type="text" name="carnet" class="form-control mt-2" placeholder="Carnet" value="{{ empleado.carnet if empleado else '' }}" required>
     <input type="text" name="telefono" class="form-control mt-2" placeholder="Teléfono" value="{{ empleado.telefono if empleado else '' }}">
     <input type="number" step="0.01" name="sueldo" class="form-control mt-2" placeholder="Sueldo" value="{{ empleado.sueldo if empleado else '' }}">
+    <input type="email" name="email" class="form-control mt-2" placeholder="Email" value="{{ empleado.email if empleado else '' }}" required>
     <input type="submit" class="btn btn-success mt-2" value="{{ 'Actualizar' if empleado else 'Añadir' }}"/>
 </form>
 
