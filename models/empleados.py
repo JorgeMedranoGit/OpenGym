@@ -22,6 +22,7 @@ class Empleado(db.Model):
     email = db.Column(db.String(100), nullable=True)
     password = db.Column(db.String(255), nullable=True)
     sueldo = db.Column(db.Numeric(10, 2), nullable=True)
+    cambiopassword = db.Column(db.Boolean, nullable=True)
 
     idrol = db.Column(db.Integer, db.ForeignKey('roles.idrol'), nullable=True)
     rol = db.relationship('Rol', backref='empleados')

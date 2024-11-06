@@ -9,9 +9,9 @@ cliente_blueprint = Blueprint('cliente_blueprint', __name__)
 
 @cliente_blueprint.route("/clientes", methods=["POST", "GET"])
 def clientesCrud():
-    if "usuario" not in session:
+    if "email" not in session:
         flash("Debes iniciar sesión")
-        return redirect("/login")
+        return redirect(url_for("main_blueprint.login"))
     if request.method == "POST":
         nombre = request.form['nombre_cliente']
         apellido = request.form['apellido_cliente']

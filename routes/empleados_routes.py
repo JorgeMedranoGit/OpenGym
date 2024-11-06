@@ -11,7 +11,7 @@ empleados_blueprint = Blueprint('empleados_blueprint', __name__)
 
 @empleados_blueprint.route('/empleados', methods=['GET', 'POST'])
 def empleadosCrud():
-    if "usuario" not in session:
+    if "email" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
     if request.method == 'POST':
