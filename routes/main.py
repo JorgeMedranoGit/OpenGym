@@ -33,7 +33,9 @@ def login():
                 flash("Inicio de sesión correcto" )
                 session["email"] = found_user.email
                 session["usuario"] = found_user.nombre + " " +  found_user.apellido
-                session["idempleado"] = found_user.idempleado
+                session["empleado_id"] = found_user.idempleado
+                flash("Inicio de sesión correcto" )
+
                 return redirect("/")
             else:
                 flash("Contraseña incorrecta")
@@ -57,6 +59,7 @@ def logout():
     flash("You have been logged out!", "info")
     session.pop("nombre", None)
     session.pop("email", None)
+    session.pop("empleado_id", None)
     return redirect("login")
 
 

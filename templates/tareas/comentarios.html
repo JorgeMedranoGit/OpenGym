@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Tareas y Comentarios{% endblock %}
+{% block content %}
+<h1>Tareas y Comentarios</h1>
+
+<!-- Mostrar todas las tareas con sus comentarios -->
+<h2>Tareas</h2>
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Empleado Asignado</th>
+            <th>Comentario</th>  <!-- Nueva columna para mostrar el comentario -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for tarea in tareas %}
+        <tr>
+            <td>{{ tarea.idtarea }}</td>
+            <td>{{ tarea.titulo }}</td>
+            <td>{{ tarea.descripcion }}</td>
+            <td>{{ tarea.empleado.nombre }} {{ tarea.empleado.apellido if tarea.empleado else 'Sin asignar' }}</td>
+            <td>{{ tarea.comentario if tarea.comentario else 'No hay comentario' }}</td>  <!-- Mostrar el comentario de la tarea -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

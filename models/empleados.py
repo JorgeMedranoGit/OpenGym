@@ -1,14 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float
-from sqlalchemy.ext.declarative import declarative_base
-
 from database import db
-
-# Importar db desde app.py
-
-
-
-Base = declarative_base()
-
 
 class Empleado(db.Model):
     __tablename__ = 'empleados'
