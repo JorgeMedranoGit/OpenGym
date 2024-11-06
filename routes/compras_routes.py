@@ -15,7 +15,7 @@ compras_blueprint = Blueprint('compras_blueprint', __name__)
 
 @compras_blueprint.route("/compras" , methods=['GET', 'POST'])
 def compraCrud():
-    if "usuario" not in session:
+    if "email" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
     compras = obtenerCompras()
