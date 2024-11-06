@@ -1,188 +1,173 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-    </style>
-    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPENG GYM</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Oswald:wght@200..700&family=Unlock&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 
-        #map {
-            position: absolute;
-            width: 100%;
-        }
-    </style>
-</head>
-
-<body class="bg-black text-white">
-    <header class="bg-black text-white py-4">
-        <div class="container mx-auto flex justify-between items-center px-4">
-            <div class="flex items-center">
-                <img alt="Open GYM" class="h-8 w-8" height="100"
-                    src="https://scontent.fcbb1-1.fna.fbcdn.net/v/t39.30808-6/462087840_943000311178632_5823762606441181382_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=r1SkcMD_kpIQ7kNvgHisRbq&_nc_zt=23&_nc_ht=scontent.fcbb1-1.fna&_nc_gid=Ap7EBbC13j2yZe5aIKJHxyr&oh=00_AYDDDD_9NLiu90Aeph6LqsOsI71WgWCXUnSPN1Q75NBqqg&oe=67215E03"
-                    width="100" />
-                <span class="ml-2 text-xl font-bold">Open GYM</span>
+    <body>
+    <section class="header" id="home">
+        <nav>
+            <a href="inicio.html"><img src="{{ url_for('static', filename='images/logo.png') }}"></a>
+            <div class="nav-links" id="navLinks">
+                <i class="fa fa-times-circle" onclick="hideMenu()"></i>
+                <ul>
+                    <li><a href="#home">HOME</a></li>
+                    <li><a href="#maquinas">MÁQUINAS</a></li>
+                    <li><a href="#eventos">EVENTOS</a></li>
+                    <li><a href="#contact">SOBRE NOSOTROS</a></li>
+                </ul>
             </div>
-            <a class="hover:underline" href="#">Log In</a>
+            <i class="fa fa-bars" onclick="showMenu()"></i>
+        </nav>
+
+        <div class="text-box">
+            <h1>OPENGYM</h1>
+            <p>BIENVENIDO AL PORTAL DE ADMINISTRACIÓN</p>
+            <a href="/login" class="sesion-btn">INICIAR SESIÓN</a>
         </div>
-    </header>
-    <main class="relative">
-        <img alt="Background image of a gym with people lifting weights" class="w-full h-screen object-cover"
-            height="1080"
-            src="https://storage.googleapis.com/a1aa/image/7M5ANOMx615HHhdKvu4W4AcuVPpvnOpDmEXet2eUz8t7epUnA.jpg"
-            width="1920" />
-        <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-            <h1 class="text-4xl md:text-6xl font-bold text-black">EL BIENESTAR EN TUS MANOS</h1>
-            <h2 class="text-4xl md:text-6xl font-bold text-red-500 mt-4">OPEN GYM</h2>
-        </div>
-    </main>
-    <section class="bg-gray-900 text-white py-12">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold mb-8">Sistema de Información de Máquinas</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-gray-800 p-6 rounded-lg">
-                    <img alt="Máquina de Press de Pecho" class="w-full h-40 object-cover mb-4"
-                        src="data:image/jpeg;base64,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qAi60x4lQX94+yD79Uh8yz8vsztVI8Tce+w74HX0l41cbik0HUqU1BIBtc1GJ39wE6MpzVsJSZLsAzX0ja+wG/jynsyvhrE58RUZeqQ8ncWNvuqdz/8At5esm4Vw+V2OnrH9p9/Qch+cCnZdkmLzre3VUz3ttt5d7flLTheCcKiFKgaqWFidTJ+HQQR6yyxAicm4bwmR/wCBRWmfG7M34nJPzktEQEREBERAREQEREBERAREQEREBERAREQEREDoxtFayMCobY2uAe7zmU4MAovdt3bflNZxDaUYnYAH8pheH4pw9JQp1m3eF2/OBZMLkdXPamhKgRVALlrk2JI7IHM7eMu2ScJ4bKLEL1j+2+5v5DkPz85VejfPqOY4l0QsD1V7MLX0uvL1mkQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREDjUQVAVPIgg+4zGs16IcUjn6PVoOl9hVZ6bAdwOlHvNniBQujzgJ+GajV61RHqFNAWncqoJBJ1MAT9Udwl9iICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIH/9k=" />
-                    <h3 class="text-2xl font-bold mb-2">Máquina de Press de Pecho (Chest Press)</h3>
-                    <p><strong>Función:</strong> Permite realizar un movimiento similar al de un press de banca,
-                        empujando hacia adelante.</p>
-                    <p><strong>Músculos trabajados:</strong> Principalmente el pectoral mayor, pero también los tríceps
-                        y los hombros.</p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-lg">
-                    <img alt="Máquina de Remo" class="w-full h-40 object-cover mb-4"
-                        src="https://powerfitnesspro.com/fitnessprocomercial/705-large_default/maquina-de-remo-alto.jpg" />
-                    <h3 class="text-2xl font-bold mb-2">Máquina de Remo (Seated Row)</h3>
-                    <p><strong>Función:</strong> Imita el movimiento de remo, tirando de un agarre hacia el torso.</p>
-                    <p><strong>Músculos trabajados:</strong> Principalmente la espalda (dorsales y trapecios) y los
-                        bíceps.</p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-lg">
-                    <img alt="Máquina de Prensa de Piernas" class="w-full h-40 object-cover mb-4"
-                        src="https://powerfitnesspro.com/fitnessprocomercial/713-large_default/maquina-hack-press-dual.jpg" />
-                    <h3 class="text-2xl font-bold mb-2">Máquina de Prensa de Piernas (Leg Press)</h3>
-                    <p><strong>Función:</strong> Permite empujar una plataforma con las piernas mientras se está
-                        sentado.</p>
-                    <p><strong>Músculos trabajados:</strong> Cuádriceps, isquiotibiales y glúteos.</p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-lg">
-                    <img alt="Máquina de Extensiones de Piernas" class="w-full h-40 object-cover mb-4"
-                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQChMZlsN--wumOaB70weq1HQoSg5hHOzfz0A&s" />
-                    <h3 class="text-2xl font-bold mb-2">Máquina de Extensiones de Piernas (Leg Extension)</h3>
-                    <p><strong>Función:</strong> Aísla y trabaja los cuádriceps extendiendo las piernas desde una
-                        posición sentada.</p>
-                    <p><strong>Músculos trabajados:</strong> Principalmente los cuádriceps.</p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-lg">
-                    <img alt="Máquina de Curl de Piernas" class="w-full h-45 object-cover mb-4"
-                        src="https://placehold.co/600x400" />
-                    <h3 class="text-2xl font-bold mb-2">Máquina de Curl de Piernas (Leg Curl)</h3>
-                    <p><strong>Función:</strong> Aísla los isquiotibiales al flexionar las piernas en la posición
-                        tumbada o sentada.</p>
-                    <p><strong>Músculos trabajados:</strong> Principalmente los isquiotibiales.</p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-lg">
-                    <img alt="Máquina de Abdominales" class="w-full h-45 object-cover mb-4"
-                        src="https://placehold.co/600x400" />
-                    <h3 class="text-2xl font-bold mb-2">Máquina de Abdominales (Abdominal Crunch)</h3>
-                    <p><strong>Función:</strong> Facilita el movimiento de contracción del abdomen al sentarse hacia
-                        adelante.</p>
-                    <p><strong>Músculos trabajados:</strong> Principalmente los músculos abdominales (recto abdominal).
-                    </p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-lg">
-                    <img alt="Máquina de Hombros" class="w-full h-45 object-cover mb-4"
-                        src="https://placehold.co/600x400" />
-                    <h3 class="text-2xl font-bold mb-2">Máquina de Hombros (Shoulder Press)</h3>
-                    <p><strong>Función:</strong> Permite empujar hacia arriba con los brazos desde una posición sentada.
-                    </p>
-                    <p><strong>Músculos trabajados:</strong> Hombros (deltoides) y tríceps.</p>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-lg">
-                    <img alt="Máquina de Pec Deck" class="w-full h-45 object-cover mb-4"
-                        src="https://placehold.co/600x400" />
-                    <h3 class="text-2xl font-bold mb-2">Máquina de Pec Deck (Pec Deck Fly)</h3>
-                    <p><strong>Función:</strong> Permite realizar un movimiento de apertura y cierre, enfocándose en el
-                        pecho.</p>
-                    <p><strong>Músculos trabajados:</strong> Principalmente los músculos pectorales.</p>
-                </div>
+    </section>
+    
+    <!--Mensajes-->
+    <section class="course" id="about">
+        <h1>ACERCA DEL GIMNASIO</h1>
+        <p class="message">VISIÓN Y VALORES DEL GIMNASIO</p>
+
+        <div class="row">
+            <div class="course-col">
+                <h3>MISIÓN</h3>
+                <p>Bienvenido a OPENGYM, donde cada día nos esforzamos por brindar el mejor ambiente para que nuestros miembros alcancen sus metas de salud y bienestar. Nuestro equipo está aquí para apoyar, inspirar y guiar a cada persona en su camino hacia una vida más activa y saludable.</p>
+            </div>
+            <div class="course-col">
+                <h3>COMUNIDAD Y EQUIPO</h3>
+                <p>Somos más que un gimnasio; somos una comunidad que crece junta. Cada uno de nuestros entrenadores, instructores y empleados es una pieza fundamental en la construcción de un ambiente seguro y motivador, donde todos pueden encontrar su lugar y avanzar hacia un mejor estilo de vida.</p>
+            </div>
+            <div class="course-col">
+                <h3>CALIDAD Y COMPROMISO</h3>
+                <p>En OPENGYM, creemos en la importancia de la calidad en cada detalle. Desde el equipo de última generación hasta el servicio personalizado de nuestros profesionales, nuestro compromiso es brindar una experiencia excepcional. Cada empleado es clave para que nuestros clientes vivan un servicio de calidad en cada visita.</p>
             </div>
         </div>
     </section>
-    <div id="map"></div>
-    <script>
-        mapboxgl.accessToken = 'pk.eyJ1IjoicGFibG9qIiwiYSI6ImNtMDVzYXZlNTBuZG8ya3EzZjlhZmk5bnYifQ.YyWx5ce9ANQ5pmvtte48bw';
-        const map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v9',
-            projection: 'globe', // Display the map as a globe, since satellite-v9 defaults to Mercator
-            zoom: 1,
-            center: [30, 15]
-        });
 
-        map.addControl(new mapboxgl.NavigationControl());
-        map.scrollZoom.disable();
+    <!----------- maquinas ---------->
+    <section class="maquinas" id="maquinas">
+        <h1>NUESTRAS MÁQUINAS</h1> 
+        <p class="message">MÁQUINAS DE FUERZA PARA TREN SUPERIOR</p>
+        <div class="row">
+            <div class="maquinas-col">
+                <img src="{{ url_for('static', filename='images/Maquinas/presspecho.png') }}" alt="">
+                <div class="layer">
+                    <h3>PRESS DE PECHO</h3>
+                </div>
+            </div>
 
-        map.on('style.load', () => {
-            map.setFog({}); // Set the default atmosphere style
-        });
+            <div class="maquinas-col">
+                <img src="{{ url_for('static', filename='images/Maquinas/hombros.png') }}" alt="">
+                <div class="layer">
+                    <h3>PRESS DE HOMBROS</h3>
+                </div>
+            </div>
 
-        // The following values can be changed to control rotation speed:
+            <div class="maquinas-col">
+                <img src="{{ url_for('static', filename='images/Maquinas/pulldown.png') }}" alt="">
+                <div class="layer">
+                    <h3>PULL-DOWN DE DORSALES</h3>
+                </div>
+            </div>
+        </div>
 
-        // At low zooms, complete a revolution every two minutes.
-        const secondsPerRevolution = 240;
-        // Above zoom level 5, do not rotate.
-        const maxSpinZoom = 5;
-        // Rotate at intermediate speeds between zoom levels 3 and 5.
-        const slowSpinZoom = 3;
 
-        let userInteracting = false;
-        const spinEnabled = true;
+        <div class="row" >
+            <div class="maquinas-col">
+                <img src="{{ url_for('static', filename='images/Maquinas/jalonRemo.png') }}" alt="">
+                <div class="layer">
+                    <h3>MÁQUINA DE REMO</h3>
+                </div>
+            </div>
 
-        function spinGlobe() {
-            const zoom = map.getZoom();
-            if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
-                let distancePerSecond = 360 / secondsPerRevolution;
-                if (zoom > slowSpinZoom) {
-                    // Slow spinning at higher zooms
-                    const zoomDif =
-                        (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
-                    distancePerSecond *= zoomDif;
-                }
-                const center = map.getCenter();
-                center.lng -= distancePerSecond;
-                // Smoothly animate the map over one second.
-                // When this animation is complete, it calls a 'moveend' event.
-                map.easeTo({ center, duration: 1000, easing: (n) => n });
-            }
-        }
+            <div class="maquinas-col">
+                <img src="{{ url_for('static', filename='images/Maquinas/bicepYtriceps.png') }}" alt="">
+                <div class="layer">
+                    <h3>MÁQUINA DE BICEPS Y TRICEPS</h3>
+                </div>
+            </div>
 
-        // Pause spinning on interaction
-        map.on('mousedown', () => {
-            userInteracting = true;
-        });
-        map.on('dragstart', () => {
-            userInteracting = true;
-        });
+            <div class="maquinas-col">
+                <img src="{{ url_for('static', filename='images/Maquinas/pectorales.png') }}" alt="">
+                <div class="layer">
+                    <h3>MÁQUINAS DE PECTORALES</h3>
+                </div>
+            </div>
+        </div>
 
-        // When animation is complete, start spinning if there is no ongoing interaction
-        map.on('moveend', () => {
-            spinGlobe();
-        });
+        <button class="btnBack" onclick="window.location.href='#home'">Volver al inicio</button>
 
-        spinGlobe();
-    </script>
+    </section>
+
+    <!------Eventos------>
+
+    <section class="events"  id="eventos">
+        <h1>EVENTOS</h1>
+        <p class="message">PREPARATE PARA NUESTROS PROXIMOS EVENTOS.</p>
+
+        <div class="row">
+            <div class="events-col">
+                <img src="{{ url_for('static', filename='images/eventos/hallowen.jpg') }}" alt="">
+                <h3>🎃 Entrenamiento de Halloween: Noche de Espantos y Cardio</h3>
+                <p>Únete a nuestro entrenamiento especial de Halloween, ¡donde el ejercicio se vuelve espeluznante! Ven disfrazado y participa en desafíos de cardio, pesas y resistencia con temática de Halloween. Premios para los mejores disfraces</p>
+            </div>
+
+            <div class="events-col">
+                <img src="{{ url_for('static', filename='images/eventos/navidad.png') }}" alt="">
+                <h3>🎅 Entrenamiento Navideño: 12 Días de Fitness</h3>
+                <p>Mantente en forma durante las fiestas con nuestro desafío ‘12 Días de Fitness’. Cada día trae una nueva rutina y un objetivo especial para que termines el año con energía. Participa en cada sesión y recibe recompensas navideñas</p>
+            </div>
+
+            <div class="events-col">
+                <img src="{{ url_for('static', filename='images/eventos/añoNuevo.png') }}" alt="">
+                <h3>🌟 Entrenamiento Especial de Fin de Año</h3>
+                <p>Despide el año en buena forma con nuestra última clase del año. Ejercicios variados, energía positiva y un brindis saludable para terminar el año. ¡Prepárate para recibir el próximo con fuerza y motivación!</p>
+            </div>
+        </div>
+
+        <button class="btnBack" onclick="window.location.href='#home'">Volver al inicio</button>
+    </section>
+
+
+    <section class="footer" id="contact">
+        <h4>NUESTRAS REDES SOCIALES</h4>
+        <div class="icons">
+            <i class="fa fa-facebook"></i> 
+            <i class="fa fa-instagram"></i>
+            <i class="fa fa-whatsapp"></i>
+            <i class="fa fa-phone"></i>
+        </div>
+
+
+        <h4>UBICACIÓN</h4>
+        <p>Encuentra nuestra sucursal de Miraflores. Av. Saavedra, edificio Cristembo Nro 1948 Piso 1.</p>
+        <div class="ubicacion">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d239.09195766276383!2d-68.1224153504468!3d-16.50228635267571!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sbo!4v1730884828736!5m2!1sen!2sbo" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </section>
+    
+
+<script>
+
+    var navLinks = document.getElementById("navLinks");
+    function showMenu(){
+        navLinks.style.left = "0";
+    } 
+    function hideMenu(){
+        navLinks.style.left = "-200px";
+    }
+</script>
+
 </body>
-
 </html>
