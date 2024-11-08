@@ -2,7 +2,9 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
+from flask_mail import Mail
 from database import init_app, db
+from config import Email
 
 
 # Si descomentan esto basicamente estan abriendo la caja de pandora XD
@@ -22,11 +24,18 @@ from routes.tareas_routes import tareas_blueprint
 from routes.tareas_asignadas import tareas_asignadas_blueprint
 
 
+mail = Mail()
+
 # Inicialización de la app.
 app = Flask(__name__)
 # -- Configuración de la base de datos mediante Config() donde se encuentra la base de datos
 app.secret_key = "qc2024"
 app.config.from_object(Config.Config()) 
+app.config.from_object(Email.Email())
+
+mail = Mail(app)
+
+
 
 init_app(app)
 

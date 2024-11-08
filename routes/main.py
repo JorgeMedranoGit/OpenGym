@@ -1,9 +1,12 @@
-from flask import Blueprint,Flask, redirect, url_for, render_template, request, session, flash, jsonify
+from flask import Blueprint,Flask, redirect, url_for, render_template, request, session, flash, jsonify, current_app
+from flask_mail import * 
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import timedelta
 from decimal import Decimal
 from models.empleados import Empleado
 from database import db
+
+import random
 
 
 main_blueprint = Blueprint('main_blueprint', __name__)
@@ -18,6 +21,7 @@ def home():
 
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
 def login():
+    mail = current_app.extensions['mail']
     if request.method == "POST":
         session.permanent = True
         email = request.form["email"]
@@ -28,15 +32,19 @@ def login():
         
         if found_user:
             if check_password_hash(found_user.password, password):
-                if(found_user.cambiopassword == False):
-                    return render_template("password.html", empleado=found_user)
-                flash("Inicio de sesión correcto" )
-                session["email"] = found_user.email
-                session["usuario"] = found_user.nombre + " " +  found_user.apellido
-                session["empleado_id"] = found_user.idempleado
-                flash("Inicio de sesión correcto" )
+                codigo = codigo_verificacion()
+                session["codigo"] = codigo
+                session["email_verificacion"] = found_user.email
 
-                return redirect("/")
+                msg = Message(
+                    "Tu código de verificación",
+                    sender="quantumcodersunivalle@gmail.com",
+                    recipients=[found_user.email]
+                )
+                msg.body = f"Tu código de verificación es: {codigo}"
+                mail.send(msg)
+
+                return redirect(url_for("main_blueprint.verificar"))
             else:
                 flash("Contraseña incorrecta")
                 return redirect("login") 
@@ -51,6 +59,26 @@ def login():
 
     return render_template("login.html")
 
+@main_blueprint.route("/empleados/verificar", methods=["POST", "GET"])
+def verificar():
+    if "codigo" not in session:
+        flash("Error, no iniciaste sesion")
+        return redirect("login") 
+    if request.method == "POST":
+        code = request.form["code"]
+        if code == session["codigo"]:
+            found_user = Empleado.query.filter_by(email=session["email_verificacion"]).first()
+            if(found_user.cambiopassword == False):
+                return render_template("password.html", empleado=found_user)
+            session["email"] = found_user.email
+            session["usuario"] = found_user.nombre + " " +  found_user.apellido
+            session["empleado_id"] = found_user.idempleado
+            flash("Inicio de sesión correcto" )
+            return redirect("/")
+        else:
+            flash("Codigo incorrecto")
+        return redirect("login") 
+    return render_template("verificacion.html", emailV = session["email_verificacion"])
 
 
 
@@ -93,3 +121,5 @@ def password():
             return redirect(url_for("main_blueprint.login"))
 
 
+def codigo_verificacion():
+    return str(random.randint(100000, 999999))
