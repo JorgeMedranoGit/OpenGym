@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from database import db
 
 Base = declarative_base()
-
+# Comentaio Nafta
 
 class Clientes(db.Model):
     __tablename__ = 'clientes'
