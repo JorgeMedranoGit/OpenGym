@@ -54,25 +54,31 @@ def formEntrega():
         fechapedido = request.form['fechapedido']
         metodopago = request.form['metodopago']
         idproveedor = request.form['idproveedor']
+        cantidades = request.form.getlist('cantidad[]')
+        preciosCompras = request.form.getlist('precio[]') 
+
 
         entregaN = Entregas(fechapedido=fechapedido, metodopago=metodopago, idproveedor=idproveedor)
-        db.session.add(entregaN)  # Añadir la entrega a la sesión antes de hacer commit
-        db.session.commit()  # Insertar la entrega y obtener el id
+        db.session.add(entregaN) 
+        db.session.commit() 
 
-        idEntrega = entregaN.identrega  # Obtener el id después de hacer commit
+        idEntrega = entregaN.identrega
 
         estadoN = EntregaEstado(fechaestado=datetime.now(), identrega=idEntrega, idestado=1)
         db.session.add(estadoN)
         db.session.commit()
 
-        cantidades = request.form.getlist('cantidad[]')  # Obtener lista de cantidades
-        preciosCompras = request.form.getlist('precio[]')  # Obtener lista de precios
+        
 
-        productos = request.form.getlist('idp[]')  # Cambia 'producto[]' a 'idp[]'
+        productos = request.form.getlist('idp[]')
         for idp, cantidad, precio in zip(productos, cantidades, preciosCompras):
             if idp.strip() and int(cantidad) > 0 and float(precio) > 0:
                 detalle = DetalleEntregas(cantidad=int(cantidad), preciocompra=float(precio), identrega=idEntrega, idproducto=idp)
                 db.session.add(detalle)
+
+                producto_db = Productos.query.get(idp)
+                if producto_db:
+                    producto_db.stock += int(cantidad)
         db.session.commit()
         flash("Entrega agregada exitosamente!")
         return redirect("/entregas")

@@ -30,29 +30,48 @@ def formCompra():
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
+    
     if request.method == 'GET':
         empleados = obtener_todos_los_empleados()
         clientes = obtener_todos_los_clientes()
-        return render_template("comprasForm.html", clientes = clientes, empleados = empleados)
+        return render_template("comprasForm.html", clientes=clientes, empleados=empleados)
+    
     if request.method == 'POST':
         fechacompra = request.form['fechacompra']
         metodopago = request.form['metodopago']
         idempleado = request.form['idempleado']
         idcliente = request.form['idcliente']
 
-        compraN = Compras(fechacompra=fechacompra, metodopago=metodopago,idcliente=idcliente, idempleado=idempleado)
-        db.session.add(compraN)  # Añadir la compra a la sesión antes de hacer commit
-        db.session.commit()  # Insertar la compra y obtener el id
+        productos = request.form.getlist('producto[]')
+        cantidades = request.form.getlist('cantidad[]')
 
-        idCompra = compraN.idcompra  # Obtener el id después de hacer commit
+        stock_ok = True
+        for producto, cantidad in zip(productos, cantidades):
+            if producto.strip() and int(cantidad) > 0:
+                producto_db = Productos.query.get(producto) 
+                if producto_db and producto_db.stock < int(cantidad):
+                    stock_ok = False
+                    break
+        
+        if not stock_ok:
+            flash("No se pudo registrar la compra, stock insuficiente.")
+            return redirect("/compras")
 
-        productos = request.form.getlist('producto[]')  # Cambiar a getlist
-        cantidades = request.form.getlist('cantidad[]')  # Cambiar a getlist
+        compraN = Compras(fechacompra=fechacompra, metodopago=metodopago, idcliente=idcliente, idempleado=idempleado)
+        db.session.add(compraN) 
+        db.session.commit()
+
+        idCompra = compraN.idcompra 
 
         for producto, cantidad in zip(productos, cantidades):
             if producto.strip() and int(cantidad) > 0:
                 detalle = DetalleCompras(cantidad=int(cantidad), idcompra=idCompra, idproducto=producto)
                 db.session.add(detalle)
+
+                # Restar del stock
+                producto_db = Productos.query.get(producto)
+                if producto_db:
+                    producto_db.stock -= int(cantidad)
 
         db.session.commit()
         flash("Compra agregada exitosamente!")
