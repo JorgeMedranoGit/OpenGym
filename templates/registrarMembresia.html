@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Membresía</title>
+</head>
+<body>
+    <h2>Registrar Membresía para {{ cliente.nombre }} {{ cliente.apellido }}</h2>
+
+    <form method="POST" action="{{ url_for('cliente_blueprint.registrarMembresia', cliente_id=cliente.idcliente) }}">
+        <label for="idmembresia">Tipo de Membresía:</label>
+        <select name="idmembresia" required>
+            <!-- Supongamos que tienes una lista de tipos de membresía que se obtiene de la base de datos -->
+            {% for membresia in membresias %}
+                <option value="{{ membresia.idmembresia }}">{{ membresia.tipomembresia }} - ${{ membresia.costo }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="turno">Turno:</label>
+        <select name="turno" required>
+            <!-- Lista de turnos disponibles -->
+            <option value="mañana">Mañana</option>
+            <option value="tarde">Tarde</option>
+            <option value="noche">Noche</option>
+        </select>
+
+        <label for="metodo_pago">Método de Pago:</label>
+        <select name="metodo_pago" required>
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="transferencia">Transferencia</option>
+        </select>
+
+        <label for="descuento">Descuento (opcional):</label>
+        <input type="number" step="0.01" name="descuento" placeholder="0.00" min="0">
+
+        <button type="submit">Registrar Membresía y Pago</button>
+    </form>
+
+    <a href="{{ url_for('cliente_blueprint.clientesCrud') }}">Cancelar</a>
+</body>
+</html>

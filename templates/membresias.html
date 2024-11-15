@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Membresías{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p>{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+<br><br>
+<form action="/membresias" method="POST" class="form mt-3">
+    <input type="hidden" name="membresia_id" value="{{ membresia.idmembresia if membresia else '' }}">
+    <input type="text" name="tipo_membresia" class="form-control mt-2" placeholder="Membresía" value="{{ membresia.tipomembresia if membresia else '' }}" required>
+    <input type="text" name="costoMembresia" class="form-control mt-2" placeholder="Costo de la membresía" value="{{ membresia.costo if membresia else '' }}" required>
+    <input type="submit" class="btn btn-success mt-2" value="{{ 'Actualizar' if membresia else 'Añadir' }}"/>
+</form>
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tipo de membresía</th>
+            <th>Costo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for membresia in membresias %}
+            {% if membresia.habilitado %}
+            <tr>
+                <td>{{ membresia.idmembresia }}</td>
+                <td>{{ membresia.tipomembresia }}</td>
+                <td>{{ membresia.costo }}</td>
+                <td>
+                    <a href="/membresias/editar/{{ membresia.idmembresia }}" class="btn btn-dark">Editar</a>
+                    <form action="/membresias/desactivar/{{ membresia.idmembresia }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Desactivar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<h2>Membresias desactivadas</h2>
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tipo de membresía</th>
+            <th>Costo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for membresia in membresias %}
+            {% if not membresia.habilitado %}
+            <tr>
+                <td>{{ membresia.idmembresia }}</td>
+                <td>{{ membresia.tipomembresia }}</td>
+                <td>{{ membresia.costo }}</td>
+                <td>
+                    <form action="/membresias/reactivar/{{ membresia.idmembresia }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-success">Reactivar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

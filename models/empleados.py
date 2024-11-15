@@ -1,4 +1,6 @@
 from database import db
+from sqlalchemy.orm import relationship
+
 
 class Empleado(db.Model):
     __tablename__ = 'empleados'
@@ -16,7 +18,15 @@ class Empleado(db.Model):
 
     idrol = db.Column(db.Integer, db.ForeignKey('roles.idrol'), nullable=True)
     rol = db.relationship('Rol', backref='empleados')
-    
+
+
+    #para el registro de cliente controlado por el empleado de NEF
+    # detalle_membresias= relationship('DetalleMembresia', back_populates='empleado')
+    #para sesiones
+    # sesiones= relationship('Sesion', back_populates='empleado')
+    #--------------------------------------------------------------
+
+
     def __repr__(self):
         return f'<Empleado {self.nombre} {self.apellido}>'
 

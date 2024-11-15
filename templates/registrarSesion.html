@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Sesión</title>
+</head>
+<body>
+    <h2>Registrar Sesión para {{ cliente.nombre }} {{ cliente.apellido }}</h2>
+
+    <form method="POST" action="{{ url_for('cliente_blueprint.registrarSesion', cliente_id=cliente.idcliente) }}">
+        <label for="monto">Monto de la Sesión:</label>
+        <input type="number" step="0.01" name="monto" placeholder="0.00" required>
+
+        <label for="metodo_pago">Método de Pago:</label>
+        <select name="metodo_pago" required>
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="transferencia">Transferencia</option>
+        </select>
+
+        <button type="submit">Registrar Sesión y Pago</button>
+    </form>
+
+    <a href="{{ url_for('cliente_blueprint.clientesCrud') }}">Cancelar</a>
+</body>
+</html>
