@@ -47,7 +47,7 @@ def login():
                 recaptcha_response = request.form.get('g-recaptcha-response')
     
                 data = {
-                    'secret': "6Le2hn8qAAAAALMs_UGmPbjBT7CGbq0RmkypTho1",
+                    'secret': "6LeEJYAqAAAAAK8HoU_2F6E8nJUwypVorl9AUcdn",
                     'response': recaptcha_response
                 }
                 r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
