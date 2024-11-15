@@ -19,12 +19,31 @@ def clientesCrud():
 
     if request.method == "POST":
     # Obtener datos del formulario
-        nombre = request.form['nombre']
-        apellido = request.form['apellido']
-        carnet = request.form['carnet']
-        telefono = request.form['telefono']
+        nombre = request.form['nombre'].strip()
+        apellido = request.form['apellido'].strip()
+        carnet = request.form['carnet'].strip()
+        telefono = request.form['telefono'].strip()
         tipo_suscripcion = request.form['tipo_suscripcion']
-        cliente_id = request.form.get('cliente_id')  # Si es edición, este campo vendrá con el ID del cliente
+        cliente_id = request.form.get('cliente_id') 
+
+        errores = []
+        if not nombre or len(nombre) < 3:
+            errores.append("El nombre es obligatorio y debe tener al menos 3 caracteres.")
+            flash("datos incorrectos")
+        if not apellido or len(apellido) < 3:
+            errores.append("El apellido es obligatorio y debe tener al menos 3 caracteres.")
+            flash("datos incorrectos")
+        if not carnet.isdigit() or len(carnet) != 8:
+            errores.append("El carnet debe ser un número de 8 dígitos.")
+            flash("datos incorrectos")
+        if not telefono.isdigit() or len(telefono) < 7:
+            errores.append("El teléfono debe ser un número válido con al menos 7 dígitos.")
+            flash("datos incorrectos")
+
+        if errores:
+            for error in errores:
+                flash(error)
+            return redirect(url_for("cliente_blueprint.clientesCrud"))
 
         if cliente_id and cliente_id.isdigit():
             cliente = Clientes.query.get(int(cliente_id))
