@@ -1,0 +1,74 @@
+.sidebar {
+    transition: width 0.3s;
+    position: fixed; /* Fija la barra lateral */
+    top: 0;
+    left: 0;
+    height: 100%; /* Ocupa toda la altura de la pantalla */
+    z-index: 10;
+    background-color: #f0f0f0; /* Un gris claro */
+}
+.sidebar.collapsed {
+    width: 64px;
+}
+.sidebar .nav-link {
+    white-space: nowrap;
+}
+.sidebar.collapsed .nav-link span {
+    display: none;
+}
+.sidebar.collapsed .nav-link {
+    text-align: center;
+}
+.dynamic-div {
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro con transparencia */
+    color: white; /* Texto en blanco para mejor contraste */
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+.dynamic-div .details {
+    display: none;
+}
+.dynamic-div.expanded .details {
+    display: block;
+}
+.dynamic-div.expanded .summary {
+    display: none;
+}
+.content {
+    margin-left: 256px; /* Espacio para la barra lateral */
+    padding: 20px; /* Espaciado interno */
+}
+@media (max-width: 768px) {
+    .toggle-sidebar-btn {
+        display: block;
+    }
+    .sidebar {
+        width: 64px;
+        left: -64px;
+    }
+    .sidebar.expanded {
+        left: 0;
+    }
+    .content {
+        margin-left: 0;
+    }
+}
+@media (min-width: 769px) {
+    .toggle-sidebar-btn {
+        display: none;
+    }
+    .sidebar {
+        width: 256px;
+    }
+    .content {
+        margin-left: 256px;
+    }
+}
+.toggle-sidebar-btn {
+    position: fixed; /* Fija el botón */
+    top: 20px; /* Espaciado desde la parte superior */
+    right: 20px; /* Espaciado desde la derecha */
+    z-index: 20; /* Asegúrate de que esté por encima de otros elementos */
+}

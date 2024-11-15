@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+{% block title %}Comprar Maquinas{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for msg in messages %}
+<p>{{msg}}</p>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<script>
+    let productosSeleccionados = [];
+    function realizarCompra(event) {
+        event.preventDefault(); // Evitar el envío del formulario
+
+        if (productosSeleccionados.length === 0) {
+            alert('No hay productos seleccionados para comprar.');
+            return;
+        }
+
+        const data = {
+            tipoMaquina: document.getElementById('tipoMaquina').value,
+            productos: productosSeleccionados
+        };
+
+        // Imprimir los datos en la consola
+        console.log("Datos a enviar:", JSON.stringify(data));
+
+        fetch('/comprarmaquinas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert('Compra realizada con éxito');
+                window.location.href = "/comprarmaquinas";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Hubo un error al realizar la compra.');
+            });
+    }
+    function validarFormulario(event) {
+        const select = document.getElementById('nombre');
+        if (select.value === '0') {
+            event.preventDefault(); // Evita el envío del formulario
+            alert('Por favor, selecciona un nombre válido.'); // Mensaje de alerta
+        }
+    }
+    function validarFormularioAgregar() {
+        const nombreSelect = document.getElementById('nombre');
+        const proveedorSelect = document.getElementById('proveedor');
+        const idEmpleadoInput = document.getElementById('idEmpleado');
+        const cantidadInput = document.getElementById('cantidad');
+        const precioUnitarioInput = document.getElementById('precioUnitario');
+        const tipoMaquinaInput = document.getElementById('tipoMaquina');
+
+        // Obtener el nuevo nombre de máquina si se ha ingresado
+        const nuevoNombre = document.getElementById('nuevoNombre').value.trim();
+        const nuevoProveedorNombre = document.getElementById('nuevoProveedorNombre').value.trim();
+        const telefonoProveedor = document.getElementById('telefonoProveedor').value.trim();
+        const correoProveedor = document.getElementById('correoProveedor').value.trim();
+
+        // Validar campos requeridos
+        if (nombreSelect.value === '0' && nuevoNombre === '') {
+            alert("Por favor, ingrese un nombre de máquina.");
+            return false;
+        }
+        if (proveedorSelect.value === '0' && nuevoProveedorNombre === '') {
+            alert("Por favor, ingrese un nombre de proveedor.");
+            return false;
+        }
+        if (idEmpleadoInput.value.trim() === '') {
+            alert("Por favor, ingrese el ID del empleado.");
+            return false;
+        }
+        if (cantidadInput.value.trim() === '' || isNaN(cantidadInput.value) || parseInt(cantidadInput.value) <= 0) {
+            alert("Por favor, ingrese una cantidad válida.");
+            return false;
+        }
+        if (precioUnitarioInput.value.trim() === '' || isNaN(precioUnitarioInput.value) || parseFloat(precioUnitarioInput.value) <= 0) {
+            alert("Por favor, ingrese un precio unitario válido.");
+            return false;
+        }
+        if (tipoMaquinaInput.value.trim() === '') {
+            alert("Por favor, seleccione un tipo de máquina.");
+            return false;
+        }
+        return true
+    }
+    function añadirProducto() {
+        if (validarFormularioAgregar()) {
+            const nombreSelect = document.getElementById('nombre');
+            const proveedorSelect = document.getElementById('proveedor');
+            const idEmpleadoInput = document.getElementById('idEmpleado');
+            const cantidadInput = document.getElementById('cantidad');
+            const precioUnitarioInput = document.getElementById('precioUnitario');
+            const tipoMaquinaInput = document.getElementById('tipoMaquina');
+
+            // Obtener el nuevo nombre de máquina si se ha ingresado
+            const nuevoNombre = document.getElementById('nuevoNombre').value;
+            const nuevoCodigoNombre = document.getElementById('codigoMaquina').value;
+            const nuevoProveedorNombre = document.getElementById('nuevoProveedorNombre').value;
+            const telfProveedor = document.getElementById('telefonoProveedor').value;
+            const correoProveedor = document.getElementById('correoProveedor').value;
+            const producto = {
+                idNombre: nombreSelect.value,
+                nombre: nombreSelect.value === '0' ? nuevoNombre : nombreSelect.options[nombreSelect.selectedIndex].text,
+                codnom: nombreSelect.value === '0' ? nuevoCodigoNombre : "conocido",
+                idProveedor: proveedorSelect.value,
+                proveedor: proveedorSelect.value === '0' ? nuevoProveedorNombre : proveedorSelect.options[proveedorSelect.selectedIndex].text,
+                telf: proveedorSelect.value === '0' ? telfProveedor : 0,
+                correo: proveedorSelect.value === '0' ? correoProveedor : "conocido",
+                idEmpleado: idEmpleadoInput.value,
+                cantidad: parseInt(cantidadInput.value),
+                precioUnitario: parseFloat(precioUnitarioInput.value),
+                tipoMaquina: tipoMaquinaInput.value // Agregar tipo de máquina
+            };
+
+            // Verificar si el producto ya existe en la lista
+            const existingProductIndex = productosSeleccionados.findIndex(p =>
+                p.idNombre === producto.idNombre &&
+                p.proveedor === producto.proveedor
+            );
+
+            if (existingProductIndex !== -1) {
+                const existingProduct = productosSeleccionados[existingProductIndex];
+
+                // Verificar si el tipo de máquina o el precio unitario son diferentes
+                if (existingProduct.tipoMaquina !== producto.tipoMaquina || existingProduct.precioUnitario !== producto.precioUnitario) {
+                    const confirmacion = confirm("El nombre de máquina y proveedor ya están en la compra, el precio o el tipo varían. ¿Desea agregarlos de todos modos?");
+                    if (!confirmacion) {
+                        return; // Si el usuario cancela, no hacer nada
+                    }
+                }
+
+                // Si ya existe, incrementar la cantidad
+                productosSeleccionados[existingProductIndex].cantidad += producto.cantidad;
+            } else {
+                // Si no existe, agregar el nuevo producto
+                productosSeleccionados.push(producto);
+            }
+
+            alert(`Producto añadido: ${producto.nombre}, Cantidad: ${producto.cantidad}`);
+            mostrarProductos();
+        }
+    }
+
+    function mostrarProductos() {
+        const listaProductos = document.getElementById('listaProductos');
+        listaProductos.innerHTML = ''; // Limpiar la lista actual
+
+        let totalCompra = 0; // Inicializar el total de la compra
+
+        productosSeleccionados.forEach((producto, index) => {
+            const li = document.createElement('li');
+            li.textContent = `Nombre: ${producto.nombre}, Proveedor: ${producto.proveedor}, Tipo: ${producto.tipoMaquina}, ID Empleado: ${producto.idEmpleado}, Cantidad: ${producto.cantidad}, Precio Unitario: $${producto.precioUnitario.toFixed(2)}`;
+
+            // Botones para aumentar y disminuir la cantidad
+            const btnMenos = document.createElement('button');
+            btnMenos.textContent = '-';
+            btnMenos.onclick = () => cambiarCantidad(index, -1);
+            li.appendChild(btnMenos);
+
+            const btnMas = document.createElement('button');
+            btnMas.textContent = '+';
+            btnMas.onclick = () => cambiarCantidad(index, 1);
+            li.appendChild(btnMas);
+
+            // Botón para eliminar el producto
+            const btnEliminar = document.createElement('button');
+            btnEliminar.textContent = 'Eliminar';
+            btnEliminar.onclick = () => eliminarProducto(index);
+            li.appendChild(btnEliminar);
+
+            // Calcular el total por producto
+            totalCompra += producto.cantidad * producto.precioUnitario;
+
+            listaProductos.appendChild(li);
+        });
+
+        // Mostrar el total de la compra
+        const totalElement = document.getElementById('totalCompra');
+        totalElement.textContent = `Total de la compra: $${totalCompra.toFixed(2)}`;
+    }
+
+    function cambiarCantidad(index, cambio) {
+        const producto = productosSeleccionados[index];
+        producto.cantidad += cambio;
+
+        // Asegurarse de que la cantidad no sea menor que 1
+        if (producto.cantidad < 1) {
+            producto.cantidad = 1; // O puedes eliminar el producto si lo prefieres
+        }
+
+        mostrarProductos();
+    }
+
+    function eliminarProducto(index) {
+        productosSeleccionados.splice(index, 1); // Eliminar el producto de la lista
+        mostrarProductos(); // Actualizar la lista de productos
+    }
+
+
+    function toggleCustomFields() {
+        const customFields = document.getElementById('customFields');
+        const link = document.getElementById('customLink');
+        const nuevoNombreInput = document.getElementById('nuevoNombre');
+        const codigoMaquinaInput = document.getElementById('codigoMaquina');
+
+        if (customFields.style.display === 'none') {
+            customFields.style.display = 'block';
+            link.textContent = '¿Encuentra la máquina que busca?';
+            nuevoNombreInput.setAttribute('required', 'required'); // Hacer obligatorio
+            codigoMaquinaInput.setAttribute('required', 'required'); // Hacer obligatorio
+            resetSelection(); // Deseleccionar la máquina
+        } else {
+            customFields.style.display = 'none';
+            link.textContent = '¿No encuentra la máquina que busca?';
+            nuevoNombreInput.removeAttribute('required'); // Quitar obligatorio
+            codigoMaquinaInput.removeAttribute('required'); // Quitar obligatorio
+        }
+    }
+
+    function toggleCustomProveedorFields() {
+        const customProveedorFields = document.getElementById('customProveedorFields');
+        const link = document.getElementById('customProveedorLink');
+        const nuevoProveedorNombreInput = document.getElementById('nuevoProveedorNombre');
+        const telefonoProveedorInput = document.getElementById('telefonoProveedor');
+        const correoProveedorInput = document.getElementById('correoProveedor');
+
+        if (customProveedorFields.style.display === 'none') {
+            customProveedorFields.style.display = 'block';
+            link.textContent = '¿Encuentra el proveedor que busca?';
+            nuevoProveedorNombreInput.setAttribute('required', 'required'); // Hacer obligatorio
+            telefonoProveedorInput.setAttribute('required', 'required'); // Hacer obligatorio
+            correoProveedorInput.setAttribute('required', 'required'); // Hacer obligatorio
+            resetSelection(); // Deseleccionar el proveedor
+        } else {
+            customProveedorFields.style.display = 'none';
+            link.textContent = '¿No encuentra el proveedor que busca?';
+            nuevoProveedorNombreInput.removeAttribute('required'); // Quitar obligatorio
+            telefonoProveedorInput.removeAttribute('required'); // Quitar obligatorio
+            correoProveedorInput.removeAttribute('required'); // Quitar obligatorio
+        }
+    }
+
+    function resetSelection() {
+        document.getElementById('nombre').selectedIndex = 0; // Deseleccionar la máquina
+        document.getElementById('proveedor').selectedIndex = 0; // Deseleccionar el proveedor
+        document.getElementById('tipoMaquina').value = ''; // Limpiar tipo de máquina
+        document.getElementById('precioUnitario').value = ''; // Limpiar precio unitario
+    }
+</script>
+
+<h1>Maquina</h1>
+<form action="/maquinas" method="post" onsubmit="validarFormulario(event)" class="form mt-3">
+    <input class="form-control mt-2" type="hidden" name="idMaquina" value="{{ maquina._id if maquina else '' }}" />
+
+    <div class="mb-3">
+        <label for="tipoMaquina" class="form-label">Tipo de Máquina</label>
+        <input class="form-control" type="text" id="tipoMaquina" name="tipoMaquina" placeholder="Tipo de Máquina"
+            value="{{ maquina.tipo if maquina else '' }}" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre de Máquina</label>
+        <select class="form-select" id="nombre" name="idNombreMaquina" required>
+            <option value="0" disabled selected>Seleccione Una Opción</option>
+            {% if nombre %}
+            <option value="{{ nombre._id }}">{{ nombre.nombre }}</option>
+            {% else %}
+            {% for nombre in nombres %}
+            <option value="{{ nombre._id }}">{{ nombre.nombre }}</option>
+            {% endfor %}
+            {% endif %}
+        </select>
+        <a href="#" id="customLink" onclick="toggleCustomFields()">¿No encuentra
+            la máquina que busca?</a>
+        <div id="customFields" style="display:none;">
+            <div class="mb-3">
+                <label for="nuevoNombre" class="form-label">Nombre de Máquina
+                    (Nuevo)</label>
+                <input class="form-control" type="text" id="nuevoNombre" name="nuevoNombre"
+                    placeholder="Nombre de Máquina" />
+            </div>
+            <div class="mb-3">
+                <label for="codigoMaquina" class="form-label">Código de
+                    Máquina</label>
+                <input class="form-control" type="text" id="codigoMaquina" name="codigoMaquina"
+                    placeholder="Código de Máquina" />
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="proveedor" class="form-label">Nombre de Proveedor</label>
+        <select class="form-select" id="proveedor" name="proveedor" required>
+            <option value="0" disabled selected>Seleccione Una Opción</option>
+            {% if proveedor %}
+            <option value="{{ proveedor._id }}">{{ proveedor.nombre }}</option>
+            {% else %}
+            {% for proveedor in proveedores %}
+            <option value="{{ proveedor._id }}">{{ proveedor.nombre }}</option>
+            {% endfor %}
+            {% endif %}
+        </select>
+        <a href="#" id="customProveedorLink" onclick="toggleCustomProveedorFields()">¿No encuentra el proveedor
+            que
+            busca?</a>
+        <div id="customProveedorFields" style="display:none;">
+            <div class="mb-3">
+                <label for="nuevoProveedorNombre" class="form-label">Nombre de
+                    Proveedor (Nuevo)</label>
+                <input class="form-control" type="text" id="nuevoProveedorNombre" name="nuevoProveedorNombre"
+                    placeholder="Nombre de Proveedor" />
+            </div>
+            <div class="mb-3">
+                <label for="telefonoProveedor" class="form-label">Teléfono de
+                    Proveedor</label>
+                <input class="form-control" type="text" id="telefonoProveedor" name="telefonoProveedor"
+                    placeholder="Teléfono de Proveedor" />
+            </div>
+            <div class="mb-3">
+                <label for="correoProveedor" class="form-label">Correo de
+                    Proveedor</label>
+                <input class="form-control" type="email" id="correoProveedor" name="correoProveedor"
+                    placeholder="Correo de Proveedor" />
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="idEmpleado" class="form-label">ID del Empleado</label>
+        <input class="form-control" type="text" id="idEmpleado" name="idEmpleado" placeholder="ID del empleado"
+            value="{{ maquina.idempleado if maquina else '' }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="cantidad" class="form-label">Cantidad</label>
+        <input class="form-control" type="number" id="cantidad" name="cantidad" placeholder="Cantidad" min="1" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="precioUnitario" class="form-label">Precio Unitario</label>
+        <input class="form-control" type="number" id="precioUnitario" name="precioUnitario"
+            placeholder="Precio Unitario" required step="0.01">
+    </div>
+
+    <button type="button" class="btn btn-primary mt-2" onclick="añadirProducto()">Añadir Producto</button>
+    <button type="button" class="btn btn-success mt-2" onclick="realizarCompra(event)">Realizar Compra</button>
+</form>
+
+<h2>Productos Añadidos</h2>
+<ul id="listaProductos"></ul>
+<p id="totalCompra">Total de la compra: $0</p>
+
+<h1>Máquinas</h1>
+<button class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
+        class="fas fa-bars"></i></button>
+{% for maquina in maquinas %}
+<div class="dynamic-div" data-id="{{maquina._id}}" data-name="Elemento 1">
+    <div class="summary">
+        <strong>ID:&nbsp;</strong>{{maquina._id}}<strong>&nbsp;Tipo:&nbsp;</strong>{{
+        maquina.tipo }}
+    </div>
+    <div class="details">
+        <p><strong>ID:&nbsp;</strong>{{maquina._id}}</p>
+        <p><strong>Número:&nbsp;</strong>{{ maquina.numeromaquina }}</p>
+        <p><strong>Tipo:&nbsp;</strong>{{ maquina.tipo }}</p>
+        <p><strong>ID Empleado:&nbsp;</strong>{{ maquina.idempleado }}</p>
+        <a href="#" class="btn btn-dark">Editar</a>
+        <form action="#" method="get" style="display:inline;">
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+<script>
+    document.querySelector('.toggle-sidebar-btn').addEventListener('click', function () {
+        document.querySelector('.sidebar').classList.toggle('expanded');
+    });
+
+    document.querySelectorAll('.dynamic-div').forEach(function (div) {
+        div.addEventListener('click', function () {
+            div.classList.toggle('expanded');
+        });
+    });
+
+    function handleResize() {
+        if (window.innerWidth <= 768) {
+            document.querySelector('.sidebar').classList.add('collapsed');
+        } else {
+            document.querySelector('.sidebar').classList.remove('collapsed');
+        }
+    }
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('load', handleResize);
+
+    function añadirProductoDesdeMaquina(idNombre, tipoMaquina, idEmpleado) {
+        const cantidad = prompt("Ingrese la cantidad:");
+        const precioUnitario = prompt("Ingrese el precio unitario:");
+
+        // Obtener el nuevo nombre de máquina si se ha ingresado
+        const nuevoNombre = document.getElementById('nuevoNombre').value.trim();
+        const nuevoProveedorNombre = document.getElementById('nuevoProveedorNombre').value.trim();
+
+        if (cantidad && precioUnitario) {
+            const producto = {
+                idNombre: idNombre,
+                nombre: nuevoNombre || "Máquina " + idNombre, // Usa el nuevo nombre si se ingresó
+                proveedor: nuevoProveedorNombre || "Proveedor X", // Usa el nuevo proveedor si se ingresó
+                idEmpleado: idEmpleado,
+                cantidad: parseInt(cantidad),
+                precioUnitario: parseFloat(precioUnitario),
+                tipoMaquina: tipoMaquina
+            };
+
+            // Agregar el producto a la lista
+            productosSeleccionados.push(producto);
+            mostrarProductos();
+        } else {
+            alert("Cantidad y precio unitario son requeridos.");
+        }
+    }
+</script>
+{% endblock %}

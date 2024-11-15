@@ -22,6 +22,7 @@ from routes.estados_routes import estados_blueprint
 from routes.main import main_blueprint
 from routes.tareas_routes import tareas_blueprint
 from routes.tareas_asignadas import tareas_asignadas_blueprint
+from routes.maquinas_routes import maquinas_blueprint
 
 
 mail = Mail()
@@ -50,6 +51,7 @@ app.register_blueprint(estados_blueprint)
 app.register_blueprint(main_blueprint)
 app.register_blueprint(tareas_blueprint)
 app.register_blueprint(tareas_asignadas_blueprint)
+app.register_blueprint(maquinas_blueprint)
 
 
 if __name__ == "__main__":
