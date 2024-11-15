@@ -4,3 +4,6 @@ packaging
 sqlalchemy
 flask_sqlalchemy
 psycopg2-binary
+flask_mail
+requests
+matplotlib

@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Agregar Compra{% endblock %}
 {% block content %}
-<form action="/compras/agregar" method="POST" class="form mt-3">
+<form action="/compras/agregar" method="POST" class="form mt-3" id="formCompras">
     <input type="datetime-local" name="fechacompra" class="form-control mt-2" placeholder="Fecha" required />
     <input type="text" name="metodopago" class="form-control mt-2" placeholder="Metodo de pago" required />
     <select type="number" name="idempleado" class="form-control mt-2" placeholder="Empleado" required >
+        <option value="" disabled selected>Seleccione un empleado</option>
         {% for empleado in empleados %}
             <option value="{{empleado.idempleado}}">{{empleado.nombre}}</option>
         {% endfor %}
     </select>
     <select type="number" name="idcliente" class="form-control mt-2" placeholder="Cliente" required>
+        <option value="" disabled selected>Seleccione un cliente</option>
         {% for cliente in clientes %}
             <option value="{{cliente._id}}">{{cliente.nombre}}</option>
         {% endfor %}
@@ -34,7 +36,12 @@
         div.innerHTML = `
         <div class="form-row align-items-center">
             <div class="col-auto">
-                <input type="number" name="producto[]" class="form-control mt-2" required onchange="actualizarPrecio(this)" placeholder="Producto">
+                <select name="producto[]" class="form-control mt-2" required onchange="actualizarPrecio(this)">
+                    <option value="" disabled selected>Seleccione un producto</option>
+                    {% for producto in productos %}
+                        <option value="{{producto._id}}">{{producto.nombre}}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-auto">
                 <input type="number" name="cantidad[]" class="form-control mt-2" min="1" required onchange="actualizarPrecio(this)" placeholder="Cantidad">
@@ -57,19 +64,16 @@
         const divProducto = element.closest('.producto');
         const subtotalElement = divProducto.querySelector('.subtotal');
 
-        // Resta el subtotal de este producto del subtotal total
         subtotal -= parseFloat(subtotalElement.innerText);
 
-        // Elimina el div del producto
         divProducto.remove();
 
-        // Actualiza el total después de eliminar el producto
         actualizarTotal();
     }
 
     function actualizarPrecio(element) {
         const divProducto = element.closest('.producto');
-        const idproducto = divProducto.querySelector('input[name="producto[]"]').value;
+        const idproducto = divProducto.querySelector('select[name="producto[]"]').value;
         const cCantidad = divProducto.querySelector('input[name="cantidad[]"]').value;
 
         if (idproducto && cCantidad) {
@@ -82,8 +86,7 @@
                         const subtotalForProduct = precio * cCantidad;
                         divProducto.querySelector('.subtotal').innerText = subtotalForProduct.toFixed(2);
 
-                        // Actualiza subtotal total
-                        subtotal = 0; // Reinicia subtotal antes de recalcular
+                        subtotal = 0;
                         const subtotales = document.querySelectorAll('.subtotal');
                         subtotales.forEach(sub => {
                             subtotal += parseFloat(sub.innerText);
@@ -96,7 +99,12 @@
     }
 
     function actualizarTotal() {
-        document.getElementById('total').innerText = (subtotal + total).toFixed(2);
+        document.getElementById('total').innerText = subtotal.toFixed(2);
     }
 </script>
+
+
+
+
+
 {% endblock %}

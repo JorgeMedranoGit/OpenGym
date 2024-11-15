@@ -5,7 +5,7 @@
     <input type="datetime-local" name="fechapedido" class="form-control mt-2" placeholder="Fecha" required />
     <input type="text" name="metodopago" class="form-control mt-2" placeholder="Metodo de pago" required />
     <select type="number" name="idproveedor" class="form-control mt-2" placeholder="Proveedor" required>
-        <option selected disabled>Selecciona un proveedor</option>
+        <option value="" selected disabled>Selecciona un proveedor</option>
         {% for proveedor in proveedores %}
             <option value="{{ proveedor._id }}">{{ proveedor.nombre }}</option>
         {% endfor %}
@@ -29,7 +29,7 @@
         <div class="form-row align-items-center">
             <div class="col-auto">
                 <select type="number" name="idp[]" class="form-control mt-2" placeholder="Producto" required>
-                    <option selected disabled>Selecciona un producto</option>
+                    <option value="" selected disabled>Selecciona un producto</option>
                     {% for producto in productos %}
                         <option value="{{ producto._id }}">{{ producto.nombre }}</option>
                     {% endfor %}

@@ -1,4 +1,4 @@
-from flask import Blueprint, Flask, redirect, url_for, render_template, request, session, flash, jsonify
+from flask import Blueprint, Flask, redirect, url_for, render_template, request, session, flash, jsonify, send_file
 from datetime import timedelta
 from decimal import Decimal
 from flask_sqlalchemy import SQLAlchemy 
@@ -10,49 +10,109 @@ from sqlalchemy import text
 from routes.empleados_routes import obtener_todos_los_empleados
 from routes.clientes_routes import obtener_todos_los_clientes
 from routes.productos_routes import obtenerTodoslosProductos
+import matplotlib
+from datetime import datetime
+matplotlib.use('Agg')  
+import matplotlib.pyplot as plt
+
+from io import BytesIO
+import base64
+
 
 compras_blueprint = Blueprint('compras_blueprint', __name__)
 
-@compras_blueprint.route("/compras" , methods=['GET', 'POST'])
+@compras_blueprint.route("/compras", methods=['GET', 'POST'])
 def compraCrud():
     if "email" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
+
     compras = obtenerCompras()
     for compra in compras:
         id = compra['idcompra']
         total = db.session.execute(text('SELECT calcular_total_compra(:idC)'), {'idC': id}).scalar()
         compra['total'] = total if total is not None else 0
-    return render_template("compras.html", compras=compras)
+
+    datos_totales = obtener_totales_por_mes()
+    meses = [fila[0] for fila in datos_totales] 
+    totales = [fila[1] for fila in datos_totales] 
+
+    img = BytesIO()
+    crear_grafico(meses, totales, img)  
+    img.seek(0) 
+    graph_url = base64.b64encode(img.getvalue()).decode('utf-8') 
+
+    return render_template("compras.html", compras=compras, graph_url=graph_url)
+
+@compras_blueprint.route('/grafico', methods=['GET'])
+def mostrar_grafico():
+    return send_file('ganancias_mensuales.png', mimetype='image/png')
 
 @compras_blueprint.route("/compras/agregar", methods=['GET', 'POST'])
 def formCompra():
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
+    
     if request.method == 'GET':
         empleados = obtener_todos_los_empleados()
         clientes = obtener_todos_los_clientes()
-        return render_template("comprasForm.html", clientes = clientes, empleados = empleados)
+        productos = obtenerTodoslosProductos()
+        return render_template("comprasForm.html", clientes=clientes, empleados=empleados, productos=productos)
+
     if request.method == 'POST':
         fechacompra = request.form['fechacompra']
         metodopago = request.form['metodopago']
         idempleado = request.form['idempleado']
         idcliente = request.form['idcliente']
 
-        compraN = Compras(fechacompra=fechacompra, metodopago=metodopago,idcliente=idcliente, idempleado=idempleado)
-        db.session.add(compraN)  # Añadir la compra a la sesión antes de hacer commit
-        db.session.commit()  # Insertar la compra y obtener el id
+        productos = request.form.getlist('producto[]')
+        cantidades = request.form.getlist('cantidad[]')
 
-        idCompra = compraN.idcompra  # Obtener el id después de hacer commit
+        # Convertir fechacompra a objeto datetime
+        fecha_compra_dt = datetime.strptime(fechacompra, '%Y-%m-%dT%H:%M')
 
-        productos = request.form.getlist('producto[]')  # Cambiar a getlist
-        cantidades = request.form.getlist('cantidad[]')  # Cambiar a getlist
+        # Obtener la fecha actual
+        fecha_actual = datetime.now()
+
+        # Comparar fechas
+        if fecha_compra_dt > fecha_actual:
+            flash("La fecha de compra no puede ser mayor a la fecha actual.")
+            return redirect("/compras")
+    
+    # Aquí puedes continuar con el procesamiento si la fecha es válida
+
+        if not cantidades or not productos:
+            flash("Datos ingresados incorrectamente")
+            return redirect("/compras")
+
+        stock_ok = True
+        for producto, cantidad in zip(productos, cantidades):
+            if producto.strip() and int(cantidad) > 0:
+                producto_db = Productos.query.get(producto) 
+                if producto_db and producto_db.stock < int(cantidad):
+                    stock_ok = False
+                    break
+        
+        if not stock_ok:
+            flash("No se pudo registrar la compra, stock insuficiente.")
+            return redirect("/compras")
+
+        compraN = Compras(fechacompra=fechacompra, metodopago=metodopago, idcliente=idcliente, idempleado=idempleado)
+        db.session.add(compraN) 
+        db.session.commit()
+
+        idCompra = compraN.idcompra 
 
         for producto, cantidad in zip(productos, cantidades):
             if producto.strip() and int(cantidad) > 0:
                 detalle = DetalleCompras(cantidad=int(cantidad), idcompra=idCompra, idproducto=producto)
                 db.session.add(detalle)
+
+                # Restar del stock
+                producto_db = Productos.query.get(producto)
+                if producto_db:
+                    producto_db.stock -= int(cantidad)
 
         db.session.commit()
         flash("Compra agregada exitosamente!")
@@ -82,5 +142,26 @@ def obtenerPrecioProducto(product_id):
         return redirect("/login")
     producto = Productos.query.get(product_id)
     if producto:
-        return jsonify({'precio': str(producto.preciov)})  # Asegúrate de convertir a string si es necesario
-    return jsonify({'precio': '0'})  # Retorna 0 como string
+        return jsonify({'precio': str(producto.preciov)})
+    return jsonify({'precio': '0'}) 
+
+
+
+
+def obtener_totales_por_mes():
+    resultados = db.session.execute(text("SELECT * FROM obtener_totales_por_mes();")).fetchall()
+    return resultados
+
+
+
+def crear_grafico(meses, totales, img):
+    plt.figure(figsize=(10, 5))
+    plt.bar(meses, totales, color='blue')
+    plt.xlabel('Meses')
+    plt.ylabel('Total Ganancias')
+    plt.title('Ganancias Mensuales')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    
+    plt.savefig(img, format='png')
+    plt.close()

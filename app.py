@@ -22,7 +22,11 @@ from routes.estados_routes import estados_blueprint
 from routes.main import main_blueprint
 from routes.tareas_routes import tareas_blueprint
 from routes.tareas_asignadas import tareas_asignadas_blueprint
+<<<<<<< HEAD
 from routes.membresias_routes import membresias_blueprint
+=======
+from routes.maquinas_routes import maquinas_blueprint
+>>>>>>> eb8313724882e1e01e9691929471c7b4ec680fea
 
 
 mail = Mail()
@@ -51,7 +55,11 @@ app.register_blueprint(estados_blueprint)
 app.register_blueprint(main_blueprint)
 app.register_blueprint(tareas_blueprint)
 app.register_blueprint(tareas_asignadas_blueprint)
+<<<<<<< HEAD
 app.register_blueprint(membresias_blueprint)
+=======
+app.register_blueprint(maquinas_blueprint)
+>>>>>>> eb8313724882e1e01e9691929471c7b4ec680fea
 
 
 if __name__ == "__main__":
