@@ -5,6 +5,7 @@ from datetime import timedelta
 from decimal import Decimal
 from models.empleados import Empleado
 from database import db
+import requests
 
 import random
 
@@ -43,7 +44,18 @@ def login():
                 )
                 msg.body = f"Tu código de verificación es: {codigo}"
                 mail.send(msg)
+                recaptcha_response = request.form.get('g-recaptcha-response')
+    
+                data = {
+                    'secret': "6Le2hn8qAAAAALMs_UGmPbjBT7CGbq0RmkypTho1",
+                    'response': recaptcha_response
+                }
+                r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
+                result = r.json()
 
+                if not result.get('success'):
+                    flash('Verificación de reCAPTCHA fallida. Por favor, inténtalo de nuevo.')
+                    return redirect("login")
                 return redirect(url_for("main_blueprint.verificar"))
             else:
                 flash("Contraseña incorrecta")
@@ -77,7 +89,7 @@ def verificar():
             return redirect("/")
         else:
             flash("Codigo incorrecto")
-        return redirect("login") 
+        return redirect("/login") 
     return render_template("verificacion.html", emailV = session["email_verificacion"])
 
 

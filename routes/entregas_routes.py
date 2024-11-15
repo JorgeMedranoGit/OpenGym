@@ -1,4 +1,4 @@
-from flask import Blueprint, Flask, redirect, url_for, render_template, request, session, flash, jsonify
+from flask import Blueprint, Flask, redirect, url_for, render_template, request, session, flash, jsonify, send_file
 from datetime import timedelta, datetime
 from decimal import Decimal
 from flask_sqlalchemy import SQLAlchemy 
@@ -13,6 +13,7 @@ from sqlalchemy import text
 from routes.proveedores_routes import obtenerTodoslosProveedores
 from routes.productos_routes import obtenerTodoslosProductos
 from routes.estados_routes import obtener_todos_los_estados
+
 
 entregas_blueprint = Blueprint('entregas_blueprint', __name__)
 
@@ -58,6 +59,20 @@ def formEntrega():
         preciosCompras = request.form.getlist('precio[]') 
 
 
+        fechapedido_dt = datetime.strptime(fechapedido, '%Y-%m-%dT%H:%M')
+
+        # Obtener la fecha actual
+        fecha_actual = datetime.now()
+
+        # Comparar fechas
+        if fechapedido_dt > fecha_actual:
+            flash("La fecha de compra no puede ser mayor a la fecha actual.")
+            return redirect("/entregas")
+
+        if not cantidades or not preciosCompras:
+            flash("Datos ingresados incorrectamente")
+            return redirect("/entregas")
+
         entregaN = Entregas(fechapedido=fechapedido, metodopago=metodopago, idproveedor=idproveedor)
         db.session.add(entregaN) 
         db.session.commit() 
@@ -90,6 +105,7 @@ def cambiar_estado():
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
+    
     entrega_id = request.form.get("entrega_id")
     estado_id = request.form.get("estado_id")
     
@@ -101,10 +117,41 @@ def cambiar_estado():
             {'fecha': fecha_actual, 'entrega_id': entrega_id, 'estado_id': estado_id}
         )
         
+        if estado_id == '2':
+            precio_compra_result = db.session.execute(
+                text('SELECT preciocompra, idp FROM detalleentregas WHERE identrega = :entrega_id LIMIT 1'),
+                {'entrega_id': entrega_id}
+            ).fetchone()
+            
+            if precio_compra_result:
+                v_preciocompra = precio_compra_result[0]
+                producto_id = precio_compra_result[1]
+
+                nuevo_precio_venta = v_preciocompra + (v_preciocompra * Decimal(0.30))
+
+                precio_venta_actual_result = db.session.execute(
+                    text('SELECT preciov FROM productos WHERE idp = :producto_id'),
+                    {'producto_id': producto_id}
+                ).fetchone()
+
+                if precio_venta_actual_result:
+                    v_precioventa_actual = precio_venta_actual_result[0]
+
+                    if v_precioventa_actual != nuevo_precio_venta:
+                        db.session.execute(
+                            text('UPDATE productos SET preciov = :nuevo_precio WHERE idp = :producto_id'),
+                            {'nuevo_precio': nuevo_precio_venta, 'producto_id': producto_id}
+                        )
+
+                        db.session.execute(
+                            text('INSERT INTO historialprecios (precioventa, fecha, idp) VALUES (:nuevo_precio, :fecha_actual, :producto_id)'),
+                            {'nuevo_precio': nuevo_precio_venta, 'fecha_actual': fecha_actual, 'producto_id': producto_id}
+                        )
+
         db.session.commit()
         flash("Estado de la entrega actualizado exitosamente", "success")
     else:
-        flash("No se pudo actualizar el estado de la entrega" + entrega_id + " Estado: " + estado_id, "danger")
+        flash("No se pudo actualizar el estado de la entrega. Entrega: " + str(entrega_id) + " Estado: " + str(estado_id), "danger")
 
     return redirect(url_for("entregas_blueprint.entregaCrud"))
 
