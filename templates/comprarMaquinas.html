@@ -10,6 +10,7 @@
 {% endwith %}
 
 <script>
+    var proveedor = {};
     let productosSeleccionados = [];
     function realizarCompra(event) {
         event.preventDefault(); // Evitar el envío del formulario
@@ -21,6 +22,7 @@
 
         const data = {
             tipoMaquina: document.getElementById('tipoMaquina').value,
+            proveedor: proveedor,
             productos: productosSeleccionados
         };
 
@@ -95,7 +97,6 @@
     function añadirProducto() {
         if (validarFormularioAgregar()) {
             const nombreSelect = document.getElementById('nombre');
-            const proveedorSelect = document.getElementById('proveedor');
             const idEmpleadoInput = document.getElementById('idEmpleado');
             const cantidadInput = document.getElementById('cantidad');
             const precioUnitarioInput = document.getElementById('precioUnitario');
@@ -104,29 +105,59 @@
             // Obtener el nuevo nombre de máquina si se ha ingresado
             const nuevoNombre = document.getElementById('nuevoNombre').value;
             const nuevoCodigoNombre = document.getElementById('codigoMaquina').value;
-            const nuevoProveedorNombre = document.getElementById('nuevoProveedorNombre').value;
-            const telfProveedor = document.getElementById('telefonoProveedor').value;
-            const correoProveedor = document.getElementById('correoProveedor').value;
+            // Obtener los datos del nuevo proveedor si se ha ingresado
+            if(productosSeleccionados.length == 0){
+                const proveedorSelect = document.getElementById('proveedor');
+                const nuevoProveedorNombre = document.getElementById('nuevoProveedorNombre').value;
+                const telfProveedor = document.getElementById('telefonoProveedor').value;
+                const correoProveedor = document.getElementById('correoProveedor').value;
+                var textoSeleccionado = "Default";
+                if(proveedorSelect.value == 0){
+                    textoSeleccionado = nuevoProveedorNombre;
+                    proveedor = {
+                        idProveedor: proveedorSelect.value,
+                        nombreProveedor: nuevoProveedorNombre,
+                        telfProveedor: telfProveedor,
+                        correoProveedor: correoProveedor
+                    }
+                }
+                else{
+                    proveedor = {
+                        idProveedor: proveedorSelect.value,
+                        nombreProveedor: "Conocido",
+                        telfProveedor: 0,
+                        correoProveedor: "Conocido"
+                    }
+                    // Obtener el proveedor seleccionado
+                    var proveedorSeleccionado = proveedorSelect.options[proveedorSelect.selectedIndex];
+                    // Obtener el texto del proveedor seleccionado
+                    textoSeleccionado = proveedorSeleccionado.text;
+                }
+                console.log(textoSeleccionado)
+                
+            }
             const producto = {
                 idNombre: nombreSelect.value,
                 nombre: nombreSelect.value === '0' ? nuevoNombre : nombreSelect.options[nombreSelect.selectedIndex].text,
                 codnom: nombreSelect.value === '0' ? nuevoCodigoNombre : "conocido",
-                idProveedor: proveedorSelect.value,
-                proveedor: proveedorSelect.value === '0' ? nuevoProveedorNombre : proveedorSelect.options[proveedorSelect.selectedIndex].text,
-                telf: proveedorSelect.value === '0' ? telfProveedor : 0,
-                correo: proveedorSelect.value === '0' ? correoProveedor : "conocido",
                 idEmpleado: idEmpleadoInput.value,
                 cantidad: parseInt(cantidadInput.value),
                 precioUnitario: parseFloat(precioUnitarioInput.value),
                 tipoMaquina: tipoMaquinaInput.value // Agregar tipo de máquina
             };
-
-            // Verificar si el producto ya existe en la lista
-            const existingProductIndex = productosSeleccionados.findIndex(p =>
-                p.idNombre === producto.idNombre &&
-                p.proveedor === producto.proveedor
-            );
-
+            var existingProductIndex
+            if(producto.idNombre != 0){
+                // Verificar si el producto ya existe en la lista
+                existingProductIndex = productosSeleccionados.findIndex(p =>
+                    p.idNombre === producto.idNombre
+                );
+            }
+            else{
+                // Verificar si el producto ya existe en la lista
+                existingProductIndex = productosSeleccionados.findIndex(p =>
+                    p.nombre === producto.nombre && p.codnom == producto.codnom
+                );
+            }
             if (existingProductIndex !== -1) {
                 const existingProduct = productosSeleccionados[existingProductIndex];
 
@@ -186,6 +217,19 @@
         // Mostrar el total de la compra
         const totalElement = document.getElementById('totalCompra');
         totalElement.textContent = `Total de la compra: $${totalCompra.toFixed(2)}`;
+        // Verificar disponibilidad de uso del proveedor
+        if(productosSeleccionados.length > 0){
+            const customProveedorFields = document.getElementById('customProveedorFields');
+            const proveedorLink = document.getElementById('customProveedorLink')
+            proveedorLink.style.display = 'none';
+            customProveedorFields.style.display = 'none';
+        }
+        else{
+            const customProveedorFields = document.getElementById('customProveedorFields');
+            const proveedorLink = document.getElementById('customProveedorLink')
+            proveedorLink.style.display = 'block';
+            customProveedorFields.style.display = 'block';
+        }
     }
 
     function cambiarCantidad(index, cambio) {
@@ -258,6 +302,10 @@
 </script>
 
 <h1>Maquina</h1>
+<h2 style="display: none;">Proveedor Seleccionado: </h2>
+<button
+    class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
+        class="fas fa-bars"></i></button>
 <form action="/maquinas" method="post" onsubmit="validarFormulario(event)" class="form mt-3">
     <input class="form-control mt-2" type="hidden" name="idMaquina" value="{{ maquina._id if maquina else '' }}" />
 
@@ -359,27 +407,6 @@
 <ul id="listaProductos"></ul>
 <p id="totalCompra">Total de la compra: $0</p>
 
-<h1>Máquinas</h1>
-<button class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
-        class="fas fa-bars"></i></button>
-{% for maquina in maquinas %}
-<div class="dynamic-div" data-id="{{maquina._id}}" data-name="Elemento 1">
-    <div class="summary">
-        <strong>ID:&nbsp;</strong>{{maquina._id}}<strong>&nbsp;Tipo:&nbsp;</strong>{{
-        maquina.tipo }}
-    </div>
-    <div class="details">
-        <p><strong>ID:&nbsp;</strong>{{maquina._id}}</p>
-        <p><strong>Número:&nbsp;</strong>{{ maquina.numeromaquina }}</p>
-        <p><strong>Tipo:&nbsp;</strong>{{ maquina.tipo }}</p>
-        <p><strong>ID Empleado:&nbsp;</strong>{{ maquina.idempleado }}</p>
-        <a href="#" class="btn btn-dark">Editar</a>
-        <form action="#" method="get" style="display:inline;">
-            <button type="submit" class="btn btn-danger">Eliminar</button>
-        </form>
-    </div>
-</div>
-{% endfor %}
 <script>
     document.querySelector('.toggle-sidebar-btn').addEventListener('click', function () {
         document.querySelector('.sidebar').classList.toggle('expanded');

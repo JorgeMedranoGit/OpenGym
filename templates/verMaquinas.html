@@ -8,70 +8,6 @@
 {% endfor%}
 {% endif %}
 {% endwith %}
-<script>
-    function validarFormulario(event) {
-        const select = document.getElementById('nombre');
-        if (select.value === '0') {
-            event.preventDefault(); // Evita el envío del formulario
-            alert('Por favor, selecciona un nombre válido.'); // Mensaje de alerta
-        }
-    }
-</script>
-<h1>Maquina</h1>
-<form action="/maquinas" method="post" onsubmit="validarFormulario(event)" class="form mt-3">
-    <input class="form-control mt-2" type="hidden" name="idMaquina"
-        value="{{ maquina._id if maquina else '' }}" />
-    
-    <div class="mb-3">
-        <label for="tipoMaquina" class="form-label">Tipo de Máquina</label>
-        <input class="form-control" type="text" id="tipoMaquina" name="tipoMaquina"
-            placeholder="Tipo de Máquina"
-            value="{{ maquina.tipo if maquina else '' }}" required />
-    </div>
-    
-    <div class="mb-3">
-        <label for="estadoMaquina" class="form-label">Estado de la Máquina</label>
-        <input class="form-control" type="text" id="estadoMaquina" name="estadoMaquina"
-            placeholder="Estado de la máquina"
-            value="{{ maquina.estado if maquina else '' }}" required />
-    </div>
-    
-    <div class="mb-3">
-        <label for="nombre" class="form-label">Nombre de Máquina</label>
-        <select class="form-select" id="nombre" name="idNombreMaquina" required>
-            <option value="0" disabled selected>Seleccione Una Opción</option>
-            {% if nombre %}
-                <option value="{{ nombre._id }}">{{ nombre.nombre }}</option>
-            {% else %}
-                {% for nombre in nombres %}
-                    <option value="{{ nombre._id }}">{{ nombre.nombre }}</option>
-                {% endfor %}
-            {% endif %}
-        </select>
-    </div>
-    <div class="mb-3">
-        <label for="proveedor" class="form-label">Nombre de Proveedor</label>
-        <select class="form-select" id="proveedor" name="proveedor" required>
-            <option value="0" disabled selected>Seleccione Una Opción</option>
-            {% if proveedor %}
-                <option value="{{ proveedor._id }}">{{ proveedor.nombre }}</option>
-            {% else %}
-                {% for proveedor in proveedores %}
-                    <option value="{{ proveedor._id }}">{{ proveedor.nombre }}</option>
-                {% endfor %}
-            {% endif %}
-        </select>
-    </div>
-    <div class="mb-3">
-        <label for="idEmpleado" class="form-label">ID del Empleado</label>
-        <input class="form-control" type="text" id="idEmpleado" name="idEmpleado"
-            placeholder="ID del empleado"
-            value="{{ maquina.idempleado if maquina else '' }}" required>
-    </div>
-    
-    <input class="btn btn-success mt-2" type="submit"
-        value="{{ 'Actualizar' if maquina else 'Añadir' }}" />
-</form>
 <h1>Maquinas</h1>
 <button
     class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
@@ -79,8 +15,8 @@
 {% for maquina in maquinas %}
 <div class="dynamic-div" data-id="{{maquina._id}}" data-name="Elemento 1">
     <div class="summary">
-        <strong>ID:&nbsp;</strong>{{maquina._id}}<strong>&nbsp;Tipo:&nbsp;</strong>{{
-        maquina.tipo }}
+        <strong>ID:&nbsp;</strong>{{maquina._id}}<strong>&nbsp;Tipo:&nbsp;</strong>{{maquina.tipo }}
+        <strong>&nbsp;Nombre:&nbsp;</strong>{{maquina.nombre }}
     </div>
     <div class="details">
         <p><strong>ID:&nbsp;</strong>{{maquina._id}}</p>
