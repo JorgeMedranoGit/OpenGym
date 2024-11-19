@@ -1,51 +1,49 @@
-.grid-container {
+.custom-grid-container {
     display: grid;
     grid-template-columns: repeat(2, minmax(300px, 1fr));
     gap: 16px;
     padding: 16px;
-    color: black;
+    align-items: start; /* Permite que las tarjetas se alineen en la parte superior */
 }
 
-.dynamic-div {
+.custom-card {
     border: 1px solid #ddd;
     border-radius: 8px;
     background-color: #fff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
     overflow: hidden;
-    color: black;
+    position: relative;
+    margin-bottom: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.dynamic-div .summary {
+.custom-card-summary {
     padding: 16px;
     font-family: Arial, sans-serif;
     font-size: 14px;
     line-height: 1.5;
-    color: black;
 }
 
-.dynamic-div:hover {
+.custom-card:hover {
     transform: scale(1.03);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.details {
+.custom-card-details {
     padding: 16px;
     font-family: Arial, sans-serif;
     font-size: 13px;
     background-color: #f9f9f9;
     border-top: 1px solid #ddd;
-    color: black;
+    display: none; /* Inicialmente oculto */
 }
 
-
-
-
-
-
-
-
-
-
-
-  
+/* Solución para evitar que otras tarjetas cambien de tamaño */
+.custom-card.expanded {
+    grid-row: span 2; /* Ocupa más espacio en filas */
+}
+@media (max-width: 768px) {
+    .custom-grid-container {
+        grid-template-columns: 1fr; /* Una sola columna en pantallas pequeñas */
+    }
+}

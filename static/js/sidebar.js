@@ -18,7 +18,7 @@ function handleResize() {
 
 window.addEventListener('resize', handleResize);
 window.addEventListener('load', handleResize);
-function añadirProductoDesdeMaquina(idNombre, tipoMaquina, idEmpleado) {
+/* function añadirProductoDesdeMaquina(idNombre, tipoMaquina, idEmpleado) {
     const cantidad = prompt("Ingrese la cantidad:");
     const precioUnitario = prompt("Ingrese el precio unitario:");
 
@@ -43,4 +43,4 @@ function añadirProductoDesdeMaquina(idNombre, tipoMaquina, idEmpleado) {
     } else {
         alert("Cantidad y precio unitario son requeridos.");
     }
-}
+} */

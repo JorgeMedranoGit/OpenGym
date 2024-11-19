@@ -14,74 +14,30 @@
 <img src="data:image/png;base64,{{ graph_url }}" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
 <br><br>
 <a class="btn btn-success mt-2" href="/compras/agregar">Registrar compra</a>
-<!-- <table class="table table-striped mt-3 responsive">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Fecha Compra</th>
-      <th>Hora Compra</th>
-      <th>Metodo de pago</th>
-      <th>Empleado</th>
-      <th>Cliente</th>
-      <th>Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for compra in compras %}
-    <tr>
-      <td>
-        {{ compra.idcompra }}
-      </td>
-      <td>
-        {{ compra.fechacompra }}
-      </td>
-      <td>
-        {{ compra.horacompra }}
-      </td>
-      <td>
-        {{ compra.metodopago }}
-      </td>
-      <td>
-        {{ compra.nombreempleado }}
-      </td>
-      <td>
-        {{ compra.nombrecliente }}
-      </td>
-      <td>bs.
-        {{ compra.total }}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table> -->
 
 
-
-<div class="grid-container">
-    {% for compra in compras %}
-    <div class="dynamic-div" data-id="{{compra.idcompra}}">
-      <div class="summary">
-        <strong>Fecha:&nbsp;</strong>{{compra.fechacompra}}
-        <strong>&nbsp;Hora:&nbsp;</strong>
-        {{ compra.horacompra }}
-        <strong>&nbsp;Total:&nbsp;</strong>
-        {{ compra.total }}
-        <p><strong>Empleado:</strong>&nbsp;{{compra.nombreempleado}}</p>
-        <p><strong>Cliente:</strong>&nbsp;{{compra.nombrecliente}}</p>
-        <p><strong>Método de pago:</strong>&nbsp;{{compra.metodopago}}</p>
-        <h5><strong>Productos</strong> <i class="fas fa-angle-down"></i></h5> 
+<div class="custom-grid-container">
+  {% for compra in compras %}
+  <div class="custom-card" data-id="{{compra.idcompra}}">
+      <div class="custom-card-summary">
+          <strong>Fecha:&nbsp;</strong>{{compra.fechacompra}}
+          <strong>&nbsp;Hora:&nbsp;</strong>{{ compra.horacompra }}
+          <strong>&nbsp;Total:&nbsp;</strong>{{ compra.total }}
+          <p><strong>Empleado:</strong>&nbsp;{{compra.nombreempleado}}</p>
+          <p><strong>Cliente:</strong>&nbsp;{{compra.nombrecliente}}</p>
+          <p><strong>Método de pago:</strong>&nbsp;{{compra.metodopago}}</p>
+          <h5><strong>Productos</strong> <i class="fas fa-angle-down"></i></h5>
       </div>
-      <div class="details" id="details-{{ compra.idcompra }}" style="display: none;">
-        
-      </div>
-    </div>  
-    {% endfor %}
+      <div class="custom-card-details" id="details-{{ compra.idcompra }}" style="display: none;"></div>
   </div>
+  {% endfor %}
+</div>
+
 
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    const tarjetas = document.querySelectorAll('.dynamic-div');
+    const tarjetas = document.querySelectorAll('.custom-card');
 
     tarjetas.forEach(tarjeta => {
       tarjeta.addEventListener('click', function() {

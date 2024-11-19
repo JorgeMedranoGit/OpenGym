@@ -11,46 +11,46 @@
 <br><br>
 <a class="btn btn-success mt-2" href="/entregas/agregar">Registrar entrega</a>
 
-
-<div class="grid-container">
-    {% for entrega in entregas %}
-    <div class="dynamic-div" data-id="{{ entrega.identrega }}">
-        <div class="summary">
-            <strong>Fecha:&nbsp;</strong>{{ entrega.fechaentrega }}
-            <strong>&nbsp;Hora:&nbsp;</strong>{{ entrega.horaentrega }}
-            <strong>&nbsp;Total:&nbsp;</strong>{{ entrega.total }}
-            <p><strong>Empleado:</strong>&nbsp;{{ entrega.nombreempleado }}</p>
-            <p><strong>Proveedor:</strong>&nbsp;{{ entrega.proveedor }}</p>
-            <p><strong>Método de pago:</strong>&nbsp;{{ entrega.metodopago }}</p>
-            <p><strong>Estado actual:</strong>&nbsp;{{ entrega.estado }}</p>
-            <p><strong>Fecha de estado:</strong>&nbsp;{% if entrega.estado != "Pendiente" %}{{ entrega.fechaestado }}{% else %}No actualizada{% endif %}</p>
-            <h5><strong>Productos</strong> <i class="fas fa-angle-down"></i></h5>
-        </div>
-        <div class="details" id="details-{{ entrega.identrega }}" style="display: none;">
-        </div>
-        {% if entrega.estado == "Pendiente" %}
-        <div class="estado">
-            <form method="POST" action="/entregas/cambiar_estado">
-                <input type="hidden" name="entrega_id" value="{{ entrega.identrega }}">
-                <label for="estado-{{ entrega.identrega }}"><strong>Cambiar estado:</strong></label>
-                <select id="estado-{{ entrega.identrega }}" name="estado_id" class="form-control" style="width: 100%; margin: 10px 0;" onchange="this.form.submit()">
-                    {% for estado in estados %}
-                        <option value="{{ estado.idestado }}" {% if estado.estado == entrega.estado %}selected{% endif %}>
-                            {{ estado.estado }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </form>
-        </div>
-        {% endif %}
-    </div>
-    {% endfor %}
+<div class="custom-grid-container">
+  {% for entrega in entregas %}
+  <div class="custom-card" data-id="{{ entrega.identrega }}">
+      <div class="custom-card-summary">
+          <strong>Fecha:&nbsp;</strong>{{ entrega.fechaentrega }}
+          <strong>&nbsp;Hora:&nbsp;</strong>{{ entrega.horaentrega }}
+          <strong>&nbsp;Total:&nbsp;</strong>{{ entrega.total }}
+          <p><strong>Empleado:</strong>&nbsp;{{ entrega.nombreempleado }}</p>
+          <p><strong>Proveedor:</strong>&nbsp;{{ entrega.proveedor }}</p>
+          <p><strong>Método de pago:</strong>&nbsp;{{ entrega.metodopago }}</p>
+          <p><strong>Estado actual:</strong>&nbsp;{{ entrega.estado }}</p>
+          <p><strong>Fecha de estado:</strong>&nbsp;{% if entrega.estado != "Pendiente" %}{{ entrega.fechaestado }}{% else %}No actualizada{% endif %}</p>
+          <h5><strong>Productos</strong> <i class="fas fa-angle-down"></i></h5>
+      </div>
+      <div class="custom-card-details" id="details-{{ entrega.identrega }}" style="display: none;">
+      </div>
+      {% if entrega.estado == "Pendiente" %}
+      <div class="custom-card-estado">
+          <form method="POST" action="/entregas/cambiar_estado">
+              <input type="hidden" name="entrega_id" value="{{ entrega.identrega }}">
+              <label for="estado-{{ entrega.identrega }}"><strong>Cambiar estado:</strong></label>
+              <select id="estado-{{ entrega.identrega }}" name="estado_id" class="form-select custom-form-select" onchange="this.form.submit()">
+                  {% for estado in estados %}
+                      <option value="{{ estado.idestado }}" {% if estado.estado == entrega.estado %}selected{% endif %}>
+                          {{ estado.estado }}
+                      </option>
+                  {% endfor %}
+              </select>
+          </form>
+      </div>
+      {% endif %}
+  </div>
+  {% endfor %}
 </div>
+
 
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-  const tarjetas = document.querySelectorAll(".dynamic-div");
+  const tarjetas = document.querySelectorAll(".custom-card");
 
   tarjetas.forEach((tarjeta) => {
     tarjeta.addEventListener("click", function (event) {

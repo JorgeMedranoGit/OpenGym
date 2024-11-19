@@ -31,27 +31,4 @@
         <p>No hay mantenimientos registrados para esta máquina.</p>
     {% endif %}
 
-    <script>
-        document.querySelector('.toggle-sidebar-btn').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('expanded');
-        });
-
-        document.querySelectorAll('.dynamic-div').forEach(function(div) {
-            div.addEventListener('click', function() {
-                div.classList.toggle('expanded');
-            });
-        });
-
-        function handleResize() {
-            if (window.innerWidth <= 768) {
-                document.querySelector('.sidebar').classList.add('collapsed');
-            } else {
-                document.querySelector('.sidebar').classList.remove('collapsed');
-            }
-        }
-
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('load', handleResize);
-    </script>
-
 {% endblock %}
