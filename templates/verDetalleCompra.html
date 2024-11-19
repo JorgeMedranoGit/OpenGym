@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Detalle de compra{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for msg in messages %}
+<p>{{msg}}</p>
+{% endfor%}
+{% endif %}
+{% endwith %}
+<h1>Detalles de Compra</h1>
+<button
+    class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
+        class="fas fa-bars"></i></button>
+        {% if maquinas %}
+            {% for maquina in maquinas %}
+                <div class="dynamic-div" data-id="{{ maquina.codigo }}" data-name="{{ maquina.codigo }}">
+                    <div class="summary">
+                        <strong>ID Maquina:&nbsp;</strong>{{ maquina.idmaquina }}<strong>&nbsp;Nombre:&nbsp;</strong>{{ maquina.nombre }}
+                        <strong>&nbsp;</strong>{{ maquina.codigo }}
+                    </div>
+                    <div class="details">
+                        <p><strong>Maquina:&nbsp;</strong>{{ maquina.nombre }}:
+                        &nbsp;{{ maquina.codigo }}&nbsp;<strong>Cantidad:&nbsp;</strong>{{ maquina.total }}</p>
+                        <p><strong>Tipo&nbsp;</strong>{{ maquina.tipo }}</p>
+                        <p><strong>Estado&nbsp;</strong>{{ maquina.estado }}
+                        {% if maquina.estado == "Comprado" %}
+                            <a href="/confirmarEntregaMaquina/{{ detalle.iddetalle }}" class="btn btn-dark">Confirmar Entrega</a>
+                        {% endif %}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No hay maquinas registradas.</p>
+        {% endif %}
+<script>
+    document.querySelector('.toggle-sidebar-btn').addEventListener('click', function() {
+        document.querySelector('.sidebar').classList.toggle('expanded');
+    });
+
+    document.querySelectorAll('.dynamic-div').forEach(function(div) {
+        div.addEventListener('click', function() {
+            div.classList.toggle('expanded');
+        });
+    });
+
+    function handleResize() {
+        if (window.innerWidth <= 768) {
+            document.querySelector('.sidebar').classList.add('collapsed');
+        } else {
+            document.querySelector('.sidebar').classList.remove('collapsed');
+        }
+    }
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('load', handleResize);
+</script>
+{% endblock %}
