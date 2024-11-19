@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, render_template, request, session, flash
+from flask import Blueprint, redirect, url_for, render_template, request, jsonify, session, flash
 from datetime import timedelta, date
 from decimal import Decimal
 from models.clientes import Clientes
@@ -14,11 +14,8 @@ def clientesCrud():
     if "email" not in session:
         flash("Debes iniciar sesión")
         return redirect(url_for("main_blueprint.login"))
-    
-    # termino_busqueda = request.args.get("buscar", "").strip()
 
     if request.method == "POST":
-    # Obtener datos del formulario
         nombre = request.form['nombre'].strip()
         apellido = request.form['apellido'].strip()
         carnet = request.form['carnet'].strip()
@@ -69,14 +66,12 @@ def clientesCrud():
             db.session.add(nuevo_cliente)
             db.session.commit()
 
-            # Manejo de suscripción si el cliente es nuevo
             if tipo_suscripcion == "membresia":
                 membresia_id = request.form.get("membresia_id")
                 metodo_pago = request.form.get("metodo_pago")
 
                 membresia_info = Membresias.query.filter_by(idmembresia=membresia_id, habilitado=True).first()
-                if membresia_info:  # Verifica que exista y esté habilitada
-                    # Crear nueva membresía para el cliente
+                if membresia_info:
                     nueva_membresia = DetalleMembresia(
                         idcliente=nuevo_cliente.idcliente,
                         idmembresia=membresia_id,
@@ -85,30 +80,27 @@ def clientesCrud():
                     )
                     db.session.add(nueva_membresia)
                     
-                    # Crear pago para la membresía
                     monto = membresia_info.costo
                     nuevo_pago = Pago(
                         idcliente=nuevo_cliente.idcliente,
                         idmembresia=membresia_id,
                         monto=monto,
                         metodopago=metodo_pago,
-                        estado="pagado" if metodo_pago else "pendiente"
+                        estado="Pendiente" 
                     )
                     db.session.add(nuevo_pago)
                 else:
                     flash("La membresía seleccionada no está activa.")
-
             elif tipo_suscripcion == "sesion":
-                # Crear pago de sesión individual
                 metodo_pago = request.form.get("metodo_pago", "efectivo")
-                monto = Decimal("20.00")  # Monto fijo para una sesión
+                monto = Decimal("20.00")
 
                 nuevo_pago = Pago(
                     idcliente=nuevo_cliente.idcliente,
-                    idmembresia=None,  # No hay membresía en este caso
+                    idmembresia=None,
                     monto=monto,
                     metodopago=metodo_pago,
-                    estado="pagado" if metodo_pago else "pendiente"
+                    estado="Pendiente" 
                 )
                 db.session.add(nuevo_pago)
 
@@ -136,10 +128,8 @@ def clientesCrud():
     ).filter(Clientes.activo == True).all()
 
 
-    # Consulta de clientes inactivos
     clientes_inactivos = Clientes.query.filter_by(activo=False).all()
 
-    # Consulta de todas las membresías
     membresias = Membresias.query.filter_by(habilitado=True).all()
 
 
@@ -150,9 +140,6 @@ def clientesCrud():
         membresias=membresias
     )
 
-    
-
-# Ruta para editar cliente
 @cliente_blueprint.route("/clientes/editar/<int:id>", methods=["GET"])
 def editarCliente(id):
     if "email" not in session:
@@ -206,20 +193,36 @@ def desactivarCliente(id):
     return redirect(url_for("cliente_blueprint.clientesCrud"))
 
 
-@cliente_blueprint.route("/clientes/activar/<int:id>", methods=["POST"])
-def activarCliente(id):
+@cliente_blueprint.route("/clientes/actualizar_estado_pago", methods=["POST"])
+def actualizar_estado_pago():
     if "email" not in session:
         flash("Debes iniciar sesión")
         return redirect(url_for("main_blueprint.login"))
-
-    cliente = Clientes.query.get(id)
-    if cliente:
-        cliente.activo = True
+    
+    idcliente = request.form.get("idcliente")
+    nuevo_estado = request.form.get("estado")
+    
+    pago = Pago.query.filter_by(idcliente=idcliente).first()
+    if pago:
+        pago.estado = nuevo_estado
         db.session.commit()
-        flash("Cliente reactivado exitosamente!")
+        flash("El estado de pago se ha actualizado correctamente.")
+    else:
+        flash("No se encontró un registro de pago para este cliente.")
+    
     return redirect(url_for("cliente_blueprint.clientesCrud"))
 
 
-# Función para obtener todos los clientes (helper function)
+@cliente_blueprint.route('/clientes/buscar', methods=['GET'])
+def buscar_clientes():
+    query = request.args.get('q', '')  # Captura el texto ingresado
+    if query:
+        clientes = Clientes.query.filter(Clientes.nombre.ilike(f"%{query}%")).all()
+        resultados = [{"id": cliente.idcliente, "nombre": cliente.nombre, "apellido": cliente.apellido} for cliente in clientes]
+        return jsonify(resultados)
+    return jsonify([]) 
+
+
+
 def obtener_todos_los_clientes():
     return Clientes.query.all()

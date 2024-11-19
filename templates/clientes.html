@@ -11,105 +11,111 @@
 
     <h1>Gestión de Clientes</h1>
 
-    <!-- Formulario para registrar/editar clientes -->
-    <h2>Registrar Nuevo Cliente</h2>
-    <form action="{{ url_for('cliente_blueprint.clientesCrud') }}" method="POST">
-        <input type="hidden" name="cliente_id" value="{{ cliente.idcliente if cliente else '' }}">
+    <button class="btn btn-outline-dark" id="btnAgregarCliente">Agregar Cliente</button>
 
-        <div class="form-group">
-            <label for="nombre">Nombre:</label>
-            <input 
-                type="text" 
-                class="form-control" 
-                id="nombre" 
-                name="nombre" 
-                value="{{ cliente.nombre if cliente else '' }}" 
-                required 
-                minlength="3" 
-                title="El nombre debe tener al menos 3 caracteres." 
-                placeholder="Ingresa el nombre">
-        </div>
-        <div class="form-group">
-            <label for="apellido">Apellido:</label>
-            <input 
-                type="text" 
-                class="form-control" 
-                id="apellido" 
-                name="apellido" 
-                value="{{ cliente.apellido if cliente else '' }}" 
-                required 
-                minlength="3" 
-                title="El apellido debe tener al menos 3 caracteres." 
-                placeholder="Ingresa el apellido">
-        </div>
-        <div class="form-group">
-            <label for="carnet">Carnet:</label>
-            <input 
-                type="text" 
-                class="form-control" 
-                id="carnet" 
-                name="carnet" 
-                value="{{ cliente.carnet if cliente else '' }}" 
-                required 
-                pattern="\d{8}" 
-                title="El carnet debe contener exactamente 8 dígitos." 
-                placeholder="Ejemplo: 12345678">
-        </div>
-        <div class="form-group">
-            <label for="telefono">Teléfono:</label>
-            <input 
-                type="tel" 
-                class="form-control" 
-                id="telefono" 
-                name="telefono" 
-                value="{{ cliente.telefono if cliente else '' }}" 
-                required 
-                pattern="\d{7,}" 
-                title="El teléfono debe contener al menos 7 dígitos." 
-                placeholder="Ejemplo: 123456789">
-        </div>
-        <div class="form-group">
-            <label for="tipo_suscripcion">Tipo de Suscripción:</label>
-            <select 
-                class="form-control" 
-                id="tipo_suscripcion" 
-                name="tipo_suscripcion" 
-                required 
-                title="Selecciona el tipo de suscripción.">
-                <option value="membresia" {% if cliente and cliente.tipocliente == 'membresia' %}selected{% endif %}>Membresía</option>
-                <option value="sesion" {% if cliente and cliente.tipocliente == 'sesion' %}selected{% endif %}>Sesión</option>
-            </select>
-        </div>
-        <div class="form-group" id="membresia-options" style="display: none;">
-            <label for="membresia_id">Membresía (si aplica):</label>
-            <select class="form-control" id="membresia_id" name="membresia_id">
-                {% for membresia in membresias %}
-                    {% if membresia.habilitado %}
-                        <option value="{{ membresia.idmembresia }}" {% if cliente and cliente.membresia_id == membresia.idmembresia %}selected{% endif %}>
-                            {{ membresia.tipomembresia }}
-                        </option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="metodo_pago">Método de Pago:</label>
-            <select 
-                class="form-control" 
-                id="metodo_pago" 
-                name="metodo_pago" 
-                required 
-                title="Selecciona un método de pago.">
-                <option value="qr">Pago QR</option>
-                <option value="efectivo">Pago en efectivo</option>
-                <option value="transferencia">Pago transferencia</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Guardar</button>
-    </form>
+    <div id="formularioCliente" style="display: none; margin-top: 20px;">
+        <h2>Registrar Nuevo Cliente</h2>
+        <form action="{{ url_for('cliente_blueprint.clientesCrud') }}" method="POST">
+            <input type="hidden" name="cliente_id" value="{{ cliente.idcliente if cliente else '' }}">
+    
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="nombre" 
+                    name="nombre" 
+                    value="{{ cliente.nombre if cliente else '' }}" 
+                    required 
+                    minlength="3" 
+                    maxlength="30"
+                    title="El nombre debe tener al menos 3 caracteres." 
+                    placeholder="Ingresa el nombre">
+            </div>
+            <div class="form-group">
+                <label for="apellido">Apellido:</label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="apellido" 
+                    name="apellido" 
+                    value="{{ cliente.apellido if cliente else '' }}" 
+                    required 
+                    minlength="3" 
+                    maxlength="30"
+                    title="El apellido debe tener al menos 3 caracteres." 
+                    placeholder="Ingresa el apellido">
+            </div>
+            <div class="form-group">
+                <label for="carnet">Carnet:</label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="carnet" 
+                    name="carnet" 
+                    value="{{ cliente.carnet if cliente else '' }}" 
+                    required 
+                    pattern="\d{8}" 
+                    title="El carnet debe contener exactamente 8 dígitos." 
+                    placeholder="Ejemplo: 12345678">
+            </div>
+            <div class="form-group">
+                <label for="telefono">Teléfono:</label>
+                <input 
+                    type="tel" 
+                    class="form-control" 
+                    id="telefono" 
+                    name="telefono" 
+                    value="{{ cliente.telefono if cliente else '' }}" 
+                    required 
+                    pattern="\d{7,15}" 
+                    maxlength="15" 
+                    title="El teléfono debe contener entre 7 y 15 dígitos." 
+                    placeholder="Ejemplo: 123456789">
+            </div>        
+            <div class="form-group">
+                <label for="tipo_suscripcion">Tipo de Suscripción:</label>
+                <select 
+                    class="form-control" 
+                    id="tipo_suscripcion" 
+                    name="tipo_suscripcion" 
+                    required 
+                    title="Selecciona el tipo de suscripción.">
+                    <option value="membresia" {% if cliente and cliente.tipocliente == 'membresia' %}selected{% endif %}>Membresía</option>
+                    <option value="sesion" {% if cliente and cliente.tipocliente == 'sesion' %}selected{% endif %}>Sesión</option>
+                </select>
+            </div>
+            <div class="form-group" id="membresia-options" style="display: none;">
+                <label for="membresia_id">Membresía (si aplica):</label>
+                <select class="form-control" id="membresia_id" name="membresia_id">
+                    {% for membresia in membresias %}
+                        {% if membresia.habilitado %}
+                            <option value="{{ membresia.idmembresia }}" {% if cliente and cliente.membresia_id == membresia.idmembresia %}selected{% endif %}>
+                                {{ membresia.tipomembresia }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="metodo_pago">Método de Pago:</label>
+                <select 
+                    class="form-control" 
+                    id="metodo_pago" 
+                    name="metodo_pago" 
+                    required 
+                    title="Selecciona un método de pago.">
+                    <option value="qr">Pago QR</option>
+                    <option value="efectivo">Pago en efectivo</option>
+                    <option value="transferencia">Pago transferencia</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+    </div>
 
-    <!-- Tabla de clientes activos -->
-    <h2>Clientes Activos</h2>
+
+    <h2>Clientes</h2>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -117,9 +123,9 @@
                 <th>Apellido</th>
                 <th>Carnet</th>
                 <th>Teléfono</th>
-                <th>Tipo Cliente</th>
                 <th>Tipo de Membresía</th>
-                <th>Estado de Pago</th>
+                <th>Pago</th>
+                <th>Estado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -130,11 +136,25 @@
                     <td>{{ cliente.apellido }}</td>
                     <td>{{ cliente.carnet }}</td>
                     <td>{{ cliente.telefono }}</td>
-                    <td>{{ cliente.tipocliente }}</td>
-                    <td>{{ tipomembresia if tipomembresia else 'N/A' }}</td>
-                    <td>{{ estado_pago if estado_pago else 'Pendiente' }}</td>
+                    <td>{{ tipomembresia if tipomembresia else 'Sesion' }}</td>
                     <td>
-                        <a href="{{ url_for('cliente_blueprint.editarCliente', id=cliente.idcliente) }}" class="btn btn-warning">Editar</a>
+                        {% if estado_pago == "Pendiente" %}
+                            <form action="{{ url_for('cliente_blueprint.actualizar_estado_pago') }}" method="POST">
+                                <input type="hidden" name="idcliente" value="{{ cliente.idcliente }}">
+                                <input type="hidden" name="estado" value="Pagado">
+                                <button type="submit" class="btn btn-secondary">Pendiente</button>
+                            </form>
+                        {% else %}
+                            <span class="btn btn-info">Pagado</span>
+                        {% endif %}
+                    </td>
+                    <td>{% if cliente.activo == True %}
+                        <span class="btn btn-success">Activo</span>
+                    {% else %}
+                        <span class="btn btn-danger">Vencido</span>
+                    {% endif %}</td>
+                    <td>
+                        <a href="{{ url_for('cliente_blueprint.editarCliente', id=cliente.idcliente) }}" class="btn btn-warning" id="btnEditarCliente">Editar</a>
                         <form action="{{ url_for('cliente_blueprint.desactivarCliente', id=cliente.idcliente) }}" method="POST" style="display:inline;">
                             <button type="submit" class="btn btn-danger">Desactivar</button>
                         </form>
@@ -143,47 +163,20 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <h2>Clientes Inactivos</h2>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Carnet</th>
-                <th>Teléfono</th>
-                <th>Tipo Cliente</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if clientes_inactivos %}
-                {% for cliente in clientes_inactivos %}
-                    <tr>
-                        <td>{{ cliente.nombre }}</td>
-                        <td>{{ cliente.apellido }}</td>
-                        <td>{{ cliente.carnet }}</td>
-                        <td>{{ cliente.telefono }}</td>
-                        <td>{{ cliente.tipocliente }}</td>
-                        <td>
-                            <form action="{{ url_for('cliente_blueprint.activarCliente', id=cliente.idcliente) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-success">Activar</button>
-                            </form>
-                        </td>
-                    </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="6" class="text-center">No hay clientes inactivos.</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
 </div>
 
 <script>
+    const btnAgregarCliente = document.getElementById('btnAgregarCliente');
+    const btnEditCliente = document.getElementById('btnEditarCliente');
+    const formularioCliente = document.getElementById('formularioCliente');
     const tipoSuscripcion = document.getElementById('tipo_suscripcion');
     const membresiaOptions = document.getElementById('membresia-options');
+
+    btnAgregarCliente.addEventListener('click', () => {
+        formularioCliente.style.display = 'block';
+        formularioCliente.querySelector('form').reset(); 
+        document.getElementById('cliente_id').value = ''; 
+    });
 
     tipoSuscripcion.addEventListener('change', function () {
         if (this.value === 'membresia') {
@@ -193,7 +186,6 @@
         }
     });
 
-    // Inicialización en caso de que la página se cargue con un tipo de suscripción ya seleccionado
     if (tipoSuscripcion.value === 'membresia') {
         membresiaOptions.style.display = 'block';
     }
