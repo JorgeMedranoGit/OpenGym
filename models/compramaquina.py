@@ -10,10 +10,11 @@ class CompraMaquina(db.Model):
 
     _id = db.Column("idcompra", db.Integer, primary_key=True, autoincrement=True)
     fecha = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)  # Almacena la fecha y hora de la compra
-    idempleado = db.Column(db.String(50), nullable=False)
-
-    def __init__(self, idempleado):
+    idempleado = db.Column(db.Integer, nullable=False)
+    idproveedor = db.Column(db.Integer, nullable=False)
+    def __init__(self, idempleado, idproveedor):
         self.idempleado = idempleado
+        self.idproveedor = idproveedor
 
     def __repr__(self):
-        return f'<CompraMaquina {self._id}, Fecha: {self.fecha}, IdEmpleado: {self.idempleado}>'
+        return f'<CompraMaquina {self._id}, Fecha: {self.fecha}, IdEmpleado: {self.idempleado}, IdEmpleado: {self.idempleado}>'

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Sesiones{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p>{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+<br><br>
+<form method="POST" action="/session" class="form mt-3">
+    <input type="hidden" name="sesion_id" value="{{ sesion.idsesion if sesion else '' }}">
+
+    <select class="form-select" id="tipo_sesion" name="tipo_sesion" required>
+        <option selected for="tipo_sesion">Tipo de Sesión:</option>
+        <option value="visita">Visita</option>
+        <option value="miembro">Miembro</option>
+    </select>
+
+    <div class="form-group">
+        <label for="buscarCliente">Buscar Cliente:</label>
+        <input type="text" id="buscarCliente" class="form-control" placeholder="Escribe un nombre...">
+        <ul id="resultadosBusqueda" class="list-group mt-2"></ul>
+    </div>
+    
+
+    <div id="visita_fields" style="display: none;">
+        <label for="costo">Costo:</label>
+        <input type="number" name="costo" step="0.01" min="0" required>
+        <label for="metodo_pago">Método de Pago:</label>
+        <select name="metodo_pago" required>
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta</option>
+        </select>
+    </div>
+
+    <input type="submit" class="btn btn-success mt-2"/>
+</form>
+
+<script>
+    const tipoSesion = document.getElementById('tipo_sesion');
+    const miembroFields = document.getElementById('miembro_fields');
+    const visitaFields = document.getElementById('visita_fields');
+
+    tipoSesion.addEventListener('change', () => {
+        if (tipoSesion.value === 'visita') {
+            visitaFields.style.display = 'block';
+            miembroFields.style.display = 'none';
+        } else if (tipoSesion.value === 'miembro') {
+            visitaFields.style.display = 'none';
+            miembroFields.style.display = 'block';
+        }
+    });
+
+
+    document.getElementById('buscarCliente').addEventListener('input', function () {
+        const query = this.value.trim();
+        const resultadosBusqueda = document.getElementById('resultadosBusqueda');
+
+        if (query.length > 0) {
+            fetch(`/clientes/buscar?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultadosBusqueda.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(cliente => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item';
+                            li.textContent = `${cliente.nombre} ${cliente.apellido}`;
+                            li.addEventListener('click', () => seleccionarCliente(cliente));
+                            resultadosBusqueda.appendChild(li);
+                        });
+                    } else {
+                        resultadosBusqueda.innerHTML = '<li class="list-group-item">Sin resultados</li>';
+                    }
+                });
+        } else {
+            resultadosBusqueda.innerHTML = '';  
+        }
+    });
+
+    function seleccionarCliente(cliente) {
+        alert(`Cliente seleccionado: ${cliente.nombre} ${cliente.apellido}`);
+    }
+</script>
+
+{% endblock %}
