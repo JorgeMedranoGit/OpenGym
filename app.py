@@ -25,6 +25,11 @@ from routes.tareas_asignadas import tareas_asignadas_blueprint
 from routes.membresias_routes import membresias_blueprint
 from routes.maquinas_routes import maquinas_blueprint
 
+from routes.mantenimientoRutas import mantenimiento_bp
+
+from routes.sesiones_routes import session_blueprint
+
+
 
 mail = Mail()
 
@@ -54,6 +59,11 @@ app.register_blueprint(tareas_blueprint)
 app.register_blueprint(tareas_asignadas_blueprint)
 app.register_blueprint(membresias_blueprint)
 app.register_blueprint(maquinas_blueprint)
+
+app.register_blueprint(mantenimiento_bp)
+
+app.register_blueprint(session_blueprint)
+
 
 
 if __name__ == "__main__":

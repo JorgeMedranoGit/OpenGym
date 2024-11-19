@@ -13,7 +13,7 @@ class Pago(db.Model):
     metodopago = db.Column(db.String(50), nullable=True)
     fecha= db.Column(db.Date, default=db.func.current_date())
     descuento = db.Column(db.Numeric(5,2), nullable=True)
-    estado= db.Column(db.String(20), default='pendiente')
+    estado= db.Column(db.String(20), default='Pendiente')
 
     # Definición de la clave foránea compuesta
     __table_args__ = (
@@ -26,7 +26,7 @@ class Pago(db.Model):
     
     detalle_membresia = db.relationship("DetalleMembresia", backref="pagos")
 
-    def __init__(self, idcliente, idmembresia, monto, metodopago = None, descuento=None, estado='pendiente'):
+    def __init__(self, idcliente, idmembresia, monto, metodopago = None, descuento=None, estado='Pendiente'):
         self.idcliente = idcliente
         self.idmembresia = idmembresia
         self.monto = monto
@@ -39,16 +39,3 @@ class Pago(db.Model):
                 f'idmembresia={self.idmembresia}, monto={self.monto}, '
                 f'metodopago={self.metodopago}, fecha={self.fecha}, '
                 f'descuento={self.descuento}, estado={self.estado})>')
-
-
-# CREATE TABLE pago (
-#     idpago SERIAL PRIMARY KEY,
-#     idcliente INT NOT NULL,
-#     idmembresia INT NOT NULL,
-#     monto NUMERIC(8,2) NOT NULL,
-#     metodopago VARCHAR(50),
-#     fecha DATE DEFAULT CURRENT_DATE,
-#     descuento NUMERIC(5,2),
-#     estado VARCHAR(20) DEFAULT 'pendiente',
-#     FOREIGN KEY (idcliente, idmembresia) REFERENCES detallemembresia(idcliente, idmembresia) ON DELETE CASCADE
-# );

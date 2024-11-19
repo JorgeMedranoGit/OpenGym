@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Editar Mantenimiento{% endblock %}
+{% block content %}
+<h2>Editar Mantenimiento</h2>
+<form action="{{ url_for('mantenimiento.editar_mantenimiento', id=mantenimiento.idmaquina) }}" method="POST">
+    <label for="tipo">Tipo:</label>
+    <input type="text" name="tipo" id="tipo" value="{{ mantenimiento.tipo }}" required><br><br>
+
+    <label for="estado">Estado:</label>
+    <input type="text" name="estado" id="estado" value="{{ mantenimiento.estado }}" required><br><br>
+
+    <label for="idmaquina">Máquina:</label>
+    <select name="idmaquina" id="idmaquina" required>
+        {% for maquina in maquinas %}
+        <option value="{{ maquina.idmaquina }}" {% if maquina.idmaquina == mantenimiento.idmaquina %}selected{% endif %}>
+            {{ maquina.tipo }} - {{ maquina.idmaquina }}
+        </option>
+        {% endfor %}
+    </select><br><br>
+
+    <label for="idempleado">Empleado:</label>
+    <select name="idempleado" id="idempleado" required>
+        {% for empleado in empleados %}
+        <option value="{{ empleado.idempleado }}" {% if empleado.idempleado == mantenimiento.idempleado %}selected{% endif %}>
+            {{ empleado.nombre }} {{ empleado.apellido }}
+        </option>
+        {% endfor %}
+    </select><br><br>
+
+    <button type="submit">Guardar Cambios</button>
+    <a href="{{ url_for('mantenimiento.listar_mantenimientos') }}">Cancelar</a>
+</form>
+{% endblock %}

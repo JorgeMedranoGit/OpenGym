@@ -9,12 +9,13 @@ class Membresias(db.Model):
     tipomembresia = db.Column(db.String(30), nullable=False)
     costo = db.Column(db.Numeric(8,2), nullable=False)
     habilitado = db.Column(db.Boolean, default=True) 
+    duracion = db.Column(db.Integer, nullable= True)
 
-    def __init__(self, tipomembresia, costo, habilitado=True):
+    def __init__(self, tipomembresia, costo, habilitado=True, duracion= None):
         self.tipomembresia = tipomembresia
         self.costo = costo
         self.habilitado= habilitado
+        self.duracion = duracion
 
     def __repr__(self):
-        return f'<Membresia(tipo="{self.tipomembresia}", costo={self.costo})>'
-
+        return f'<Membresia(tipo="{self.tipomembresia}", costo={self.costo}, duracion={self.duracion} dias)>'
