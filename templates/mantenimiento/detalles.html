@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Detalles de Mantenimientos{% endblock %}
+
+{% block content %}
+    <h1>Detalles de Mantenimientos para la Máquina: {{ maquina.tipo }}</h1>
+
+    <button class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    {% if mantenimientos %}
+        <div class="card-container">
+            {% for mantenimiento in mantenimientos %}
+                <div class="dynamic-div" data-id="{{ mantenimiento.idmantenimiento }}" data-name="Mantenimiento {{ mantenimiento.idmantenimiento }}">
+                    <div class="summary">
+                        <strong>ID Mantenimiento:&nbsp;</strong>{{ mantenimiento.idmantenimiento }}
+                        <strong>&nbsp;Estado:&nbsp;</strong>{{ mantenimiento.estado }}
+                    </div>
+                    <div class="details">
+                        <h3>Detalles de Mantenimiento: {{ mantenimiento.idmantenimiento }}</h3>
+                        <p><strong>Empleado:</strong> {{ mantenimiento.empleado.nombre }}</p>
+                        <p><strong>Fecha de Inicio:</strong> {{ mantenimiento.fechainicio.strftime('%Y-%m-%d') }}</p>
+                        <p><strong>Fecha de Fin:</strong> {{ mantenimiento.fechafin.strftime('%Y-%m-%d') }}</p>
+                        <p><strong>Estado:</strong> {{ mantenimiento.estado }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No hay mantenimientos registrados para esta máquina.</p>
+    {% endif %}
+
+    <script>
+        document.querySelector('.toggle-sidebar-btn').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('expanded');
+        });
+
+        document.querySelectorAll('.dynamic-div').forEach(function(div) {
+            div.addEventListener('click', function() {
+                div.classList.toggle('expanded');
+            });
+        });
+
+        function handleResize() {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.sidebar').classList.add('collapsed');
+            } else {
+                document.querySelector('.sidebar').classList.remove('collapsed');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('load', handleResize);
+    </script>
+
+{% endblock %}

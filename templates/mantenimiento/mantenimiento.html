@@ -1,29 +1,79 @@
 {% extends "base.html" %}
-{% block title %}Empleados{% endblock %}
+
+{% block title %}Máquinas en Mantenimiento{% endblock %}
+
 {% block content %}
 
-<br><br>
-<h1>Lista de Máquinas</h1>
-<table border="1">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Tipo</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for maquina in maquinas %}
-        <tr>
-            <td>{{ maquina._id }}</td>
-            <td>{{ maquina.tipo }}</td>
-            <td>{{ maquina.estado }}</td>
-            <td>
-                <a href="{{ url_for('mantenimiento.asignar_mantenimiento', id=maquina._id) }}">Asignar Mantenimiento</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="flash-{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+    <br><br>
+    <h1>Máquinas en Mantenimiento</h1>
+
+    <button class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    {% if maquinas %}
+        <div class="card-container">
+            {% for maquina, mantenimiento_estado, empleado_nombre, fecha_inicio, fecha_fin in maquinas %}
+                <div class="dynamic-div" data-id="{{ maquina._id }}" data-name="{{ maquina.tipo }}">
+                    <div class="summary">
+                        <strong>ID Máquina:&nbsp;</strong>{{ maquina._id }}
+                        <strong>&nbsp;Tipo:&nbsp;</strong>{{ maquina.tipo }}
+                        <strong>&nbsp;Estado:&nbsp;</strong>{{ mantenimiento_estado if mantenimiento_estado else "No asignado" }}
+                    </div>
+                    <div class="details">
+                        <h3>Detalles de Máquina: {{ maquina._id }}</h3>
+                        <p><strong>Empleado Asignado:</strong> {{ empleado_nombre if empleado_nombre else "N/A" }}</p>
+                        <p><strong>Fecha de Inicio:</strong> {{ fecha_inicio.strftime('%Y-%m-%d') if fecha_inicio else "No disponible" }}</p>
+                        <p><strong>Fecha de Fin:</strong> {{ fecha_fin.strftime('%Y-%m-%d') if fecha_fin else "No disponible" }}</p>
+
+                        {% if mantenimiento_estado == "En mantenimiento" %}
+                            <p><strong>Mantenimiento en proceso</strong></p>
+                            <form action="{{ url_for('mantenimiento.finalizar_mantenimiento', id=maquina._id) }}" method="POST">
+                                <button type="submit" class="btn btn-danger">Finalizar Mantenimiento</button>
+                            </form>
+                        {% else %}
+                            <a href="{{ url_for('mantenimiento.asignar_mantenimiento', id=maquina._id) }}" class="btn btn-success">Agregar Mantenimiento</a>
+                        {% endif %}
+
+                        <a href="{{ url_for('mantenimiento.ver_detalles', id=maquina._id) }}" class="btn btn-info">Ver detalles de mantenimientos</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No hay máquinas en mantenimiento.</p>
+    {% endif %}
+
+    <script>
+        document.querySelector('.toggle-sidebar-btn').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('expanded');
+        });
+
+        document.querySelectorAll('.dynamic-div').forEach(function(div) {
+            div.addEventListener('click', function() {
+                div.classList.toggle('expanded');
+            });
+        });
+
+        function handleResize() {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.sidebar').classList.add('collapsed');
+            } else {
+                document.querySelector('.sidebar').classList.remove('collapsed');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('load', handleResize);
+    </script>
 {% endblock %}
