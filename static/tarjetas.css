@@ -1,0 +1,39 @@
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    color: black;
+}
+
+.dynamic-div {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    color: black;
+}
+
+.dynamic-div .summary {
+    padding: 16px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: black;
+}
+
+.dynamic-div:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.details {
+    padding: 16px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #ddd;
+    color: black;
+}

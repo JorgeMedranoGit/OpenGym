@@ -1,42 +1,127 @@
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 {% extends "base.html" %}
 {% block title %}Compras{% endblock %}
 {% block content %}
 {% with messages = get_flashed_messages() %}
-    {% if messages %}
-        {% for msg in messages %}
-            <p>{{msg}}</p>
-        {% endfor%}
-    {% endif %}
+{% if messages %}
+{% for msg in messages %}
+<p>{{msg}}</p>
+{% endfor%}
+{% endif %}
 {% endwith %}
+
+<h2>Ganancias Mensuales</h2>
+<img src="data:image/png;base64,{{ graph_url }}" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
 <br><br>
 <a class="btn btn-success mt-2" href="/compras/agregar">Registrar compra</a>
-<table class="table table-striped mt-3 responsive">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Fecha Compra</th>
-            <th>Hora Compra</th>
-            <th>Metodo de pago</th>
-            <th>Empleado</th>
-            <th>Cliente</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for compra in compras %}
-        <tr>
-            <td>{{ compra.idcompra }}</td>
-            <td>{{ compra.fechacompra }}</td>
-            <td>{{ compra.horacompra }}</td>
-            <td>{{ compra.metodopago }}</td>
-            <td>{{ compra.nombreempleado }}</td>
-            <td>{{ compra.nombrecliente }}</td>
-            <td>bs. {{ compra.total }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<h2>Ganancias Mensuales</h2>
-    <img src="data:image/png;base64,{{ graph_url }}" alt="Gráfico de Ganancias Mensuales">
-{% endblock %}
+<!-- <table class="table table-striped mt-3 responsive">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Fecha Compra</th>
+      <th>Hora Compra</th>
+      <th>Metodo de pago</th>
+      <th>Empleado</th>
+      <th>Cliente</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for compra in compras %}
+    <tr>
+      <td>
+        {{ compra.idcompra }}
+      </td>
+      <td>
+        {{ compra.fechacompra }}
+      </td>
+      <td>
+        {{ compra.horacompra }}
+      </td>
+      <td>
+        {{ compra.metodopago }}
+      </td>
+      <td>
+        {{ compra.nombreempleado }}
+      </td>
+      <td>
+        {{ compra.nombrecliente }}
+      </td>
+      <td>bs.
+        {{ compra.total }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table> -->
 
+
+
+<div class="grid-container">
+    {% for compra in compras %}
+    <div class="dynamic-div" data-id="{{compra.idcompra}}">
+      <div class="summary">
+        <strong>Fecha:&nbsp;</strong>{{compra.fechacompra}}
+        <strong>&nbsp;Hora:&nbsp;</strong>
+        {{ compra.horacompra }}
+        <strong>&nbsp;Total:&nbsp;</strong>
+        {{ compra.total }}
+        <p><strong>Empleado:</strong>&nbsp;{{compra.nombreempleado}}</p>
+        <p><strong>Cliente:</strong>&nbsp;{{compra.nombrecliente}}</p>
+        <p><strong>Método de pago:</strong>&nbsp;{{compra.metodopago}}</p>
+        <h5><strong>Productos</strong> <i class="fas fa-angle-down"></i></h5> 
+      </div>
+      <div class="details" id="details-{{ compra.idcompra }}" style="display: none;">
+        
+      </div>
+    </div>  
+    {% endfor %}
+  </div>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const tarjetas = document.querySelectorAll('.dynamic-div');
+
+    tarjetas.forEach(tarjeta => {
+      tarjeta.addEventListener('click', function() {
+        const idcompra = this.dataset.id; 
+        const detailsDiv = document.getElementById(`details-${idcompra}`); 
+
+        if (detailsDiv.style.display === "none" || detailsDiv.style.display === "") {
+          detailsDiv.style.display = "block";
+
+          fetch(`/compras/detallecompras/${idcompra}`)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error("Error al obtener los datos");
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (!data.resultados || !Array.isArray(data.resultados)) {
+                throw new Error("Datos inválidos recibidos");
+              }
+
+              const detallesHtml = data.resultados.map(detalle => `
+                            <p><strong>Producto:</strong> ${detalle.producto}</p>
+                            <p><strong>Cantidad:</strong> ${detalle.cantidad}</p>
+                            <p><strong>Subtotal:</strong> ${detalle.subtotal}</p>
+                            <hr>
+                        `).join('');
+              detailsDiv.innerHTML = detallesHtml;
+            })
+            .catch(error => {
+              console.error("Hubo un problema con la solicitud:", error);
+              detailsDiv.innerHTML = `<p>Error al cargar los detalles.</p>`;
+            });
+        } else {
+          detailsDiv.style.display = "none";
+        }
+      });
+    });
+  });
+</script>
+
+  
+{% endblock %}

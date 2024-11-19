@@ -147,6 +147,27 @@ def obtenerPrecioProducto(product_id):
 
 
 
+@compras_blueprint.route("/compras/detallecompras/<int:id>", methods=['GET'])
+def detallecompras(id):
+    detalles = DetalleCompras.query.filter_by(idcompra=id).all()  # Filtra por el id de la compra
+    
+    resultados = []
+    for detalle in detalles:
+        producto = Productos.query.get(detalle.idproducto)
+        if producto:
+            resultados.append({
+                "producto": producto.nombre,
+                "cantidad": detalle.cantidad,
+                "subtotal": producto.preciov * detalle.cantidad
+            })
+    
+    return jsonify({"resultados": resultados})  # Devuelve un JSON con la clave "resultados"
+
+
+
+
+        
+
 
 def obtener_totales_por_mes():
     resultados = db.session.execute(text("SELECT * FROM obtener_totales_por_mes();")).fetchall()
@@ -156,8 +177,9 @@ def obtener_totales_por_mes():
 
 def crear_grafico(meses, totales, img):
     plt.figure(figsize=(10, 5))
-    plt.bar(meses, totales, color='blue')
+    plt.bar(meses, totales, color='red')
     plt.xlabel('Meses')
+    plt.gca().set_facecolor('#f6f6f6') 
     plt.ylabel('Total Ganancias')
     plt.title('Ganancias Mensuales')
     plt.xticks(rotation=45)
