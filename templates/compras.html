@@ -5,7 +5,7 @@
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 {% for msg in messages %}
-<p>{{msg}}</p>
+<p class="btn btn-primary">{{msg}}</p>
 {% endfor%}
 {% endif %}
 {% endwith %}
@@ -121,7 +121,13 @@
       });
     });
   });
+
+
+
+
+  
 </script>
+
 
   
 {% endblock %}

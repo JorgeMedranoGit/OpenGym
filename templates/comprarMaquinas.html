@@ -280,32 +280,30 @@
         if (customProveedorFields.style.display === 'none') {
             customProveedorFields.style.display = 'block';
             link.textContent = '¿Encuentra el proveedor que busca?';
-            nuevoProveedorNombreInput.setAttribute('required', 'required'); // Hacer obligatorio
-            telefonoProveedorInput.setAttribute('required', 'required'); // Hacer obligatorio
-            correoProveedorInput.setAttribute('required', 'required'); // Hacer obligatorio
-            resetSelection(); // Deseleccionar el proveedor
+            nuevoProveedorNombreInput.setAttribute('required', 'required');
+            telefonoProveedorInput.setAttribute('required', 'required');
+            correoProveedorInput.setAttribute('required', 'required');
+            resetSelection(); 
         } else {
             customProveedorFields.style.display = 'none';
             link.textContent = '¿No encuentra el proveedor que busca?';
-            nuevoProveedorNombreInput.removeAttribute('required'); // Quitar obligatorio
-            telefonoProveedorInput.removeAttribute('required'); // Quitar obligatorio
-            correoProveedorInput.removeAttribute('required'); // Quitar obligatorio
+            nuevoProveedorNombreInput.removeAttribute('required');
+            telefonoProveedorInput.removeAttribute('required');
+            correoProveedorInput.removeAttribute('required');
         }
     }
 
     function resetSelection() {
-        document.getElementById('nombre').selectedIndex = 0; // Deseleccionar la máquina
-        document.getElementById('proveedor').selectedIndex = 0; // Deseleccionar el proveedor
-        document.getElementById('tipoMaquina').value = ''; // Limpiar tipo de máquina
-        document.getElementById('precioUnitario').value = ''; // Limpiar precio unitario
+        document.getElementById('nombre').selectedIndex = 0;
+        document.getElementById('proveedor').selectedIndex = 0;
+        document.getElementById('tipoMaquina').value = '';
+        document.getElementById('precioUnitario').value = '';
     }
 </script>
 
 <h1>Maquina</h1>
 <h2 style="display: none;">Proveedor Seleccionado: </h2>
-<button
-    class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
-        class="fas fa-bars"></i></button>
+
 <form action="/maquinas" method="post" onsubmit="validarFormulario(event)" class="form mt-3">
     <input class="form-control mt-2" type="hidden" name="idMaquina" value="{{ maquina._id if maquina else '' }}" />
 
@@ -408,26 +406,7 @@
 <p id="totalCompra">Total de la compra: $0</p>
 
 <script>
-    document.querySelector('.toggle-sidebar-btn').addEventListener('click', function () {
-        document.querySelector('.sidebar').classList.toggle('expanded');
-    });
 
-    document.querySelectorAll('.dynamic-div').forEach(function (div) {
-        div.addEventListener('click', function () {
-            div.classList.toggle('expanded');
-        });
-    });
-
-    function handleResize() {
-        if (window.innerWidth <= 768) {
-            document.querySelector('.sidebar').classList.add('collapsed');
-        } else {
-            document.querySelector('.sidebar').classList.remove('collapsed');
-        }
-    }
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('load', handleResize);
 
     function añadirProductoDesdeMaquina(idNombre, tipoMaquina, idEmpleado) {
         const cantidad = prompt("Ingrese la cantidad:");

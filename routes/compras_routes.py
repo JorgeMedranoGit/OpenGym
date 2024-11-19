@@ -149,7 +149,7 @@ def obtenerPrecioProducto(product_id):
 
 @compras_blueprint.route("/compras/detallecompras/<int:id>", methods=['GET'])
 def detallecompras(id):
-    detalles = DetalleCompras.query.filter_by(idcompra=id).all()  # Filtra por el id de la compra
+    detalles = DetalleCompras.query.filter_by(idcompra=id).all()
     
     resultados = []
     for detalle in detalles:
@@ -161,7 +161,7 @@ def detallecompras(id):
                 "subtotal": producto.preciov * detalle.cantidad
             })
     
-    return jsonify({"resultados": resultados})  # Devuelve un JSON con la clave "resultados"
+    return jsonify({"resultados": resultados}) 
 
 
 
