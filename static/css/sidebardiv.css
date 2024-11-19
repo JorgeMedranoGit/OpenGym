@@ -1,3 +1,6 @@
+body{
+    background-color: #f6f6f6;
+}
 .sidebar {
     transition: width 0.3s;
     position: fixed; /* Fija la barra lateral */

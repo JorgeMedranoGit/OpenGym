@@ -98,7 +98,22 @@ def formEntrega():
         flash("Entrega agregada exitosamente!")
         return redirect("/entregas")
 
+@entregas_blueprint.route("/entregas/detalleentrega/<int:id>", methods=['GET'])
+def detallecompras(id):
+    detalles = DetalleEntregas.query.filter_by(identrega=id).all()
     
+    resultados = []
+    for detalle in detalles:
+        producto = Productos.query.get(detalle.idp)
+        if producto:
+            resultados.append({
+                "producto": producto.nombre,
+                "cantidad": detalle.cantidad,
+                "subtotal": producto.preciov * detalle.preciocompra
+            })
+    
+    return jsonify({"resultados": resultados}) 
+
 
 @entregas_blueprint.route("/entregas/cambiar_estado", methods=['POST'])
 def cambiar_estado():
