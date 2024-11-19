@@ -1,9 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float
-from sqlalchemy.ext.declarative import declarative_base
 from database import db
-from sqlalchemy import update
 
-Base = declarative_base()
+from sqlalchemy import update
 
 
 
@@ -16,7 +13,6 @@ class Maquinas(db.Model):
     idnombremaquina = db.Column(db.Integer, nullable=False)
     iddetallecompramaquina = db.Column(db.Integer, nullable=False)
     
-
     def __init__(self, tipo, estado, idnombremaquina, iddetallecompramaquina):
         self.tipo = tipo
         self.estado = estado
@@ -33,4 +29,5 @@ class Maquinas(db.Model):
         )
         db.session.execute(query)
         db.session.commit()
+
     
