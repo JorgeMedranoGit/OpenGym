@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Crear Mantenimiento{% endblock %}
+{% block content %}
+<h1>Asignar Mantenimiento a Máquina</h1>
+<form method="POST">
+    <p>Máquina: {{ maquina.tipo }} (Estado: {{ maquina.estado }})</p>
+    <label for="titulo">Título:</label>
+    <input type="text" name="tipo" id="tipo" required><br>
+
+    <label for="fechainicio">Fecha Inicio:</label>
+    <input type="date" name="fechainicio" id="fechainicio" required><br>
+
+    <label for="fechafin">Fecha Fin:</label>
+    <input type="date" name="fechafin" id="fechafin" required><br>
+
+    <label for="idempleado">Empleado:</label>
+    <select name="idempleado" id="idempleado" required>
+        {% for empleado in empleados %}
+        <option value="{{ empleado.idempleado }}">{{ empleado.nombre }}</option>
+        {% endfor %}
+    </select><br>
+
+    <button type="submit">Asignar Mantenimiento</button>
+</form>
+{% endblock %}

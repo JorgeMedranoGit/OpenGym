@@ -24,6 +24,8 @@ from routes.tareas_routes import tareas_blueprint
 from routes.tareas_asignadas import tareas_asignadas_blueprint
 from routes.membresias_routes import membresias_blueprint
 from routes.maquinas_routes import maquinas_blueprint
+#Nueva ruta
+from routes.mantenimientoRutas import mantenimiento_bp
 
 
 mail = Mail()
@@ -54,6 +56,7 @@ app.register_blueprint(tareas_blueprint)
 app.register_blueprint(tareas_asignadas_blueprint)
 app.register_blueprint(membresias_blueprint)
 app.register_blueprint(maquinas_blueprint)
+app.register_blueprint(mantenimiento_bp)
 
 
 if __name__ == "__main__":

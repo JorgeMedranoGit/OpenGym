@@ -1,10 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float
-from sqlalchemy.ext.declarative import declarative_base
 from database import db
-
-
-Base = declarative_base()
-
 
 
 class NombreMaquinas(db.Model):
