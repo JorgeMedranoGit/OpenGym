@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 from database import db
-
+from sqlalchemy import update
 
 Base = declarative_base()
 
@@ -24,4 +24,13 @@ class Maquinas(db.Model):
         self.iddetallecompramaquina = iddetallecompramaquina
     def __repr__(self):
         return f'<Maquina {self.idnombremaquina}, Tipo: {self.tipo}, Estado: {self.estado}, IdEmpleado: {self.idempleado}>'
+    def actualizar_estado_maquinas(iddetallecompramaquina):
+    # Define el query para actualizar el estado a 'Operativo'
+        query = (
+            update(Maquinas)
+            .where(Maquinas.iddetallecompramaquina == iddetallecompramaquina)
+            .values(estado='Operativo')
+        )
+        db.session.execute(query)
+        db.session.commit()
     

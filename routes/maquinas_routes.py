@@ -7,6 +7,7 @@ from models.nombreMaquina import NombreMaquinas
 from models.proveedores import Proveedores
 from models.compramaquina import CompraMaquina
 from models.detallecompramaquina import DetalleCompraMaquina
+from sqlalchemy import text
 from database import db
 
 maquinas_blueprint = Blueprint('maquinas_blueprint', __name__)
@@ -17,6 +18,91 @@ def maquinas():
         flash("Debes iniciar sesión")
         return redirect("/login")
     return render_template("verMaquinas.html", maquinas=Maquinas.query.all(), nombres=NombreMaquinas.query.all(), proveedores=Proveedores.query.all())
+@maquinas_blueprint.route("/verComprasMaquinas", methods=["GET"])
+def ver_compras_maquinas():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+    try:
+        # Llamar al procedimiento almacenado
+        result = db.session.execute(text("SELECT * FROM obtenercomprasmaquinas()"))
+        # Obtener los resultados
+        compras = result.fetchall()
+
+        # Llamar al procedimiento almacenado
+        result = db.session.execute(text("SELECT * FROM obtenerdetallescomprasmaquinas()"))
+        # Obtener los resultados
+        detalles = result.fetchall()
+        
+        # Convertir los resultados a una lista de diccionarios
+        compras_dict = []
+        for row in compras:
+            compras_dict.append({
+                'idcompra': row.idcompra,
+                'fecha': row.fecha,
+                'proveedor': row.proveedor,
+                'Gastos': row.gastos
+            })
+        detalles_dict = []
+        for row in detalles:
+            detalles_dict.append({
+                'idcompra': row.idcompra,
+                'fecha': row.fecha,
+                'nombre': row.nombre,
+                'codigo': row.codigomaquina,
+                'proveedor': row.proveedor,
+                'tipo': row.tipo,
+                'gastos': row.gastos,
+                'estado': row.estado,
+                'total': row.total,
+                'iddetalle': row.iddetalle
+            })
+        # Renderizar la plantilla con los resultados
+        return render_template("verComprasMaquinas.html", compras=compras_dict, detalleCompras=detalles_dict)
+
+    except Exception as e:
+        flash(f"Error al obtener las compras: {str(e)}")
+        return redirect(url_for('maquinas_blueprint.maquinas'))
+    
+    
+    
+@maquinas_blueprint.route("/verDetalleCompra/<int:iddetalle>", methods=["GET"])
+def ver_detalles_compra(iddetalle):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+    try:
+        # Llamar al procedimiento almacenado
+        result = db.session.execute(text(f"SELECT * FROM obtener_maquinas_por_detalle(:iddetalle)"), {'iddetalle': iddetalle})
+        # Obtener los resultados
+        maquinas = result.fetchall()
+        #Mapear los resultados
+        maquinas_dict = []
+        for row in maquinas:
+            maquinas_dict.append({
+                'idmaquina': row.idmaquina,
+                'nombre': row.nombre,
+                'codigo': row.codigomaquina,
+                'tipo': row.tipo,
+                'estado': row.estado
+            })
+        # Renderizar la plantilla con los resultados
+        return render_template("verDetalleCompra.html", detalle=maquinas_dict, maquinas=maquinas_dict)
+    except Exception as e:
+        flash(f"Error al obtener las maquinas: {str(e)}")
+        return redirect(url_for('maquinas_blueprint.maquinas'))
+
+@maquinas_blueprint.route("/confirmarEntregaDetalle/<int:iddetalle>", methods=["GET"])
+def confirmar_entrega_detalle(iddetalle):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+    try:
+        Maquinas.actualizar_estado_maquinas(iddetalle)
+        return redirect("/verComprasMaquinas")
+    except Exception as e:
+        flash(f"Error al obtener las maquinas: {str(e)}")
+        return redirect(url_for('maquinas_blueprint.maquinas'))
     
 @maquinas_blueprint.route("/comprarmaquinas", methods=["POST", "GET"])
 def maquinasCrud():
