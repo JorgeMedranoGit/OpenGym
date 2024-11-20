@@ -1,4 +1,4 @@
-#!/home/bando/Documents/Projects/Python/OpenGym/.venv/bin/python
+#!/home/bando/Documents/Projects/Python/OpenGymFinals/OpenGym/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
