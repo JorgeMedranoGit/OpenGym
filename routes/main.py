@@ -50,7 +50,24 @@ def home():
     
     compras_totales = obtener_compras_totales_por_mes()
     entregas_totales = obtener_entregas_totales_por_mes()
+    #obtencion de graficos de proveedores de maquinas
+    ventas_por_proveedor = obtener_ventas_totales_por_proveedor()
+    nombresProveedorPastel = []
+    totalesProveedoPastel = []
+    for row in ventas_por_proveedor:
+        nombresProveedorPastel.append(row.proveedor)
+        totalesProveedoPastel.append(row.total)
+        
     
+    #obtencion de graficos de proveedores de productos
+    ventas_por_proveedor_producto = obtener_ventas_totales_por_proveedor_producto()
+    nombresProveedorPastelProducto = []
+    totalesProveedoPastelProducto = []
+    for row in ventas_por_proveedor_producto:
+        nombresProveedorPastelProducto.append(row.proveedor)
+        totalesProveedoPastelProducto.append(row.total)
+        
+    #obtencion de                                                                                                                 
     compras_filtradas = filtrar_por_fechas(compras_totales, c_fecha_inicio, c_fecha_fin)
     entregas_filtradas = filtrar_por_fechas(entregas_totales, e_fecha_inicio, e_fecha_fin)
     
@@ -65,12 +82,23 @@ def home():
     img2 = BytesIO()
     crear_grafico(meses_entregas, totales_entregas, img2, "Dinero gastado en suministros mensualmente")  
     img2.seek(0) 
-
+    
+    #obtencion de grafico pastel de proveedores
+    img3 = BytesIO()
+    grafico_pastel(nombresProveedorPastel, totalesProveedoPastel, img3, "Porcentaje de proveedores mas solicitados para maquinas")  
+    img3.seek(0) 
+    
+    #obtencion de grafico pastel de proveedores y productos
+    img5 = BytesIO()
+    grafico_pastel(nombresProveedorPastelProducto, totalesProveedoPastelProducto, img5, "Porcentaje de proveedores mas solicitados para productos")
+    img5.seek(0)
+    
     v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
     img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
-    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')  
-
-    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, nombre=session.get('usuario'))
+    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
+    img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
+    img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
+    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img5=img5, nombre=session.get('usuario'))
 
 
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
@@ -220,6 +248,12 @@ def obtener_compras_totales_por_mes():
 def obtener_entregas_totales_por_mes():
     resultados = db.session.execute(text("SELECT * FROM obtener_entregas_totales_por_mes();")).fetchall()
     return resultados
+def obtener_ventas_totales_por_proveedor():
+    resultados = db.session.execute(text("select * from obtener_ventas_maquinas_por_proveedor();")).fetchall()
+    return resultados
+def obtener_ventas_totales_por_proveedor_producto():
+    resultados = db.session.execute(text("select * from obtener_ventas_productos_por_proveedor();")).fetchall()
+    return resultados
 
 
 
@@ -236,3 +270,14 @@ def crear_grafico(meses, totales, img, titulo, color='red', xlabel='Meses', ylab
     plt.savefig(img, format='png')
     plt.close()
 
+def grafico_pastel(nombres, cantidades, img, titulo):
+    colores = ['#c81d25', '#087e8b', '#0b3954']
+    if len(nombres) != len(cantidades):
+        raise ValueError("Los arreglos de nombres y cantidades deben tener la misma longitud.")
+    plt.figure(figsize=(8, 8))
+    plt.pie(cantidades, labels=nombres, autopct='%1.1f%%', startangle=140, colors=colores)
+    plt.title(titulo, pad=20, loc="left")
+    plt.axis('equal')
+    
+    plt.savefig(img, format='png')
+    plt.close()

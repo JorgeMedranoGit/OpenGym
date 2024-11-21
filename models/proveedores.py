@@ -15,11 +15,10 @@ class Proveedores(db.Model):
     correo = db.Column(db.String(50), nullable=False)
     habilitado = db.Column(db.Boolean, nullable=False)
 
-    def __init__(self, nombre, telefono, correo, habilitado):
+    def __init__(self, nombre, telefono, correo):
         self.nombre = nombre
         self.telefono = telefono
         self.correo = correo
-        self.habilitado = habilitado
 
     def __repr__(self):
         return f'<Proveedor {self.nombre}, Telefono: {self.telefono}, Correo: {self.correo}>'
