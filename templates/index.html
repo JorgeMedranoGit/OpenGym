@@ -4,7 +4,7 @@
 {% with messages = get_flashed_messages() %}
     {% if messages %}
         {% for msg in messages %}
-            <p class="btn btn-primary">{{msg}}</p>
+            <p class="alert alert-info">{{msg}}</p>
         {% endfor %}
     {% endif %}
 {% endwith %}
@@ -52,6 +52,13 @@
         </div>
         <div class="flex-fill">
             <img src="data:image/png;base64,{{ img5 }}" alt="Gráfico de Proveedores" style="background-color: #f6f6f6;" width="370">
+        </div>
+
+
+    <!-- Grafico Pablito -->
+        <div class="flex-fill">
+            <img src="data:image/png;base64,{{ img4 }}" class="img-rectangulo" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
+            
         </div>
     </div>
     
