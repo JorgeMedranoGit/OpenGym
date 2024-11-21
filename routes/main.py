@@ -232,7 +232,23 @@ def codigo_verificacion():
 
 
 
+def procesar_datos_productos(resultados):
+    productos = {}
+    meses = sorted(set(row[2] for row in resultados))  # Extraer meses únicos y ordenarlos
 
+    for producto, num_ventas, mes in resultados:
+        if producto not in productos:
+            productos[producto] = {mes: num_ventas}
+        else:
+            productos[producto][mes] = num_ventas
+
+    # Crear listas de ventas por mes para cada producto
+    ventas_por_producto = {
+        producto: [productos[producto].get(mes, 0) for mes in meses]
+        for producto in productos
+    }
+
+    return ventas_por_producto, meses
 
 # Filtrado por fechas
 def filtrar_por_fechas(datos, fecha_inicio, fecha_fin):
