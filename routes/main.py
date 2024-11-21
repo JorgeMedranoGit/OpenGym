@@ -92,13 +92,25 @@ def home():
     img5 = BytesIO()
     grafico_pastel(nombresProveedorPastelProducto, totalesProveedoPastelProducto, img5, "Porcentaje de proveedores mas solicitados para productos")
     img5.seek(0)
+
+    resultados = obtener_suma_venta_productos()
+    ventas_por_producto, meses = procesar_datos_productos(resultados)
+
+    # Seleccionar los tres productos más vendidos
+    productos_top = sorted(ventas_por_producto.keys(), 
+                           key=lambda p: sum(ventas_por_producto[p]), 
+                           reverse=True)[:3]
+    ventas_top = [ventas_por_producto[producto] for producto in productos_top]
+
+    # Crear el gráfico
+    img4 = crear_stackplot_base64(*ventas_top, meses=meses, labels=productos_top)
     
     v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
     img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
     img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
     img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
     img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
-    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img5=img5, nombre=session.get('usuario'))
+    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4,img5=img5, nombre=session.get('usuario'))
 
 
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
@@ -254,6 +266,10 @@ def obtener_ventas_totales_por_proveedor():
 def obtener_ventas_totales_por_proveedor_producto():
     resultados = db.session.execute(text("select * from obtener_ventas_productos_por_proveedor();")).fetchall()
     return resultados
+def obtener_suma_venta_productos():
+    resultados = db.session.execute(text("select * from obtener_productos_mas_vendidos();")).fetchall()
+    return resultados
+
 
 
 
@@ -281,3 +297,24 @@ def grafico_pastel(nombres, cantidades, img, titulo):
     
     plt.savefig(img, format='png')
     plt.close()
+
+
+def crear_stackplot_base64(*ventas, meses, labels):
+    colores = ['#c81d25', '#087e8b', '#0b3954']
+    plt.figure(figsize=(5, 3))
+    plt.stackplot(meses, *ventas, labels=labels, colors=colores)
+    plt.title('Ventas de productos por mes')
+    plt.xlabel('Mes')
+    plt.ylabel('Cantidad de ventas')
+    plt.legend(loc='upper left')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+
+    # Convertir la imagen a Base64
+    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    return img_base64
