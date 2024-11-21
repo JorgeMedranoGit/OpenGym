@@ -9,6 +9,7 @@ from database import db
 from sqlalchemy import text
 import requests
 import matplotlib
+import io
 from datetime import datetime
 matplotlib.use('Agg')  
 import calendar
@@ -290,7 +291,7 @@ def obtener_suma_venta_productos():
 
 
 def crear_grafico(meses, totales, img, titulo, color='red', xlabel='Meses', ylabel='Valores (bs.)', facecolor='#ffffff'):
-    plt.figure(figsize=(7, 4))
+    plt.figure(figsize=(5, 3))
     plt.bar(meses, totales, color=color)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)

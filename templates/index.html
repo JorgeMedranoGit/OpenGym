@@ -18,12 +18,14 @@
                 <input type="month" id="c_fecha_inicio" name="c_fecha_inicio" value="{{ request.args.get('c_fecha_inicio', '') }}">
                 <label for="c_fecha_fin">Fecha de fin:</label>
                 <input type="month" id="c_fecha_fin" name="c_fecha_fin" value="{{ request.args.get('c_fecha_fin', '') }}">
-
+                <br>
             <!--- * * IMPORTANTE * * --->
                 <!-- Persistencia de valores filtrados al filtrar otro reporte (muchachos si colocan mas, poner sus filtros aca) -->
-
-                <input type="hidden" name="e_fecha_inicio" value="{{ request.args.get('e_fecha_inicio', '') }}">
-                <input type="hidden" name="e_fecha_fin" value="{{ request.args.get('e_fecha_fin', '') }}">
+                <div class="container-md">
+                    <input type="hidden" name="e_fecha_inicio" value="{{ request.args.get('e_fecha_inicio', '') }}">
+                    <input type="hidden" name="e_fecha_fin" value="{{ request.args.get('e_fecha_fin', '') }}">
+                </div>
+                
                 
                 <button type="submit" class="btn btn-primary">Filtrar</button>
                 <a href="{{ url_for('main_blueprint.home') }}" class="btn btn-secondary">Limpiar Filtro</a>
@@ -39,14 +41,19 @@
                 
             <!--- * * IMPORTANTE * * --->
                 <!-- Persistencia de valores filtrados al filtrar otro reporte (muchachos si colocan mas, poner sus filtros aca) -->
-
-                <input type="hidden" name="c_fecha_inicio" value="{{ request.args.get('c_fecha_inicio', '') }}">
-                <input type="hidden" name="c_fecha_fin" value="{{ request.args.get('c_fecha_fin', '') }}">
+                <br>
+                <div class="container-md">
+                    <input type="hidden" name="c_fecha_inicio" value="{{ request.args.get('c_fecha_inicio', '') }}">
+                    <input type="hidden" name="c_fecha_fin" value="{{ request.args.get('c_fecha_fin', '') }}">
+                </div>
+                
                 
                 <button type="submit" class="btn btn-primary">Filtrar</button>
                 <a href="{{ url_for('main_blueprint.home') }}" class="btn btn-secondary">Limpiar Filtro</a>
             </form>
         </div>
+        <br>
+        <br>
         <div class="flex-fill">
             <img src="data:image/png;base64,{{ img3 }}" alt="Gráfico de Proveedores" style="background-color: #f6f6f6;" width="370">
         </div>
