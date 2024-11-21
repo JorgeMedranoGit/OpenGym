@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Proveedores{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor%}
+    {% endif %}
+{% endwith %}
+<h1>Proveedores</h1>
+<form action="/proveedores" method="post" class="form mt-3">
+
+    <input class="form-control mt-1" type="hidden" name="proveedor_id" value="{{ proveedor._id if proveedor else '' }}">
+    <label for="nombreProveedor" class="form-label">Nombre Completo</label>
+    <input class="form-control" type="text" name="nombreProveedor" placeholder="Nombre del Proveedor" value="{{ proveedor.nombre if proveedor else '' }}" 
+        required minlength="3" pattern="^[A-Z0-9][a-zA-Z0-9]*(\s+[A-Z0-9][a-zA-Z0-9]*)*$" oninvalid="this.setCustomValidity('Las palabras deben iniciar con mayuscula')">
+    <p><small>Ingrese el nombre completo o de empresa puede incluir números.</small></p>
+    <label for="telefonoProveedor" class="form-label mt-1">Telefono de contacto</label>
+    <input class="form-control" type="text" name="telefonoProveedor" placeholder="Telefono del Proveedor" value="{{ proveedor.telefono if proveedor else '' }}" 
+        required  pattern="^\+?\d+$" minlength="8" oninvalid="this.setCustomValidity('Solo se admite el signo + al inicio o números')">
+    <p><small>El valor debe ser un número y puede comenzar con un signo +.</small></p>
+    <label for="correoProveedor" class="form-label mt-1">Correo de contacto</label>
+    <input class="form-control" type="email" name="correoProveedor" placeholder="Correo del Proveedor" value="{{ proveedor.correo if proveedor else '' }}" required>
+    <p><small>Correo de contacto de la empresa o proveedor.</small></p>
+    <input class="btn btn-success mt-2" type="submit" value="{{ 'Actualizar' if proveedor else 'Añadir' }}"/>
+    <a href="/proveedores" class="btn btn-danger mt-2">Volver a Proveedores</a>
+</form>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Proveedores{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for msg in messages %}
+<p>{{msg}}</p>
+{% endfor %}
+{% endif %}
+{% endwith %}
+<h1>Proveedores</h1>
+<a href="/addProveedores" class="btn btn-success">Agregar proveedor</a>
+<a href="/verProveedoresDeshabilitados" class="btn btn-danger">Ver Deshabilitados</a>
+
+<!-- Formulario de búsqueda -->
+<form id="search-form" class="mb-3 mt-3">
+    <div class="input-group">
+        <input type="text" id="search-input" class="form-control" placeholder="Buscar proveedor por nombre" aria-label="Buscar proveedor">
+        <button class="btn btn-primary" type="submit">Buscar</button>
+    </div>
+</form>
+
+<!-- Contenedor para las sugerencias -->
+<div id="suggestions" class="list-group" style="display: none;"></div>
+
+<div class="container mt-3">
+    {% for proveedor in proveedores %}
+    <div class="dynamic-div" data-id="{{proveedor._id}}" data-name="{{proveedor.nombre}}">
+        <div class="summary">
+            <strong>ID:&nbsp;</strong>{{proveedor._id}}<strong>&nbsp;
+                <strong>&nbsp;Nombre:&nbsp;</strong>{{proveedor.nombre }}
+        </div>
+        <div class="details">
+            <p><strong>ID:&nbsp;</strong>{{proveedor._id}}</p>
+            <p><strong>Numero:&nbsp;</strong>{{ proveedor.nombre }}</p>
+            <p><strong>Tipo:&nbsp;</strong>{{ proveedor.telefono }}</p>
+            <p><strong>Estado:&nbsp;</strong>{{ proveedor.correo }}</p>
+            <a href="/proveedores/editar/{{ proveedor._id }}" class="btn btn-dark">Editar</a>
+            <form action="/proveedores/eliminar/{{ proveedor._id }}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.getElementById('search-input').addEventListener('input', function() {
+        const query = this.value;
+
+        if (query.length > 0) {
+            fetch(`/proveedores/buscar?nombre=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const suggestions = document.getElementById('suggestions');
+                    suggestions.innerHTML = ''; // Limpiar sugerencias anteriores
+                    if (data.length > 0) {
+                        suggestions.style.display = 'block'; // Mostrar sugerencias
+                        data.forEach(proveedor => {
+                            const item = document.createElement('a');
+                            item.href = `/proveedores/editar/${proveedor.id}`; // Enlace a la edición
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = proveedor.nombre;
+                            suggestions.appendChild(item);
+                        });
+                    } else {
+                        suggestions.style.display = 'none'; // Ocultar si no hay sugerencias
+                    }
+                });
+        } else {
+            document.getElementById('suggestions').style.display = 'none'; // Ocultar si no hay texto
+        }
+    });
+</script>
+{% endblock %}

@@ -8,7 +8,14 @@ from database import db
 
 proveedores_blueprint = Blueprint('proveedores_blueprint', __name__)
 
-@proveedores_blueprint.route("/proveedores", methods=["POST", "GET"])
+@proveedores_blueprint.route("/proveedores", methods=["GET"])
+def verProveedores():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+    return render_template("proveedores/verProveedores.html", proveedores=Proveedores.query.filter(Proveedores.habilitado == True).all())
+
+@proveedores_blueprint.route("/addProveedores", methods=["POST", "GET"])
 def proveedoresCrud():
     if "usuario" not in session:
         flash("Debes iniciar sesión")
@@ -31,8 +38,7 @@ def proveedoresCrud():
             db.session.commit() 
             flash("Proveedor añadido exitosamente!")
         return redirect("/proveedores")
-    proveedores = Proveedores.query.all()
-    return render_template("proveedores.html", proveedores=proveedores)
+    return render_template("proveedores/proveedores.html")
 #Proveedores (Edicion)
 @proveedores_blueprint.route("/proveedores/editar/<int:id>", methods=["GET"])
 def editarProveedor(id):
@@ -40,7 +46,7 @@ def editarProveedor(id):
         flash("Debes iniciar sesión")
         return redirect("/login")
     proveedor = Proveedores.query.get(id) 
-    return render_template("proveedores.html", proveedor=proveedor, proveedores=Proveedores.query.all())
+    return render_template("proveedores/proveedores.html", proveedor=proveedor)
 
 @proveedores_blueprint.route("/proveedores/eliminar/<int:id>", methods=["POST"])
 def eliminarProveedor(id):
@@ -48,11 +54,27 @@ def eliminarProveedor(id):
         flash("Debes iniciar sesión")
         return redirect("/login")
     proveedor = Proveedores.query.get(id)
-    db.session.delete(proveedor)
-    db.session.commit()
-    flash("Proveedor eliminado exitosamente!")
+    if proveedor:
+        proveedor.habilitado = False
+        db.session.commit()  # Guarda los cambios en la base de datos
+        flash("Proveedor deshabilitado exitosamente!")
+    else:
+        flash("Proveedor no encontrado.")
     return redirect("/proveedores")
 
+@proveedores_blueprint.route("/proveedores/buscar", methods=["GET"])
+def buscarProveedores():
+    if "email" not in session:
+        return jsonify([])  # Retorna una lista vacía si no hay sesión
+    
+    nombre = request.args.get('nombre', '')
+    proveedores = Proveedores.query.filter(Proveedores.nombre.ilike(f'%{nombre}%')).all()  # Filtra por nombre
+
+    # Convertir los resultados a un formato JSON
+    resultados = [{'id': proveedor._id, 'nombre': proveedor.nombre} for proveedor in proveedores]
+    
+    return jsonify(resultados)  # Retorna los resultados en formato JSON
+
 def obtenerTodoslosProveedores():
-    return Proveedores.query.all()
+    return Proveedores.query.filter(Proveedores.habilitado == True).all()
 
