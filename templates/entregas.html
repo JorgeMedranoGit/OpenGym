@@ -4,10 +4,11 @@
 {% with messages = get_flashed_messages() %}
     {% if messages %}
         {% for msg in messages %}
-            <p class="btn btn-primary">{{msg}}</p>
+          <p class="alert alert-info">{{msg}}</p>
         {% endfor %}
     {% endif %}
 {% endwith %}
+<h1>Gestión de entregas</h1>
 <br><br>
 <a class="btn btn-success mt-2" href="/entregas/agregar">Registrar entrega</a>
 

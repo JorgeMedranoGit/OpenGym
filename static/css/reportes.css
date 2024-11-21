@@ -1,0 +1,17 @@
+
+.img-rectangulo {
+    width: auto;
+}
+.img-cuadrado {
+    width: auto;
+}
+
+/* Media query para pantallas pequeñas */
+@media (max-width: 600px) {
+    .img-rectangulo {
+        width: 370px;
+    }
+    .img-cuadrado {
+        width: 450px;
+    }
+}

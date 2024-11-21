@@ -4,15 +4,16 @@
 {% with messages = get_flashed_messages() %}
     {% if messages %}
         {% for msg in messages %}
-            <p class="btn btn-primary">{{msg}}</p>
+            <p class="alert alert-info">{{msg}}</p>
         {% endfor %}
     {% endif %}
 {% endwith %}
+<!-- Mensaje de bienvenida al empleado -->
     <h1>Bienvenido {{nombre}}</h1>
     <h3>{{rol}}</h3>
     <div class="d-flex flex-wrap">
         <div class="flex-fill">
-            <img src="data:image/png;base64,{{ img1 }}" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
+            <img src="data:image/png;base64,{{ img1 }}" class="img-rectangulo" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
             <form method="get" action="{{ url_for('main_blueprint.home') }}">
                 <label for="c_fecha_inicio">Fecha de inicio:</label>
                 <input type="month" id="c_fecha_inicio" name="c_fecha_inicio" value="{{ request.args.get('c_fecha_inicio', '') }}">
@@ -23,6 +24,7 @@
                 <!-- Persistencia de valores filtrados al filtrar otro reporte (muchachos si colocan mas, poner sus filtros aca) -->
 
                 <input type="hidden" name="e_fecha_inicio" value="{{ request.args.get('e_fecha_inicio', '') }}">
+                <br>
                 <input type="hidden" name="e_fecha_fin" value="{{ request.args.get('e_fecha_fin', '') }}">
                 
                 <button type="submit" class="btn btn-primary">Filtrar</button>
@@ -30,7 +32,7 @@
             </form>
         </div>
         <div class="flex-fill">
-            <img src="data:image/png;base64,{{ img2 }}" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
+            <img src="data:image/png;base64,{{ img2 }}" class="img-rectangulo" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
             <form method="get" action="{{ url_for('main_blueprint.home') }}">
                 <label for="e_fecha_inicio">Fecha de inicio:</label>
                 <input type="month" id="e_fecha_inicio" name="e_fecha_inicio" value="{{ request.args.get('e_fecha_inicio', '') }}">
@@ -46,6 +48,10 @@
                 <button type="submit" class="btn btn-primary">Filtrar</button>
                 <a href="{{ url_for('main_blueprint.home') }}" class="btn btn-secondary">Limpiar Filtro</a>
             </form>
+        </div>
+        <div class="flex-fill">
+            <img src="data:image/png;base64,{{ img4 }}" class="img-rectangulo" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
+            
         </div>
     </div>
     
