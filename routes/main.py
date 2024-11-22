@@ -5,6 +5,7 @@ from datetime import timedelta
 from decimal import Decimal
 from models.empleados import Empleado
 from models.empleados import Rol
+from models.tareas import Tarea
 from database import db
 from sqlalchemy import text
 import requests
@@ -30,91 +31,149 @@ def home():
         flash("Debes iniciar sesión")
         return redirect(url_for("main_blueprint.login"))  
     
-    if session["rol"] == "Administrador":
-        c_fecha_inicio = request.args.get("c_fecha_inicio", "1800-01")
-        c_fecha_fin = request.args.get("c_fecha_fin", "2100-12")
-        e_fecha_inicio = request.args.get("e_fecha_inicio", "1800-01")
-        e_fecha_fin = request.args.get("e_fecha_fin", "2100-12")
+    c_fecha_inicio = request.args.get("c_fecha_inicio", "1800-01")
+    c_fecha_fin = request.args.get("c_fecha_fin", "2100-12")
+    e_fecha_inicio = request.args.get("e_fecha_inicio", "1800-01")
+    e_fecha_fin = request.args.get("e_fecha_fin", "2100-12")
 
-        if(c_fecha_inicio == ''):
-            c_fecha_inicio = "1800-01"
-        if(c_fecha_fin == ''):
-            c_fecha_fin = "2100-12"
-        if(e_fecha_inicio == ''):
-            e_fecha_inicio = "1800-01"
-        if(e_fecha_fin == ''):
-            e_fecha_fin = "2100-12"
+    if(c_fecha_inicio == ''):
+        c_fecha_inicio = "1800-01"
+    if(c_fecha_fin == ''):
+        c_fecha_fin = "2100-12"
+    if(e_fecha_inicio == ''):
+        e_fecha_inicio = "1800-01"
+    if(e_fecha_fin == ''):
+        e_fecha_fin = "2100-12"
 
-        c_fecha_inicio += "-01"
-        c_fecha_fin = obtener_ultimo_dia_mes(c_fecha_fin)
-        e_fecha_inicio += "-01"
-        e_fecha_fin = obtener_ultimo_dia_mes(e_fecha_fin)
+    c_fecha_inicio += "-01"
+    c_fecha_fin = obtener_ultimo_dia_mes(c_fecha_fin)
+    e_fecha_inicio += "-01"
+    e_fecha_fin = obtener_ultimo_dia_mes(e_fecha_fin)
+    
+    compras_totales = obtener_compras_totales_por_mes()
+    entregas_totales = obtener_entregas_totales_por_mes()
+    #obtencion de graficos de proveedores de maquinas
+    ventas_por_proveedor = obtener_ventas_totales_por_proveedor()
+    nombresProveedorPastel = []
+    totalesProveedoPastel = []
+    for row in ventas_por_proveedor:
+        nombresProveedorPastel.append(row.proveedor)
+        totalesProveedoPastel.append(row.total)
         
-        compras_totales = obtener_compras_totales_por_mes()
-        entregas_totales = obtener_entregas_totales_por_mes()
-        #obtencion de graficos de proveedores de maquinas
-        ventas_por_proveedor = obtener_ventas_totales_por_proveedor()
-        nombresProveedorPastel = []
-        totalesProveedoPastel = []
-        for row in ventas_por_proveedor:
-            nombresProveedorPastel.append(row.proveedor)
-            totalesProveedoPastel.append(row.total)
-            
+    
+    #obtencion de graficos de proveedores de productos
+    ventas_por_proveedor_producto = obtener_ventas_totales_por_proveedor_producto()
+    nombresProveedorPastelProducto = []
+    totalesProveedoPastelProducto = []
+    for row in ventas_por_proveedor_producto:
+        nombresProveedorPastelProducto.append(row.proveedor)
+        totalesProveedoPastelProducto.append(row.total)
         
-        #obtencion de graficos de proveedores de productos
-        ventas_por_proveedor_producto = obtener_ventas_totales_por_proveedor_producto()
-        nombresProveedorPastelProducto = []
-        totalesProveedoPastelProducto = []
-        for row in ventas_por_proveedor_producto:
-            nombresProveedorPastelProducto.append(row.proveedor)
-            totalesProveedoPastelProducto.append(row.total)
-            
-        #obtencion de                                                                                                                 
-        compras_filtradas = filtrar_por_fechas(compras_totales, c_fecha_inicio, c_fecha_fin)
-        entregas_filtradas = filtrar_por_fechas(entregas_totales, e_fecha_inicio, e_fecha_fin)
-        
-        meses_compras = [fila[0] for fila in compras_filtradas] 
-        totales_compras = [fila[1] for fila in compras_filtradas] 
-        img1 = BytesIO()
-        crear_grafico(meses_compras, totales_compras, img1, "Ganancias mensuales de ventas de productos")  
-        img1.seek(0) 
+    #obtencion de                                                                                                                 
+    compras_filtradas = filtrar_por_fechas(compras_totales, c_fecha_inicio, c_fecha_fin)
+    entregas_filtradas = filtrar_por_fechas(entregas_totales, e_fecha_inicio, e_fecha_fin)
+    
+    meses_compras = [fila[0] for fila in compras_filtradas] 
+    totales_compras = [fila[1] for fila in compras_filtradas] 
+    img1 = BytesIO()
+    crear_grafico(meses_compras, totales_compras, img1, "Ganancias mensuales de ventas de productos")  
+    img1.seek(0) 
 
-        meses_entregas = [fila[0] for fila in entregas_filtradas] 
-        totales_entregas = [fila[1] for fila in entregas_filtradas] 
-        img2 = BytesIO()
-        crear_grafico(meses_entregas, totales_entregas, img2, "Dinero gastado en suministros mensualmente")  
-        img2.seek(0) 
-        
-        #obtencion de grafico pastel de proveedores
-        img3 = BytesIO()
-        grafico_pastel(nombresProveedorPastel, totalesProveedoPastel, img3, "Porcentaje de proveedores mas solicitados para maquinas")  
-        img3.seek(0) 
-        
-        #obtencion de grafico pastel de proveedores y productos
-        img5 = BytesIO()
-        grafico_pastel(nombresProveedorPastelProducto, totalesProveedoPastelProducto, img5, "Porcentaje de proveedores mas solicitados para productos")
-        img5.seek(0)
+    meses_entregas = [fila[0] for fila in entregas_filtradas] 
+    totales_entregas = [fila[1] for fila in entregas_filtradas] 
+    img2 = BytesIO()
+    crear_grafico(meses_entregas, totales_entregas, img2, "Dinero gastado en suministros mensualmente")  
+    img2.seek(0) 
+    
+    #obtencion de grafico pastel de proveedores
+    img3 = BytesIO()
+    grafico_pastel(nombresProveedorPastel, totalesProveedoPastel, img3, "Porcentaje de proveedores mas solicitados para maquinas")  
+    img3.seek(0) 
+    
+    #obtencion de grafico pastel de proveedores y productos
+    img5 = BytesIO()
+    grafico_pastel(nombresProveedorPastelProducto, totalesProveedoPastelProducto, img5, "Porcentaje de proveedores mas solicitados para productos")
+    img5.seek(0)
 
-        resultados = obtener_suma_venta_productos()
-        ventas_por_producto, meses = procesar_datos_productos(resultados)
+    resultados = obtener_suma_venta_productos()
+    ventas_por_producto, meses = procesar_datos_productos(resultados)
 
-        # Seleccionar los tres productos más vendidos
-        productos_top = sorted(ventas_por_producto.keys(), 
-                            key=lambda p: sum(ventas_por_producto[p]), 
-                            reverse=True)[:3]
-        ventas_top = [ventas_por_producto[producto] for producto in productos_top]
+    # Seleccionar los tres productos más vendidos
+    productos_top = sorted(ventas_por_producto.keys(), 
+                           key=lambda p: sum(ventas_por_producto[p]), 
+                           reverse=True)[:3]
+    ventas_top = [ventas_por_producto[producto] for producto in productos_top]
 
-        # Crear el gráfico
-        img4 = crear_stackplot_base64(*ventas_top, meses=meses, labels=productos_top)
-        
-        v_rol = "Eres un " + session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
-        img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
-        img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
-        img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
-        img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
-        return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4,img5=img5, nombre=session.get('usuario'))
-    else:
-        return redirect("tareasCom")
+    # Crear el gráfico
+    img4 = crear_stackplot_base64(*ventas_top, meses=meses, labels=productos_top)
+
+# Gráfico de tareas
+    tareas_por_empleado = db.session.query(
+        Tarea.idempleado,
+        db.func.count(Tarea.idtarea).label('cantidad_tareas')
+    ).group_by(Tarea.idempleado).all()
+
+    empleados_dict = {empleado.idempleado: empleado.nombre for empleado in Empleado.query.all()}
+
+    empleados = [empleados_dict[tarea.idempleado] for tarea in tareas_por_empleado]
+    cantidades = [tarea.cantidad_tareas for tarea in tareas_por_empleado]
+
+    # Generar el gráfico de pastel
+    img_tareas = BytesIO()
+    plt.figure(figsize=(8, 6))
+    plt.pie(cantidades, labels=empleados, autopct='%1.1f%%', startangle=140)
+    plt.axis('equal')  # Para que el gráfico sea un círculo
+    plt.savefig(img_tareas, format='png')
+    img_tareas.seek(0)
+    img_tareas_base64 = base64.b64encode(img_tareas.getvalue()).decode('utf-8')
+    plt.close()
+
+    # Gráfico de tareas completadas
+    # Obtener todos los empleados
+    todos_empleados = {empleado.idempleado: empleado.nombre for empleado in Empleado.query.all()}
+
+    # Obtener el conteo de tareas completadas
+    tareas_completadas_por_empleado = db.session.query(
+        Tarea.idempleado,
+        db.func.count(Tarea.idtarea).label('cantidad_completadas')
+    ).filter(Tarea.estado == True).group_by(Tarea.idempleado).all()
+
+    # Crear un diccionario para contar las tareas completadas
+    tareas_completadas_dict = {tarea.idempleado: tarea.cantidad_completadas for tarea in tareas_completadas_por_empleado}
+
+    # Crear listas para empleados y cantidades
+    empleados = []
+    cantidades_completadas = []
+
+    for empleado_id, nombre in todos_empleados.items():
+        empleados.append(nombre)
+        # Si el empleado no tiene tareas completadas, asignar 0
+        cantidad = tareas_completadas_dict.get(empleado_id, 0)
+        cantidades_completadas.append(cantidad)
+
+    # Generar el gráfico de barras
+    img_tareas_completadas = BytesIO()
+    plt.figure(figsize=(10, 6))
+    plt.bar(empleados, cantidades_completadas, color='skyblue')
+    plt.xlabel('Empleados')
+    plt.ylabel('Cantidad de Tareas Completadas')
+    plt.title('Tareas Completadas por Empleado')
+    plt.xticks(rotation=45)
+    plt.tight_layout()  # Ajusta el gráfico para que no se corten las etiquetas
+    plt.savefig(img_tareas_completadas, format='png')
+    img_tareas_completadas.seek(0)
+    img_tareas_completadas_base64 = base64.b64encode(img_tareas_completadas.getvalue()).decode('utf-8')
+    plt.close()
+
+
+    v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
+    img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
+    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
+    img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
+    img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
+
+    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4, img5=img5, img_tareas=img_tareas_base64, img_tareas_completadas=img_tareas_completadas_base64, nombre=session.get('usuario'))
+
 
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
 def login():
