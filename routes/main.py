@@ -30,89 +30,91 @@ def home():
         flash("Debes iniciar sesión")
         return redirect(url_for("main_blueprint.login"))  
     
-    c_fecha_inicio = request.args.get("c_fecha_inicio", "1800-01")
-    c_fecha_fin = request.args.get("c_fecha_fin", "2100-12")
-    e_fecha_inicio = request.args.get("e_fecha_inicio", "1800-01")
-    e_fecha_fin = request.args.get("e_fecha_fin", "2100-12")
+    if session["rol"] == "Administrador":
+        c_fecha_inicio = request.args.get("c_fecha_inicio", "1800-01")
+        c_fecha_fin = request.args.get("c_fecha_fin", "2100-12")
+        e_fecha_inicio = request.args.get("e_fecha_inicio", "1800-01")
+        e_fecha_fin = request.args.get("e_fecha_fin", "2100-12")
 
-    if(c_fecha_inicio == ''):
-        c_fecha_inicio = "1800-01"
-    if(c_fecha_fin == ''):
-        c_fecha_fin = "2100-12"
-    if(e_fecha_inicio == ''):
-        e_fecha_inicio = "1800-01"
-    if(e_fecha_fin == ''):
-        e_fecha_fin = "2100-12"
+        if(c_fecha_inicio == ''):
+            c_fecha_inicio = "1800-01"
+        if(c_fecha_fin == ''):
+            c_fecha_fin = "2100-12"
+        if(e_fecha_inicio == ''):
+            e_fecha_inicio = "1800-01"
+        if(e_fecha_fin == ''):
+            e_fecha_fin = "2100-12"
 
-    c_fecha_inicio += "-01"
-    c_fecha_fin = obtener_ultimo_dia_mes(c_fecha_fin)
-    e_fecha_inicio += "-01"
-    e_fecha_fin = obtener_ultimo_dia_mes(e_fecha_fin)
-    
-    compras_totales = obtener_compras_totales_por_mes()
-    entregas_totales = obtener_entregas_totales_por_mes()
-    #obtencion de graficos de proveedores de maquinas
-    ventas_por_proveedor = obtener_ventas_totales_por_proveedor()
-    nombresProveedorPastel = []
-    totalesProveedoPastel = []
-    for row in ventas_por_proveedor:
-        nombresProveedorPastel.append(row.proveedor)
-        totalesProveedoPastel.append(row.total)
+        c_fecha_inicio += "-01"
+        c_fecha_fin = obtener_ultimo_dia_mes(c_fecha_fin)
+        e_fecha_inicio += "-01"
+        e_fecha_fin = obtener_ultimo_dia_mes(e_fecha_fin)
         
-    
-    #obtencion de graficos de proveedores de productos
-    ventas_por_proveedor_producto = obtener_ventas_totales_por_proveedor_producto()
-    nombresProveedorPastelProducto = []
-    totalesProveedoPastelProducto = []
-    for row in ventas_por_proveedor_producto:
-        nombresProveedorPastelProducto.append(row.proveedor)
-        totalesProveedoPastelProducto.append(row.total)
+        compras_totales = obtener_compras_totales_por_mes()
+        entregas_totales = obtener_entregas_totales_por_mes()
+        #obtencion de graficos de proveedores de maquinas
+        ventas_por_proveedor = obtener_ventas_totales_por_proveedor()
+        nombresProveedorPastel = []
+        totalesProveedoPastel = []
+        for row in ventas_por_proveedor:
+            nombresProveedorPastel.append(row.proveedor)
+            totalesProveedoPastel.append(row.total)
+            
         
-    #obtencion de                                                                                                                 
-    compras_filtradas = filtrar_por_fechas(compras_totales, c_fecha_inicio, c_fecha_fin)
-    entregas_filtradas = filtrar_por_fechas(entregas_totales, e_fecha_inicio, e_fecha_fin)
-    
-    meses_compras = [fila[0] for fila in compras_filtradas] 
-    totales_compras = [fila[1] for fila in compras_filtradas] 
-    img1 = BytesIO()
-    crear_grafico(meses_compras, totales_compras, img1, "Ganancias mensuales de ventas de productos")  
-    img1.seek(0) 
+        #obtencion de graficos de proveedores de productos
+        ventas_por_proveedor_producto = obtener_ventas_totales_por_proveedor_producto()
+        nombresProveedorPastelProducto = []
+        totalesProveedoPastelProducto = []
+        for row in ventas_por_proveedor_producto:
+            nombresProveedorPastelProducto.append(row.proveedor)
+            totalesProveedoPastelProducto.append(row.total)
+            
+        #obtencion de                                                                                                                 
+        compras_filtradas = filtrar_por_fechas(compras_totales, c_fecha_inicio, c_fecha_fin)
+        entregas_filtradas = filtrar_por_fechas(entregas_totales, e_fecha_inicio, e_fecha_fin)
+        
+        meses_compras = [fila[0] for fila in compras_filtradas] 
+        totales_compras = [fila[1] for fila in compras_filtradas] 
+        img1 = BytesIO()
+        crear_grafico(meses_compras, totales_compras, img1, "Ganancias mensuales de ventas de productos")  
+        img1.seek(0) 
 
-    meses_entregas = [fila[0] for fila in entregas_filtradas] 
-    totales_entregas = [fila[1] for fila in entregas_filtradas] 
-    img2 = BytesIO()
-    crear_grafico(meses_entregas, totales_entregas, img2, "Dinero gastado en suministros mensualmente")  
-    img2.seek(0) 
-    
-    #obtencion de grafico pastel de proveedores
-    img3 = BytesIO()
-    grafico_pastel(nombresProveedorPastel, totalesProveedoPastel, img3, "Porcentaje de proveedores mas solicitados para maquinas")  
-    img3.seek(0) 
-    
-    #obtencion de grafico pastel de proveedores y productos
-    img5 = BytesIO()
-    grafico_pastel(nombresProveedorPastelProducto, totalesProveedoPastelProducto, img5, "Porcentaje de proveedores mas solicitados para productos")
-    img5.seek(0)
+        meses_entregas = [fila[0] for fila in entregas_filtradas] 
+        totales_entregas = [fila[1] for fila in entregas_filtradas] 
+        img2 = BytesIO()
+        crear_grafico(meses_entregas, totales_entregas, img2, "Dinero gastado en suministros mensualmente")  
+        img2.seek(0) 
+        
+        #obtencion de grafico pastel de proveedores
+        img3 = BytesIO()
+        grafico_pastel(nombresProveedorPastel, totalesProveedoPastel, img3, "Porcentaje de proveedores mas solicitados para maquinas")  
+        img3.seek(0) 
+        
+        #obtencion de grafico pastel de proveedores y productos
+        img5 = BytesIO()
+        grafico_pastel(nombresProveedorPastelProducto, totalesProveedoPastelProducto, img5, "Porcentaje de proveedores mas solicitados para productos")
+        img5.seek(0)
 
-    resultados = obtener_suma_venta_productos()
-    ventas_por_producto, meses = procesar_datos_productos(resultados)
+        resultados = obtener_suma_venta_productos()
+        ventas_por_producto, meses = procesar_datos_productos(resultados)
 
-    # Seleccionar los tres productos más vendidos
-    productos_top = sorted(ventas_por_producto.keys(), 
-                           key=lambda p: sum(ventas_por_producto[p]), 
-                           reverse=True)[:3]
-    ventas_top = [ventas_por_producto[producto] for producto in productos_top]
+        # Seleccionar los tres productos más vendidos
+        productos_top = sorted(ventas_por_producto.keys(), 
+                            key=lambda p: sum(ventas_por_producto[p]), 
+                            reverse=True)[:3]
+        ventas_top = [ventas_por_producto[producto] for producto in productos_top]
 
-    # Crear el gráfico
-    img4 = crear_stackplot_base64(*ventas_top, meses=meses, labels=productos_top)
-    
-    v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
-    img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
-    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
-    img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
-    img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
-    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4,img5=img5, nombre=session.get('usuario'))
-
+        # Crear el gráfico
+        img4 = crear_stackplot_base64(*ventas_top, meses=meses, labels=productos_top)
+        
+        v_rol = "Eres un " + session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
+        img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
+        img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
+        img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
+        img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
+        return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4,img5=img5, nombre=session.get('usuario'))
+    else:
+        return redirect("tareasCom")
 
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
 def login():
@@ -182,7 +184,10 @@ def verificar():
             rol = Rol.query.get(found_user.idrol)
             session["rol"] = rol.descripcion
             flash("Inicio de sesión correcto" )
-            return redirect("/")
+            if session["rol"] == "Administrador":
+                return redirect("/")
+            else:
+                return redirect("tareasCom")
         else:
             flash("Codigo incorrecto")
         return redirect("/login") 

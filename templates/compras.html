@@ -10,8 +10,71 @@
 {% endif %}
 {% endwith %}
 
-<br><br>
+<style>
+  .cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales */
+    gap: 0px; /* Espacio entre las tarjetas */
+    margin: 0;
+    margin-top: 50px;
+    width: 60%;
+  }
+
+  .container {
+    position: relative;
+    width: 250px;
+    height: 80px;
+    border: 1px black solid;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    background-color: white;
+    padding: 30px 10px 10px 10px;
+    box-sizing: border-box;
+  }
+
+  .red-box {
+    position: absolute;
+    top: -20px;
+    left: 10px;
+    width: 120px;
+    height: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border: 2px black solid;
+  }
+
+  /* Media query para pantallas pequeñas */
+  @media (max-width: 768px) {
+    .cards-container {
+      grid-template-columns: 1fr; /* 1 columna en pantallas pequeñas */
+    }
+    .container{
+      margin-bottom: 30px;
+    }
+  }
+</style>
+
+<h3>Gestion de compras</h3>
+
 <a class="btn btn-success mt-2" href="/compras/agregar">Registrar compra</a>
+
+<div class="cards-container">
+  {% if rol == "Administrador" %}
+  <div class="container">
+      <div class="red-box" style="background-color: red;"></div>
+      <p>Total de ventas: {{ total_compras }} bs.</p>
+  </div>
+  {% endif %}
+  
+  <div class="container">
+      <div class="red-box" style="background-color: #ffca47;"></div>
+      <p>Tus ventas: {{ total_compras_individual }} bs.</p>
+  </div>
+  
+  <div class="container">
+      <div class="red-box" style="background-color: #00da77;"></div>
+      <p>Mas vendido: {{ producto_mas_comprado.nombre }} ({{producto_mas_comprado.total_compras}} u.)</p>
+  </div>
+</div>
+
 
 
 <div class="custom-grid-container">

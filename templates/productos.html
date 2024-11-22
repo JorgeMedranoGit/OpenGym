@@ -4,7 +4,7 @@
 {% with messages = get_flashed_messages() %}
     {% if messages %}
         {% for msg in messages %}
-            <p>{{msg}}</p>
+            <p class="alert alert-info">{{msg}}</p>
         {% endfor%}
     {% endif %}
 {% endwith %}
@@ -12,8 +12,8 @@
 <form action="/productos" method="post" class="form mt-3">
     <input type="hidden" name="producto_id" class="form-control mt-2" value="{{ producto._id if producto else '' }}">
     <input type="text" name="nombreProduc" class="form-control mt-2" placeholder="Nombre del Producto" value="{{ producto.nombre if producto else '' }}" required>
-    <input type="text" name="precioProduc" class="form-control mt-2" placeholder="Precio del Producto" value="{{ producto.preciov if producto else '' }}" required>
-    <input type="number" name="stockProduc"  class="form-control mt-2" placeholder="Stock del Producto" value="{{ producto.stock if producto else '' }}" required>
+    <input type="hidden" name="precioProduc" class="form-control mt-2" placeholder="Precio del Producto" value="{{ producto.preciov if producto else 0 }}" required>
+    <input type="hidden" name="stockProduc"  class="form-control mt-2" placeholder="Stock del Producto" value="{{ producto.stock if producto else 0 }}" required>
     <input type="submit" class="btn btn-success mt-2" value="{{ 'Actualizar' if producto else 'Añadir' }}"/>
 </form>
 
