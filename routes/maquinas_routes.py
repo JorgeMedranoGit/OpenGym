@@ -19,7 +19,7 @@ def maquinas():
         return redirect("/login")
     if session['rol'] != "Administrador":
         return redirect("/tareasCom")
-    return render_template("verMaquinas.html", maquinas=Maquinas.query.all(), nombres=NombreMaquinas.query.all(), proveedores=Proveedores.query.all())
+    return render_template("verMaquinas.html", maquinas=Maquinas.query.all(), nombres=NombreMaquinas.query.all(), proveedores=Proveedores.query.all(), rol = session["rol"])
 @maquinas_blueprint.route("/verComprasMaquinas", methods=["GET"])
 def ver_compras_maquinas():
     if "usuario" not in session:
@@ -62,7 +62,7 @@ def ver_compras_maquinas():
                 'iddetalle': row.iddetalle
             })
         # Renderizar la plantilla con los resultados
-        return render_template("verComprasMaquinas.html", compras=compras_dict, detalleCompras=detalles_dict)
+        return render_template("verComprasMaquinas.html", compras=compras_dict, detalleCompras=detalles_dict, rol = session["rol"])
 
     except Exception as e:
         flash(f"Error al obtener las compras: {str(e)}")
@@ -93,7 +93,7 @@ def ver_detalles_compra(iddetalle):
                 'estado': row.estado
             })
         # Renderizar la plantilla con los resultados
-        return render_template("verDetalleCompra.html", detalle=maquinas_dict, maquinas=maquinas_dict)
+        return render_template("verDetalleCompra.html", detalle=maquinas_dict, maquinas=maquinas_dict, rol = session["rol"])
     except Exception as e:
         flash(f"Error al obtener las maquinas: {str(e)}")
         return redirect(url_for('maquinas_blueprint.maquinas'))
@@ -174,4 +174,4 @@ def maquinasCrud():
             return jsonify({"error": str(e)}), 500
 
     maquinas = Maquinas.query.all()
-    return render_template("comprarMaquinas.html", maquinas=maquinas, nombres=NombreMaquinas.query.all(), proveedores=Proveedores.query.filter(Proveedores.habilitado == True).all())
+    return render_template("comprarMaquinas.html", maquinas=maquinas, nombres=NombreMaquinas.query.all(), proveedores=Proveedores.query.filter(Proveedores.habilitado == True).all(), rol = session["rol"])

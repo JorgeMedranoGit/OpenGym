@@ -22,47 +22,53 @@ import base64
 compras_blueprint = Blueprint('compras_blueprint', __name__)
 
 
-# Ruta para listar las compras
-from flask import render_template, flash, redirect, session
-from sqlalchemy import text
 
 @compras_blueprint.route("/compras", methods=['GET', 'POST'])
 def compraCrud():
-    if session["rol"] == "Administrador" or session["rol"] == "Recepcionista":
-        # Validación de permisos
-        if "email" not in session:
-            flash("Debes iniciar sesión")
-            return redirect("/login")
+    if "email" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
 
-        # Obtención de ganancia por cada compra
+    compras = []
+    
+    if session["rol"] == "Administrador":
+        # Si el usuario es Administrador, obtenemos todas las compras
         compras = obtenerCompras()
         for compra in compras:
             id = compra['idcompra']
             total = db.session.execute(text('SELECT calcular_total_compra(:idC)'), {'idC': id}).scalar()
-            total_compras = db.session.execute(text('SELECT calcular_total_compras_admin()')).scalar()
-            total_compras_individual = db.session.execute(text('SELECT calcular_total_compras_individual(:idemp)'), {'idemp': session["empleado_id"]}).scalar()
+            compra['total'] = total if total is not None else 0
+    elif session["rol"] == "Recepcionista":
+        compras = obtenerCompras_emp()
+        for compra in compras:
+            id = compra['idcompra']
+            total = db.session.execute(text('SELECT calcular_total_compra(:idC)'), {'idC': id}).scalar()
             compra['total'] = total if total is not None else 0
 
-        # Obtener el producto con más compras
-        producto_mas_comprado = db.session.execute(text('''
-            SELECT p.idp, p.nombre, SUM(c.cantidad) AS total_compras
-            FROM detallecompras c
-            JOIN productos p ON c.idproducto = p.idp
-            GROUP BY p.idp, p.nombre
-            ORDER BY total_compras DESC
-            LIMIT 1;
-        ''')).fetchone()
+    
 
-        # Envío de la lista al HTML de compras
-        return render_template("compras.html", 
-                               compras=compras, 
-                               total_compras=total_compras, 
-                               total_compras_individual=total_compras_individual, 
-                               rol=session["rol"],
-                               producto_mas_comprado=producto_mas_comprado)
-    else:
-        flash("No tienes permisos suficientes")
-        return redirect("tareasCom")
+    # Obtención de totales para el Administrador
+    total_compras = db.session.execute(text('SELECT calcular_total_compras_admin()')).scalar()
+    total_compras_individual = db.session.execute(text('SELECT calcular_total_compras_individual(:idemp)'), {'idemp': session["empleado_id"]}).scalar()
+    
+    # Obtener el producto con más compras
+    producto_mas_comprado = db.session.execute(text('''
+        SELECT p.idp, p.nombre, SUM(c.cantidad) AS total_compras
+        FROM detallecompras c
+        JOIN productos p ON c.idproducto = p.idp
+        GROUP BY p.idp, p.nombre
+        ORDER BY total_compras DESC
+        LIMIT 1;
+    ''')).fetchone()
+
+    # Envío de la lista al HTML de compras
+    return render_template("compras.html", 
+                           compras=compras, 
+                           total_compras=total_compras, 
+                           total_compras_individual=total_compras_individual, 
+                           rol=session["rol"],
+                           producto_mas_comprado=producto_mas_comprado,
+                           )
 
 
 # Ruta para agregar una compra
@@ -77,7 +83,7 @@ def formCompra():
             empleados = obtener_todos_los_empleados()
             clientes = obtener_todos_los_clientes()
             productos = obtenerTodoslosProductos()
-            return render_template("comprasForm.html", clientes=clientes, empleados=empleados, productos=productos)
+            return render_template("comprasForm.html", clientes=clientes, empleados=empleados, productos=productos, rol = session["rol"])
 
     if request.method == 'POST':
         try:
@@ -143,6 +149,23 @@ def formCompra():
 
 def obtenerCompras():
     compras = Compras.query.all()
+    resultado = []
+    
+    for compra in compras:
+        fecha_formateada = compra.fechacompra.strftime("%d/%m/%Y")
+        hora_formateada = compra.fechacompra.strftime("%H:%M:%S")
+        resultado.append({
+            'idcompra': compra.idcompra,
+            'nombreempleado': compra.empleado.nombre,
+            'nombrecliente': compra.cliente.nombre,
+            'fechacompra': fecha_formateada,
+            'horacompra': hora_formateada,
+            'metodopago': compra.metodopago
+        })
+    return resultado
+
+def obtenerCompras_emp():
+    compras = Compras.query.filter_by(idempleado= session["empleado_id"])
     resultado = []
     
     for compra in compras:

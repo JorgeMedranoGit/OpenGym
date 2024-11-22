@@ -33,7 +33,7 @@ def empleadosCrud():
         return redirect('/empleados')
 
     empleados = obtener_todos_los_empleados()
-    return render_template('empleados.html', empleados=empleados)
+    return render_template('empleados.html', empleados=empleados, rol = session["rol"])
 
 
 @empleados_blueprint.route('/empleados/editar/<int:empleado_id>', methods=['GET'])
@@ -42,7 +42,7 @@ def editar_empleado(empleado_id):
         flash("Debes iniciar sesión")
         return redirect("/login")
     empleado = obtener_empleado_por_id(empleado_id)
-    return render_template('empleados.html', empleado=empleado, empleados=obtener_todos_los_empleados())
+    return render_template('empleados.html', empleado=empleado, empleados=obtener_todos_los_empleados(), rol = session["rol"])
 
 
 @empleados_blueprint.route('/empleados/eliminar/<int:empleado_id>', methods=['POST'])
@@ -101,7 +101,7 @@ def asignar_rol(empleado_id):
         return redirect('/empleados')
 
     roles = obtener_todos_los_roles()  # Aquí obtienes todos los roles
-    return render_template('asignar_rol.html', empleado=empleado, roles=roles)
+    return render_template('asignar_rol.html', empleado=empleado, roles=roles, rol = session["rol"])
 
 
 @empleados_blueprint.route('/empleados/actualizar_rol/<int:empleado_id>', methods=['GET', 'POST'])
@@ -119,7 +119,7 @@ def actualizar_rol(empleado_id):
         return redirect('/empleados')
 
     roles = obtener_todos_los_roles()
-    return render_template('actualizar_rol.html', empleado=empleado, roles=roles)
+    return render_template('actualizar_rol.html', empleado=empleado, roles=roles, rol = session["rol"])
 
 
 

@@ -30,7 +30,8 @@ def home():
     if "email" not in session:
         flash("Debes iniciar sesión")
         return redirect(url_for("main_blueprint.login"))  
-    
+    if session["rol"] != "Administrador":
+        return redirect("/tareasCom")
     c_fecha_inicio = request.args.get("c_fecha_inicio", "1800-01")
     c_fecha_fin = request.args.get("c_fecha_fin", "2100-12")
     e_fecha_inicio = request.args.get("e_fecha_inicio", "1800-01")

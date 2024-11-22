@@ -79,7 +79,7 @@ def sessionCrud():
 
         return redirect(url_for("session_blueprint.sessionCrud"))
 
-    return render_template("session.html")
+    return render_template("session.html", rol = session["rol"])
 
 @session_blueprint.route("/clientes/<int:id>", methods=["GET", "POST"])
 def ver_cliente(id):
@@ -105,4 +105,4 @@ def ver_cliente(id):
     # Obtener sesiones relacionadas con el cliente
     sesiones = Sesion.query.filter_by(idcliente=id).all()
 
-    return render_template("ver_cliente.html", cliente=cliente, sesiones=sesiones)
+    return render_template("ver_cliente.html", cliente=cliente, sesiones=sesiones, rol = session["rol"])

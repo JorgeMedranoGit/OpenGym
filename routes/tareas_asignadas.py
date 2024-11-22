@@ -16,8 +16,9 @@ def ver_tareas():
 
     # Recuperar las tareas del empleado autenticado
     tareas = Tarea.query.filter_by(idempleado=empleado_id).all()
-    
-    return render_template('tareas_asignadas/tareas.html', tareas=tareas)
+    rol = session['rol']
+    print(rol)
+    return render_template('tareas_asignadas/tareas.html', tareas=tareas, rol = rol)
 
 
 # Ruta para marcar una tarea como completada

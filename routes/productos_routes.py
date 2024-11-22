@@ -36,7 +36,7 @@ def productosCrud():
             return redirect("/productos")  
 
         productos = Productos.query.all()
-        return render_template("productos.html", productos=productos)
+        return render_template("productos.html", productos=productos, rol = session["rol"])
     else:
         flash("No tienes permisos suficientes")
         return redirect("tareasCom")
@@ -48,7 +48,7 @@ def editarProducto(id):
         return redirect("/login")
     if session["rol"] == "Administrador":
         producto = Productos.query.get(id) 
-        return render_template("productos.html", producto=producto, productos=Productos.query.all())
+        return render_template("productos.html", producto=producto, productos=Productos.query.all(), rol = session["rol"])
     else:
         flash("No tienes permisos suficientes")
         return redirect("tareasCom")

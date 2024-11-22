@@ -60,13 +60,22 @@
   {% if rol == "Administrador" %}
   <div class="container">
       <div class="red-box" style="background-color: red;"></div>
+      {% if total_compras %}
       <p>Total de ventas: {{ total_compras }} bs.</p>
+      {% else %}
+      <p>Aún no hay ventas registradas.</p>
+      {% endif %}
   </div>
   {% endif %}
   
   <div class="container">
       <div class="red-box" style="background-color: #ffca47;"></div>
+      {% if total_compras_individual %}
       <p>Tus ventas: {{ total_compras_individual }} bs.</p>
+      {% else %}
+      <p>No registraste compras</p>
+      {% endif %}
+      
   </div>
   
   <div class="container">
@@ -75,7 +84,12 @@
   </div>
 </div>
 
-
+{% if rol == "Recepcionista" %}
+<h3>Reporte de tus compras</h3>
+{% endif %}
+{% if rol == "Administrador" %}
+<h3>Reporte de todas las compras</h3>
+{% endif %}
 
 <div class="custom-grid-container">
   {% for compra in compras %}
@@ -92,6 +106,9 @@
       <div class="custom-card-details" id="details-{{ compra.idcompra }}" style="display: none;"></div>
   </div>
   {% endfor %}
+  {% if not compras %}
+  <p>Aun no se han registrado compras</p>
+  {% endif%}
 </div>
 
 

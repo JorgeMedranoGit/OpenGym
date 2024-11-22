@@ -49,7 +49,7 @@ def entregaCrud():
             # Manejo cuando fechaestado es None, asignar un valor por defecto si es necesario
                 entrega['fechaestado'] = "Fecha no disponible"
         # Envio de las listas creadas previamente
-        return render_template("entregas.html", entregas=entregas, estados = estados)
+        return render_template("entregas.html", entregas=entregas, estados = estados, rol = session["rol"])
     else:
         flash("No tienes permisos suficiente")
         return redirect("tareasCom")
@@ -67,7 +67,7 @@ def formEntrega():
         if request.method == 'GET':
             proveedores = obtenerTodoslosProveedores()
             productos = obtenerTodoslosProductos()
-            return render_template("entregasForm.html", proveedores=proveedores, productos=productos)
+            return render_template("entregasForm.html", proveedores=proveedores, productos=productos, rol = session["rol"])
 
         # Accion POST
         if request.method == 'POST':

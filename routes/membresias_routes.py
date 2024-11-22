@@ -31,7 +31,7 @@ def membresiasCrud():
         return redirect("/membresias")
 
     membresias = Membresias.query.all()
-    return render_template("membresias.html", membresias=membresias)
+    return render_template("membresias.html", membresias=membresias, rol = session["rol"])
 
 @membresias_blueprint.route("/membresias/editar/<int:id>", methods=["GET"])
 def editarMembresia(id):
@@ -40,7 +40,7 @@ def editarMembresia(id):
         return redirect("/login")
     membresia = Membresias.query.get(id)
     membresias = Membresias.query.filter_by(habilitado=True).all()
-    return render_template("membresias.html", membresia=membresia, membresias=membresias)
+    return render_template("membresias.html", membresia=membresia, membresias=membresias, rol = session["rol"])
 
 @membresias_blueprint.route("/membresias/desactivar/<int:id>", methods=["POST"])
 def desactivarMembresia(id):

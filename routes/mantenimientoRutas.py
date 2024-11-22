@@ -23,7 +23,7 @@ def listar_maquinas():
         Empleado, Empleado.idempleado == MantenimientoMaquina.idempleado
     ).distinct(Maquinas._id).order_by(Maquinas._id).all()
 
-    return render_template('/mantenimiento/mantenimiento.html', maquinas=maquinas, datetime=datetime)
+    return render_template('/mantenimiento/mantenimiento.html', maquinas=maquinas, datetime=datetime, rol = session["rol"])
 
 @mantenimiento_bp.route('/asignar_mantenimiento/<int:id>', methods=['GET', 'POST'])
 def asignar_mantenimiento(id):
@@ -97,7 +97,7 @@ def asignar_mantenimiento(id):
         flash("Mantenimiento asignado exitosamente", "success")
         return redirect(url_for('mantenimiento.listar_maquinas'))
 
-    return render_template('/mantenimiento/crearMaquina.html', maquina=maquina, empleados=empleados)
+    return render_template('/mantenimiento/crearMaquina.html', maquina=maquina, empleados=empleados, rol = session["rol"])
 
 @mantenimiento_bp.route('/finalizar_mantenimiento/<int:id>', methods=['POST'])
 def finalizar_mantenimiento(id):
@@ -125,4 +125,4 @@ def ver_detalles(id):
     mantenimientos = MantenimientoMaquina.query.filter_by(idmaquina=id).all()
     maquina = Maquinas.query.get_or_404(id)
 
-    return render_template('/mantenimiento/detalles.html', mantenimientos=mantenimientos, maquina=maquina)
+    return render_template('/mantenimiento/detalles.html', mantenimientos=mantenimientos, maquina=maquina, rol = session["rol"])

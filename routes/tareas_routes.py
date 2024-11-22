@@ -30,7 +30,7 @@ def tareas_crud():
 
     tareas = obtener_todas_las_tareas()
     empleados = obtener_todos_los_empleados()
-    return render_template('tareas/tareas.html', tareas=tareas, empleados=empleados)
+    return render_template('tareas/tareas.html', tareas=tareas, empleados=empleados, rol = session["rol"])
 
 
 @tareas_blueprint.route('/tareas/editar/<int:tarea_id>', methods=['GET'])
@@ -40,7 +40,7 @@ def editar_tarea(tarea_id):
         return redirect("/login")
     tarea = obtener_tarea_por_id(tarea_id)
     empleados = obtener_todos_los_empleados()
-    return render_template('tareas/editar_tarea.html', tarea=tarea, empleados=empleados)
+    return render_template('tareas/editar_tarea.html', tarea=tarea, empleados=empleados, rol = session["rol"])
 
 
 @tareas_blueprint.route('/tareas/eliminar/<int:tarea_id>', methods=['POST'])
@@ -61,8 +61,7 @@ def ver_comentarios():
     
     # Obtener todas las tareas, cada una con su comentario
     tareas = Tarea.query.all()
-    
-    return render_template('tareas/comentarios.html', tareas=tareas)
+    return render_template('tareas/comentarios.html', tareas=tareas, rol = session["rol"])
 
 
 

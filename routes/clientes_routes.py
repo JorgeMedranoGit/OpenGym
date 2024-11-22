@@ -132,12 +132,12 @@ def clientesCrud():
 
     membresias = Membresias.query.filter_by(habilitado=True).all()
 
-
     return render_template(
         "clientes.html", 
         clientes=clientes, 
         clientes_inactivos=clientes_inactivos, 
-        membresias=membresias
+        membresias=membresias,
+        rol = session["rol"]
     )
 
 @cliente_blueprint.route("/clientes/editar/<int:id>", methods=["GET"])
@@ -171,7 +171,8 @@ def editarCliente(id):
             cliente=cliente,
             clientes=clientes,
             clientes_inactivos=clientes_inactivos,
-            membresias=membresias
+            membresias=membresias,
+            rol = session["rol"]
         )
     else:
         flash("Cliente no encontrado")
