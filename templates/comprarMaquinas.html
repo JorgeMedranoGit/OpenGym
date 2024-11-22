@@ -54,45 +54,71 @@
         }
     }
     function validarFormularioAgregar() {
+        var valido = true;
         const nombreSelect = document.getElementById('nombre');
-        const proveedorSelect = document.getElementById('proveedor');
+        const errorNombre = document.getElementById('errorNombre');
         const idEmpleadoInput = document.getElementById('idEmpleado');
+        const errorIdEmpleado = document.getElementById('errorIdEmpleado');
         const cantidadInput = document.getElementById('cantidad');
+        const errorCantidad = document.getElementById('errorCantidad');
         const precioUnitarioInput = document.getElementById('precioUnitario');
+        const errorPrecioUnitario = document.getElementById('errorPrecioUnitario');
         const tipoMaquinaInput = document.getElementById('tipoMaquina');
-
+        const errorTipoMaquina = document.getElementById('errorTipoMaquina');
+        const proveedorSelect = document.getElementById('proveedor');
+        const errorNuevoProveedorNombre = document.getElementById('errorNuevoProveedorNombre')
+        const errorProveedor = document.getElementById('errorProveedor')
+        const errorCodigoMaquina = document.getElementById('errorCodigoMaquina');
+        // Limpiar mensajes de error
+        errorNombre.textContent = '';
+        errorIdEmpleado.textContent = '';
+        errorCantidad.textContent = '';
+        errorPrecioUnitario.textContent = '';
+        errorProveedor.textContent = "";
+        errorTipoMaquina.textContent = '';
+        errorCodigoMaquina.textContent = '';
         // Obtener el nuevo nombre de máquina si se ha ingresado
         const nuevoNombre = document.getElementById('nuevoNombre').value.trim();
+        const codigoMaquina = document.getElementById('codigoMaquina').value.trim();
+        //Campos del proveedor
         const nuevoProveedorNombre = document.getElementById('nuevoProveedorNombre').value.trim();
         const telefonoProveedor = document.getElementById('telefonoProveedor').value.trim();
         const correoProveedor = document.getElementById('correoProveedor').value.trim();
-
         // Validar campos requeridos
-        if (nombreSelect.value === '0' && nuevoNombre === '') {
-            alert("Por favor, ingrese un nombre de máquina.");
-            return false;
+        if (nombreSelect.value === '0') {
+            if(nuevoNombre === ''){
+                errorNombre.textContent = "Por favor, ingrese un nombre de máquina.";
+                valido = false;
+            }
+            else{
+                if(codigoMaquina == ""){
+                    errorCodigoMaquina.textContent = "Por favor, ingrese un codigo de máquina.";
+                }
+                valido = false;
+            }
         }
         if (proveedorSelect.value === '0' && nuevoProveedorNombre === '') {
-            alert("Por favor, ingrese un nombre de proveedor.");
-            return false;
+            console.log("Por favor, ingrese un nombre de proveedor.")
+            errorProveedor.textContent = "Por favor, ingrese un nombre de proveedor.";
+            valido = false;
         }
         if (idEmpleadoInput.value.trim() === '') {
-            alert("Por favor, ingrese el ID del empleado.");
-            return false;
+            errorIdEmpleado.textContent = "Por favor, ingrese el ID del empleado.";
+            valido = false;
         }
-        if (cantidadInput.value.trim() === '' || isNaN(cantidadInput.value) || parseInt(cantidadInput.value) <= 0) {
-            alert("Por favor, ingrese una cantidad válida.");
-            return false;
+        if (cantidadInput.value.trim() === '' || isNaN(cantidadInput.value) || parseInt(cantidadInput.value ) <= 0) {
+            errorCantidad.textContent = "Por favor, ingrese una cantidad válida.";
+            valido = false;
         }
         if (precioUnitarioInput.value.trim() === '' || isNaN(precioUnitarioInput.value) || parseFloat(precioUnitarioInput.value) <= 0) {
-            alert("Por favor, ingrese un precio unitario válido.");
-            return false;
+            errorPrecioUnitario.textContent = "Por favor, ingrese un precio unitario válido.";
+            valido = false;
         }
         if (tipoMaquinaInput.value.trim() === '') {
-            alert("Por favor, seleccione un tipo de máquina.");
-            return false;
+            errorTipoMaquina.textContent = "Por favor, seleccione un tipo de máquina.";
+            valido = false;
         }
-        return true
+        return valido;
     }
     function añadirProducto() {
         if (validarFormularioAgregar()) {
@@ -106,13 +132,13 @@
             const nuevoNombre = document.getElementById('nuevoNombre').value;
             const nuevoCodigoNombre = document.getElementById('codigoMaquina').value;
             // Obtener los datos del nuevo proveedor si se ha ingresado
-            if(productosSeleccionados.length == 0){
+            if (productosSeleccionados.length == 0) {
                 const proveedorSelect = document.getElementById('proveedor');
                 const nuevoProveedorNombre = document.getElementById('nuevoProveedorNombre').value;
                 const telfProveedor = document.getElementById('telefonoProveedor').value;
                 const correoProveedor = document.getElementById('correoProveedor').value;
                 var textoSeleccionado = "Default";
-                if(proveedorSelect.value == 0){
+                if (proveedorSelect.value == 0) {
                     textoSeleccionado = nuevoProveedorNombre;
                     proveedor = {
                         idProveedor: proveedorSelect.value,
@@ -121,7 +147,7 @@
                         correoProveedor: correoProveedor
                     }
                 }
-                else{
+                else {
                     proveedor = {
                         idProveedor: proveedorSelect.value,
                         nombreProveedor: "Conocido",
@@ -134,7 +160,7 @@
                     textoSeleccionado = proveedorSeleccionado.text;
                 }
                 console.log(textoSeleccionado)
-                
+
             }
             const producto = {
                 idNombre: nombreSelect.value,
@@ -146,13 +172,13 @@
                 tipoMaquina: tipoMaquinaInput.value // Agregar tipo de máquina
             };
             var existingProductIndex
-            if(producto.idNombre != 0){
+            if (producto.idNombre != 0) {
                 // Verificar si el producto ya existe en la lista
                 existingProductIndex = productosSeleccionados.findIndex(p =>
                     p.idNombre === producto.idNombre
                 );
             }
-            else{
+            else {
                 // Verificar si el producto ya existe en la lista
                 existingProductIndex = productosSeleccionados.findIndex(p =>
                     p.nombre === producto.nombre && p.codnom == producto.codnom
@@ -175,8 +201,6 @@
                 // Si no existe, agregar el nuevo producto
                 productosSeleccionados.push(producto);
             }
-
-            alert(`Producto añadido: ${producto.nombre}, Cantidad: ${producto.cantidad}`);
             mostrarProductos();
         }
     }
@@ -188,47 +212,76 @@
         let totalCompra = 0; // Inicializar el total de la compra
 
         productosSeleccionados.forEach((producto, index) => {
-            const li = document.createElement('li');
-            li.textContent = `Nombre: ${producto.nombre}, Proveedor: ${producto.proveedor}, Tipo: ${producto.tipoMaquina}, ID Empleado: ${producto.idEmpleado}, Cantidad: ${producto.cantidad}, Precio Unitario: $${producto.precioUnitario.toFixed(2)}`;
+            const tr = document.createElement('tr');
 
-            // Botones para aumentar y disminuir la cantidad
+            // Crear celdas para cada propiedad del producto
+            const tdNombre = document.createElement('td');
+            tdNombre.textContent = producto.nombre;
+            tr.appendChild(tdNombre);
+
+            const tdTipo = document.createElement('td');
+            tdTipo.textContent = producto.tipoMaquina;
+            tr.appendChild(tdTipo);
+
+            const tdCantidad = document.createElement('td');
+            tdCantidad.textContent = producto.cantidad;
+            tr.appendChild(tdCantidad);
+
+            const tdPrecioUnitario = document.createElement('td');
+            tdPrecioUnitario.textContent = `$${producto.precioUnitario.toFixed(2)}`;
+            tr.appendChild(tdPrecioUnitario);
+
+            const tdAcciones = document.createElement('td');
+
+            // Botón para disminuir la cantidad
             const btnMenos = document.createElement('button');
             btnMenos.textContent = '-';
+            btnMenos.className = 'btn btn-danger btn-sm me-1'; // Clases de Bootstrap para botón
             btnMenos.onclick = () => cambiarCantidad(index, -1);
-            li.appendChild(btnMenos);
+            tdAcciones.appendChild(btnMenos);
 
+            // Botón para aumentar la cantidad
             const btnMas = document.createElement('button');
             btnMas.textContent = '+';
+            btnMas.className = 'btn btn-success btn-sm me-1'; // Clases de Bootstrap para botón
             btnMas.onclick = () => cambiarCantidad(index, 1);
-            li.appendChild(btnMas);
+            tdAcciones.appendChild(btnMas);
 
             // Botón para eliminar el producto
             const btnEliminar = document.createElement('button');
             btnEliminar.textContent = 'Eliminar';
+            btnEliminar.className = 'btn btn-warning btn-sm'; // Clases de Bootstrap para botón
             btnEliminar.onclick = () => eliminarProducto(index);
-            li.appendChild(btnEliminar);
+            tdAcciones.appendChild(btnEliminar);
+
+            tr.appendChild(tdAcciones);
 
             // Calcular el total por producto
             totalCompra += producto.cantidad * producto.precioUnitario;
 
-            listaProductos.appendChild(li);
+            // Añadir la fila a la tabla
+            document.getElementById('listaProductos').appendChild(tr);
         });
 
         // Mostrar el total de la compra
         const totalElement = document.getElementById('totalCompra');
         totalElement.textContent = `Total de la compra: $${totalCompra.toFixed(2)}`;
         // Verificar disponibilidad de uso del proveedor
-        if(productosSeleccionados.length > 0){
+        if (productosSeleccionados.length > 0) {
             const customProveedorFields = document.getElementById('customProveedorFields');
             const proveedorLink = document.getElementById('customProveedorLink')
-            proveedorLink.style.display = 'none';
-            customProveedorFields.style.display = 'none';
+            const divProveedores = document.getElementById('proveedorDiv');
+            divProveedores.style.display = 'none';
+            /*proveedorLink.style.display = 'none';
+            customProveedorFields.style.display = 'none';*/
         }
-        else{
+        else {
             const customProveedorFields = document.getElementById('customProveedorFields');
             const proveedorLink = document.getElementById('customProveedorLink')
-            proveedorLink.style.display = 'block';
-            customProveedorFields.style.display = 'block';
+            const divProveedores = document.getElementById('proveedorDiv');
+            divProveedores.style.display = 'block';
+            /*proveedorLink.style.display = 'block';
+            customProveedorFields.style.display = 'block';*/
         }
     }
 
@@ -283,7 +336,7 @@
             nuevoProveedorNombreInput.setAttribute('required', 'required');
             telefonoProveedorInput.setAttribute('required', 'required');
             correoProveedorInput.setAttribute('required', 'required');
-            resetSelection(); 
+            resetSelection();
         } else {
             customProveedorFields.style.display = 'none';
             link.textContent = '¿No encuentra el proveedor que busca?';
@@ -299,6 +352,60 @@
         document.getElementById('tipoMaquina').value = '';
         document.getElementById('precioUnitario').value = '';
     }
+    function buscarProveedores() {
+        const input = document.getElementById('busquedaProveedor').value.toLowerCase();
+        const resultadosDiv = document.getElementById('resultadosBusqueda');
+        const select = document.getElementById('proveedor');
+        const options = select.options;
+
+        // Limpiar resultados anteriores
+        resultadosDiv.innerHTML = '';
+
+        if (input) {
+            let coincidencias = false;
+
+            for (let i = 1; i < options.length; i++) {
+                const option = options[i];
+                const nombreProveedor = option.text.toLowerCase();
+
+                if (nombreProveedor.includes(input)) {
+                    coincidencias = true;
+
+                    const div = document.createElement('div');
+                    div.textContent = option.text;
+                    div.className = 'result-item p-2'; // Clase para estilo
+                    div.style.cursor = 'pointer';
+                    div.onclick = () => seleccionarProveedor(option.value, option.text);
+                    resultadosDiv.appendChild(div);
+                }
+            }
+
+            // Mostrar el div de resultados si hay coincidencias
+            resultadosDiv.style.display = coincidencias ? 'block' : 'none';
+        } else {
+            resultadosDiv.style.display = 'none'; // Ocultar si no hay texto
+        }
+    }
+
+    function seleccionarProveedor(id, nombre) {
+        const select = document.getElementById('proveedor');
+        select.value = id; // Establecer el valor del select
+        document.getElementById('busquedaProveedor').value = nombre; // Establecer el texto del input
+        document.getElementById('resultadosBusqueda').style.display = 'none'; // Ocultar resultados
+    }
+    function verificarSelectMaquina(){
+        const selectMaquina = document.getElementById('nombre');
+        if(selectMaquina.value !== '0'){
+            const customFields = document.getElementById('customFields');
+            const nuevoNombreInput = document.getElementById('nuevoNombre');
+            const codigoMaquinaInput = document.getElementById('codigoMaquina');
+            const link = document.getElementById('customLink');
+            customFields.style.display = 'none';
+            link.textContent = '¿No encuentra la máquina que busca?';
+            nuevoNombreInput.removeAttribute('required'); // Quitar obligatorio
+            codigoMaquinaInput.removeAttribute('required'); // Quitar obligatorio
+        }
+    }
 </script>
 
 <h1>Maquina</h1>
@@ -311,11 +418,12 @@
         <label for="tipoMaquina" class="form-label">Tipo de Máquina</label>
         <input class="form-control" type="text" id="tipoMaquina" name="tipoMaquina" placeholder="Tipo de Máquina"
             value="{{ maquina.tipo if maquina else '' }}" required />
+        <div class="text-danger" id="errorTipoMaquina"></div>
     </div>
 
     <div class="mb-3">
         <label for="nombre" class="form-label">Nombre de Máquina</label>
-        <select class="form-select" id="nombre" name="idNombreMaquina" required>
+        <select class="form-control form-select" id="nombre" name="idNombreMaquina" onchange="verificarSelectMaquina()" required>
             <option value="0" disabled selected>Seleccione Una Opción</option>
             {% if nombre %}
             <option value="{{ nombre._id }}">{{ nombre.nombre }}</option>
@@ -325,27 +433,33 @@
             {% endfor %}
             {% endif %}
         </select>
-        <a href="#" id="customLink" onclick="toggleCustomFields()">¿No encuentra
-            la máquina que busca?</a>
+        <div class="text-danger" id="errorNombre"></div>
+        <a href="#" id="customLink" onclick="toggleCustomFields()">¿No encuentra la máquina que busca?</a>
         <div id="customFields" style="display:none;">
             <div class="mb-3">
-                <label for="nuevoNombre" class="form-label">Nombre de Máquina
-                    (Nuevo)</label>
+                <label for="nuevoNombre" class="form-label">Nombre de Máquina (Nuevo)</label>
                 <input class="form-control" type="text" id="nuevoNombre" name="nuevoNombre"
                     placeholder="Nombre de Máquina" />
+                <div class="text-danger" id="errorNuevoNombre"></div>
             </div>
             <div class="mb-3">
-                <label for="codigoMaquina" class="form-label">Código de
-                    Máquina</label>
+                <label for="codigoMaquina" class="form-label">Código de Máquina</label>
                 <input class="form-control" type="text" id="codigoMaquina" name="codigoMaquina"
                     placeholder="Código de Máquina" />
+                <div class="text-danger" id="errorCodigoMaquina"></div>
             </div>
         </div>
     </div>
 
     <div class="mb-3">
+        <label for="busquedaProveedor" class="form-label">Buscar Proveedor</label>
+        <input type="text" id="busquedaProveedor" class="form-control" placeholder="Buscar proveedor..."
+            oninput="buscarProveedores()">
+    </div>
+
+    <div class="mb-3" id="proveedorDiv">
         <label for="proveedor" class="form-label">Nombre de Proveedor</label>
-        <select class="form-select" id="proveedor" name="proveedor" required>
+        <select class="form-control form-select" id="proveedor" name="proveedor" required>
             <option value="0" disabled selected>Seleccione Una Opción</option>
             {% if proveedor %}
             <option value="{{ proveedor._id }}">{{ proveedor.nombre }}</option>
@@ -355,46 +469,51 @@
             {% endfor %}
             {% endif %}
         </select>
-        <a href="#" id="customProveedorLink" onclick="toggleCustomProveedorFields()">¿No encuentra el proveedor
-            que
-            busca?</a>
+        <div class="text-danger" id="errorProveedor"></div>
+        <a href="#" id="customProveedorLink" class="mt-2" onclick="toggleCustomProveedorFields()">¿No encuentra el proveedor que busca?</a>
         <div id="customProveedorFields" style="display:none;">
             <div class="mb-3">
-                <label for="nuevoProveedorNombre" class="form-label">Nombre de
-                    Proveedor (Nuevo)</label>
+                <label for="nuevoProveedorNombre" class="form-label">Nombre de Proveedor (Nuevo)</label>
                 <input class="form-control" type="text" id="nuevoProveedorNombre" name="nuevoProveedorNombre"
                     placeholder="Nombre de Proveedor" />
+                <div class="text-danger" id="errorNuevoProveedorNombre"></div>
             </div>
             <div class="mb-3">
-                <label for="telefonoProveedor" class="form-label">Teléfono de
-                    Proveedor</label>
+                <label for="telefonoProveedor" class="form-label">Teléfono de Proveedor</label>
                 <input class="form-control" type="text" id="telefonoProveedor" name="telefonoProveedor"
                     placeholder="Teléfono de Proveedor" />
+                <div class="text-danger" id="errorTelefonoProveedor"></ ```html
+                <div class="text-danger" id="errorTelefonoProveedor"></div>
             </div>
             <div class="mb-3">
-                <label for="correoProveedor" class="form-label">Correo de
-                    Proveedor</label>
+                <label for="correoProveedor" class="form-label">Correo de Proveedor</label>
                 <input class="form-control" type="email" id="correoProveedor" name="correoProveedor"
                     placeholder="Correo de Proveedor" />
+                <div class="text-danger" id="errorCorreoProveedor"></div>
             </div>
         </div>
     </div>
+    <div id="resultadosBusqueda">
 
+    </div>
     <div class="mb-3">
         <label for="idEmpleado" class="form-label">ID del Empleado</label>
         <input class="form-control" type="text" id="idEmpleado" name="idEmpleado" placeholder="ID del empleado"
             value="{{ maquina.idempleado if maquina else '' }}" required>
+        <div class="text-danger" id="errorIdEmpleado"></div>
     </div>
 
     <div class="mb-3">
         <label for="cantidad" class="form-label">Cantidad</label>
         <input class="form-control" type="number" id="cantidad" name="cantidad" placeholder="Cantidad" min="1" required>
+        <div class="text-danger" id="errorCantidad"></div>
     </div>
 
     <div class="mb-3">
         <label for="precioUnitario" class="form-label">Precio Unitario</label>
         <input class="form-control" type="number" id="precioUnitario" name="precioUnitario"
             placeholder="Precio Unitario" required step="0.01">
+        <div class="text-danger" id="errorPrecioUnitario"></div>
     </div>
 
     <button type="button" class="btn btn-primary mt-2" onclick="añadirProducto()">Añadir Producto</button>
@@ -402,8 +521,21 @@
 </form>
 
 <h2>Productos Añadidos</h2>
-<ul id="listaProductos"></ul>
-<p id="totalCompra">Total de la compra: $0</p>
+<table class="table table-striped" id="tablaProductos">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="listaProductos">
+        <!-- Las filas de productos se añadirán aquí dinámicamente -->
+    </tbody>
+</table>
+<h3 id="totalCompra">Total de la compra: $0</h3>
 
 <script>
 
