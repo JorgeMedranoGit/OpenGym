@@ -12,7 +12,7 @@
     <h3>{{rol}}</h3>
     <div class="d-flex flex-wrap justify-content-center">
         <div class="flex-fill">
-            <img src="data:image/png;base64,{{ img1 }}" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
+            <img src="data:image/png;base64,{{ img1 }}" class="img-rectangulo" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
             <form method="get" action="{{ url_for('main_blueprint.home') }}">
                 <label for="c_fecha_inicio">Fecha de inicio:</label>
                 <input type="month" id="c_fecha_inicio" name="c_fecha_inicio" value="{{ request.args.get('c_fecha_inicio', '') }}">
@@ -32,7 +32,7 @@
             </form>
         </div>
         <div class="flex-fill">
-            <img src="data:image/png;base64,{{ img2 }}" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
+            <img src="data:image/png;base64,{{ img2 }}" class="img-rectangulo" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
             <form method="get" action="{{ url_for('main_blueprint.home') }}">
                 <label for="e_fecha_inicio">Fecha de inicio:</label>
                 <input type="month" id="e_fecha_inicio" name="e_fecha_inicio" value="{{ request.args.get('e_fecha_inicio', '') }}">
@@ -56,15 +56,13 @@
         <br>
         <!--Graficos pastel-->
         <div class="flex-fill">
-            <img src="data:image/png;base64,{{ img3 }}" alt="Gráfico de Proveedores" style="background-color: #f6f6f6;" width="370">
+            <img src="data:image/png;base64,{{ img3 }}" class="img-cuadrado" alt="Gráfico de Proveedores" style="background-color: #f6f6f6;" width="370">
         </div>
         <div class="flex-fill">
-            <img src="data:image/png;base64,{{ img5 }}" alt="Gráfico de Proveedores" style="background-color: #f6f6f6;" width="370">
+            <img src="data:image/png;base64,{{ img5 }}" class="img-cuadrado" alt="Gráfico de Proveedores" style="background-color: #f6f6f6;" width="370">
         </div>
-        <!-- Grafico Pablito -->
         <div class="flex-fill">
             <img src="data:image/png;base64,{{ img4 }}" class="img-rectangulo" alt="Gráfico de Ganancias Mensuales" style="background-color: #f6f6f6;">
-            
         </div>
     </div>
     

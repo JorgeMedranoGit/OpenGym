@@ -179,7 +179,8 @@ def verificar():
             session["email"] = found_user.email
             session["usuario"] = found_user.nombre + " " +  found_user.apellido
             session["empleado_id"] = found_user.idempleado
-            session["rol"] = Rol.query.get(found_user.idrol).descripcion
+            rol = Rol.query.get(found_user.idrol)
+            session["rol"] = rol.descripcion
             flash("Inicio de sesión correcto" )
             return redirect("/")
         else:
