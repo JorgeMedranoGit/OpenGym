@@ -17,12 +17,16 @@ def maquinas():
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
+    if session['rol'] != "Administrador":
+        return redirect("/tareasCom")
     return render_template("verMaquinas.html", maquinas=Maquinas.query.all(), nombres=NombreMaquinas.query.all(), proveedores=Proveedores.query.all())
 @maquinas_blueprint.route("/verComprasMaquinas", methods=["GET"])
 def ver_compras_maquinas():
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
+    if session['rol'] != "Administrador":
+        return redirect("/tareasCom")
     try:
         # Llamar al procedimiento almacenado
         result = db.session.execute(text("SELECT * FROM obtenercomprasmaquinas()"))
@@ -71,6 +75,8 @@ def ver_detalles_compra(iddetalle):
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
+    if session['rol'] != "Administrador":
+        return redirect("/tareasCom")
     try:
         # Llamar al procedimiento almacenado
         result = db.session.execute(text(f"SELECT * FROM obtener_maquinas_por_detalle(:iddetalle)"), {'iddetalle': iddetalle})
@@ -97,6 +103,8 @@ def confirmar_entrega_detalle(iddetalle):
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
+    if session['rol'] != "Administrador":
+        return redirect("/tareasCom")
     try:
         Maquinas.actualizar_estado_maquinas(iddetalle)
         return redirect("/verComprasMaquinas")
@@ -109,7 +117,8 @@ def maquinasCrud():
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
-    
+    if session['rol'] != "Administrador":
+        return redirect("/tareasCom")
     if request.method == "POST":
         print("Entró en la ruta POST")
         try:
@@ -165,4 +174,4 @@ def maquinasCrud():
             return jsonify({"error": str(e)}), 500
 
     maquinas = Maquinas.query.all()
-    return render_template("comprarMaquinas.html", maquinas=maquinas, nombres=NombreMaquinas.query.all(), proveedores=Proveedores.query.all())
+    return render_template("comprarMaquinas.html", maquinas=maquinas, nombres=NombreMaquinas.query.all(), proveedores=Proveedores.query.filter(Proveedores.habilitado == True).all())

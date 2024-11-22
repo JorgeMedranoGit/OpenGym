@@ -304,15 +304,26 @@ def crear_grafico(meses, totales, img, titulo, color='red', xlabel='Meses', ylab
     plt.savefig(img, format='png')
     plt.close()
 
+import matplotlib.pyplot as plt
+
 def grafico_pastel(nombres, cantidades, img, titulo):
     colores = ['#c81d25', '#087e8b', '#0b3954']
+    maximo = max(cantidades)
+    explode = []
+    for cant in cantidades:
+        if cant == maximo:
+            explode.append(0.1)
+        else:
+            explode.append(0)
     if len(nombres) != len(cantidades):
         raise ValueError("Los arreglos de nombres y cantidades deben tener la misma longitud.")
-    plt.figure(figsize=(8, 8))
-    plt.pie(cantidades, labels=nombres, autopct='%1.1f%%', startangle=140, colors=colores)
-    plt.title(titulo, pad=20, loc="left")
+    plt.figure(figsize=(13, 10))
+    # Aumentar el tamaño de los labels del gráfico
+    plt.pie(cantidades, explode=explode, labels=nombres, autopct='%1.1f%%', startangle=140, colors=colores,textprops={'fontsize': 24}
+    )
+    # Aumentar el tamaño del título
+    plt.title(titulo, pad=30, loc="center", fontsize=30)
     plt.axis('equal')
-    
     plt.savefig(img, format='png')
     plt.close()
 

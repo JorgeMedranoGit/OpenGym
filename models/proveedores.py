@@ -19,6 +19,7 @@ class Proveedores(db.Model):
         self.nombre = nombre
         self.telefono = telefono
         self.correo = correo
+        self.habilitado = True
 
     def __repr__(self):
         return f'<Proveedor {self.nombre}, Telefono: {self.telefono}, Correo: {self.correo}>'
