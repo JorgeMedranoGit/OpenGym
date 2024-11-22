@@ -12,6 +12,7 @@ import requests
 import io
 
 import matplotlib
+import io
 from datetime import datetime
 matplotlib.use('Agg')  
 import calendar
@@ -81,24 +82,6 @@ def home():
     img5 = BytesIO()
     grafico_pastel(nombresProveedorPastelProducto, totalesProveedoPastelProducto, img5, "Porcentaje de proveedores mas solicitados para productos")
     img5.seek(0)
-    
-    v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
-    img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
-    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
-    img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
-    img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
-
-
-    v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
-    img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
-    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')  
-
-
-
-
-
-
-
 
     resultados = obtener_suma_venta_productos()
     ventas_por_producto, meses = procesar_datos_productos(resultados)
@@ -111,10 +94,13 @@ def home():
 
     # Crear el gráfico
     img4 = crear_stackplot_base64(*ventas_top, meses=meses, labels=productos_top)
-
-
-    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img4=img4, nombre=session.get('usuario'))
-
+    
+    v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
+    img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
+    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
+    img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
+    img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
+    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4,img5=img5, nombre=session.get('usuario'))
 
 
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
@@ -236,7 +222,23 @@ def codigo_verificacion():
 
 
 
+def procesar_datos_productos(resultados):
+    productos = {}
+    meses = sorted(set(row[2] for row in resultados))  # Extraer meses únicos y ordenarlos
 
+    for producto, num_ventas, mes in resultados:
+        if producto not in productos:
+            productos[producto] = {mes: num_ventas}
+        else:
+            productos[producto][mes] = num_ventas
+
+    # Crear listas de ventas por mes para cada producto
+    ventas_por_producto = {
+        producto: [productos[producto].get(mes, 0) for mes in meses]
+        for producto in productos
+    }
+
+    return ventas_por_producto, meses
 
 def filtrar_por_fechas(datos, fecha_inicio, fecha_fin):
     fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
@@ -273,6 +275,10 @@ def obtener_entregas_totales_por_mes():
 def obtener_suma_venta_productos():
     resultados = db.session.execute(text("select * from obtener_productos_mas_vendidos();")).fetchall()
     return resultados
+def obtener_suma_venta_productos():
+    resultados = db.session.execute(text("select * from obtener_productos_mas_vendidos();")).fetchall()
+    return resultados
+
 
 
 def crear_grafico(meses, totales, img, titulo, color_list=None, xlabel='Meses', ylabel='Valores (bs.)', facecolor='#ffffff'):
@@ -297,6 +303,22 @@ def crear_grafico(meses, totales, img, titulo, color_list=None, xlabel='Meses', 
     plt.savefig(img, format='png')
     plt.close()
 
+
+
+def crear_stackplot_base64(*ventas, meses, labels):
+    colores = ['#c81d25', '#087e8b', '#0b3954']
+    plt.figure(figsize=(5, 3))
+    plt.stackplot(meses, *ventas, labels=labels, colors=colores)
+    plt.title('Ventas de productos por mes')
+    plt.xlabel('Mes')
+    plt.ylabel('Cantidad de ventas')
+    plt.legend(loc='upper left')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    plt.close()
 
 
 def crear_stackplot_base64(*ventas, meses, labels):
