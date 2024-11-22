@@ -14,7 +14,12 @@ def verProveedores():
         flash("Debes iniciar sesión")
         return redirect("/login")
     return render_template("proveedores/verProveedores.html", proveedores=Proveedores.query.filter(Proveedores.habilitado == True).all())
-
+@proveedores_blueprint.route("/verProveedoresDeshabilitados", methods=["GET"])
+def verProveedoresDeshabilitados():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+    return render_template("proveedores/proveedoresDesh.html", proveedores=Proveedores.query.filter(Proveedores.habilitado == False).all())
 @proveedores_blueprint.route("/addProveedores", methods=["POST", "GET"])
 def proveedoresCrud():
     if "usuario" not in session:
@@ -61,6 +66,20 @@ def eliminarProveedor(id):
     else:
         flash("Proveedor no encontrado.")
     return redirect("/proveedores")
+@proveedores_blueprint.route("/proveedores/habilitar/<int:id>", methods=["POST"])
+def habilitarProveedor(id):
+    if "email" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+    proveedor = Proveedores.query.get(id)
+    if proveedor:
+        proveedor.habilitado = True
+        db.session.commit()  # Guarda los cambios en la base de datos
+        flash("Proveedor deshabilitado exitosamente!")
+    else:
+        flash("Proveedor no encontrado.")
+    return redirect("/proveedores")
+
 
 @proveedores_blueprint.route("/proveedores/buscar", methods=["GET"])
 def buscarProveedores():

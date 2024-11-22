@@ -93,11 +93,11 @@
             else{
                 if(codigoMaquina == ""){
                     errorCodigoMaquina.textContent = "Por favor, ingrese un codigo de máquina.";
+                    valido = false;
                 }
-                valido = false;
             }
         }
-        if (proveedorSelect.value === '0' && nuevoProveedorNombre === '') {
+        if (proveedorSelect.value === '0' && nuevoProveedorNombre === '' && productosSeleccionados.length === 0) {
             console.log("Por favor, ingrese un nombre de proveedor.")
             errorProveedor.textContent = "Por favor, ingrese un nombre de proveedor.";
             valido = false;
