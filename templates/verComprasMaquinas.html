@@ -5,42 +5,68 @@
 {% if messages %}
 {% for msg in messages %}
 <p>{{msg}}</p>
-{% endfor%}
+{% endfor %}
 {% endif %}
 {% endwith %}
+
 <h1>Compras de Maquinas</h1>
-<button
-    class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
-        class="fas fa-bars"></i></button>
-        {% if compras %}
-            {% for compra in compras %}
-                <div class="dynamic-div" data-id="{{ compra.idcompra }}" data-name="{{ compra.proveedor }}">
-                    <div class="summary">
-                        <strong>ID Compra:&nbsp;</strong>{{ compra.idcompra }}<strong>&nbsp;Proveedor:&nbsp;</strong>{{ compra.proveedor }}
-                        <strong>&nbsp;Total:&nbsp;</strong>{{ compra.Gastos }}<strong>&nbsp;Fecha:&nbsp;</strong>{{ compra.fecha }}
-                    </div>
-                    <div class="details">
-                        <h3>Detalles de compra:&nbsp;{{ compra.idcompra }}</h3>
-                        <h4>Fecha:&nbsp;{{ compra.fecha }}
-                        Proveedor:&nbsp;{{ compra.proveedor }}</h4>
-                    {% for detalle in detalleCompras %}
-                        {% if detalle.idcompra == compra.idcompra %}
-                            <p><strong>Maquina:&nbsp;</strong>{{ detalle.nombre }}:
-                            &nbsp;{{ detalle.codigo }}&nbsp;<strong>Cantidad:&nbsp;</strong>{{ detalle.total }}</p>
-                            <p><strong>Tipo&nbsp;</strong>{{ detalle.tipo }}</p>
-                            <p><strong>Subtotal&nbsp;</strong>{{ detalle.gastos }}</p>
-                            <p><strong>Estado&nbsp;</strong>{{ detalle.estado }}
-                            {% if detalle.estado == "Comprado" %}
-                            <a href="/confirmarEntregaDetalle/{{ detalle.iddetalle }}" class="btn btn-dark">Confirmar Entrega</a>
-                            {% endif %}</p>
-                            <a href="/verDetalleCompra/{{ detalle.iddetalle }}" class="btn btn-dark">Ver Mas</a>
-                        {% endif %}
-                    {% endfor %}
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No hay compras registradas.</p>
-        {% endif %}
+
+<div class="mb-3">
+    <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
+    <input type="date" id="fechaInicio" class="form-control">
+</div>
+<div class="mb-3">
+    <label for="fechaFin" class="form-label">Fecha de Fin</label>
+    <input type="date" id="fechaFin" class="form-control">
+</div>
+<button class="btn btn-primary" onclick="filtrarCompras()">Filtrar</button>
+
+{% if compras %}
+    {% for compra in compras %}
+        <div class="dynamic-div" data-id="{{ compra.idcompra }}" data-name="{{ compra.proveedor }}">
+            <div class="summary">
+                <strong>ID Compra:&nbsp;</strong>{{ compra.idcompra }}<strong>&nbsp;Proveedor:&nbsp;</strong>{{ compra.proveedor }}
+                <strong>&nbsp;Total:&nbsp;</strong>{{ compra.Gastos }}<strong>&nbsp;Fecha:&nbsp;</strong><data>{{ compra.fecha }}</data>
+            </div>
+            <div class="details">
+                <h3>Detalles de compra:&nbsp;{{ compra.idcompra }}</h3>
+                <h4>Fecha:&nbsp;{{ compra.fecha }} Proveedor:&nbsp;{{ compra.proveedor }}</h4>
+                {% for detalle in detalleCompras %}
+                    {% if detalle.idcompra == compra.idcompra %}
+                        <p><strong>Maquina:&nbsp;</strong>{{ detalle.nombre }}:
+                        &nbsp;{{ detalle.codigo }}&nbsp;<strong>Cantidad:&nbsp;</strong>{{ detalle.total }}</p>
+                        <p><strong>Tipo&nbsp;</strong>{{ detalle.tipo }}</p>
+                        <p><strong>Subtotal&nbsp;</strong>{{ detalle.gastos }}</p>
+                        <p><strong>Estado&nbsp;</strong>{{ detalle.estado }}
+                        {% if detalle.estado == "Comprado" %}
+                        <a href="/confirmarEntregaDetalle/{{ detalle.iddetalle }}" class="btn btn-dark">Confirmar Entrega</a>
+                        {% endif %}</p>
+                        <a href="/verDetalleCompra/{{ detalle.iddetalle }}" class="btn btn-dark">Ver Mas</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+    {% else %}
+        <p>No hay compras registradas.</p>
+    {% endif %}
+    
+<script>
+    function filtrarCompras() {
+        const fechaInicio = new Date(document.getElementById('fechaInicio').value);
+        const fechaFin = new Date(document.getElementById('fechaFin').value);
+        const compras = document.querySelectorAll('.dynamic-div');
+
+        compras.forEach(compra => {
+            const fechaCompra = new Date(compra.querySelector('.summary data').textContent);
+            console.log(new Date(compra.querySelector('.summary data').textContent));
+            if (fechaCompra >= fechaInicio && fechaCompra <= fechaFin) {
+                compra.style.display = 'block'; // Mostrar compra
+            } else {
+                compra.style.display = 'none'; // Ocultar compra
+            }
+        });
+    }
+</script>
 
 {% endblock %}
