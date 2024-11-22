@@ -13,37 +13,45 @@ def productosCrud():
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
-    if request.method == "POST":
-        nombre = request.form['nombreProduc']
-        precioVenta = Decimal(request.form['precioProduc'])  
-        stock = int(request.form['stockProduc']) 
-        
-        producto_id = request.form.get('producto_id')  
-        if producto_id: 
-            producto = Productos.query.get(producto_id)
-            producto.nombre = nombre
-            producto.preciov = precioVenta
-            producto.stock = stock
-            db.session.commit() 
-            flash("Producto editado exitosamente!")
-        else:
-            nuevo_producto = Productos(nombre, precioVenta, stock)
-            db.session.add(nuevo_producto)
-            db.session.commit() 
-            flash("Producto añadido exitosamente!")
+    if session["rol"] == "Administrador":
+        if request.method == "POST":
+            nombre = request.form['nombreProduc']
+            precioVenta = Decimal(request.form['precioProduc'])  
+            stock = int(request.form['stockProduc']) 
+            
+            producto_id = request.form.get('producto_id')  
+            if producto_id: 
+                producto = Productos.query.get(producto_id)
+                producto.nombre = nombre
+                producto.preciov = precioVenta
+                producto.stock = stock
+                db.session.commit() 
+                flash("Producto editado exitosamente!")
+            else:
+                nuevo_producto = Productos(nombre, precioVenta, stock)
+                db.session.add(nuevo_producto)
+                db.session.commit() 
+                flash("Producto añadido exitosamente!")
 
-        return redirect("/productos")  
+            return redirect("/productos")  
 
-    productos = Productos.query.all()
-    return render_template("productos.html", productos=productos)
+        productos = Productos.query.all()
+        return render_template("productos.html", productos=productos)
+    else:
+        flash("No tienes permisos suficientes")
+        return redirect("tareasCom")
 
 @productos_blueprint.route("/productos/editar/<int:id>", methods=["GET"])
 def editarProducto(id):
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
-    producto = Productos.query.get(id) 
-    return render_template("productos.html", producto=producto, productos=Productos.query.all())
+    if session["rol"] == "Administrador":
+        producto = Productos.query.get(id) 
+        return render_template("productos.html", producto=producto, productos=Productos.query.all())
+    else:
+        flash("No tienes permisos suficientes")
+        return redirect("tareasCom")
 
 
 @productos_blueprint.route("/productos/eliminar/<int:id>", methods=["POST"])
@@ -51,11 +59,14 @@ def eliminarProducto(id):
     if "email" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
-    producto = Productos.query.get(id)
-    db.session.delete(producto)
-    db.session.commit()
-    flash("Producto eliminado exitosamente!")
-    return redirect("/productos")
-
+    if session["rol"] == "Administrador":
+        producto = Productos.query.get(id)
+        db.session.delete(producto)
+        db.session.commit()
+        flash("Producto eliminado exitosamente!")
+        return redirect("/productos")
+    else:
+        flash("No tienes permisos suficientes")
+        return redirect("tareasCom")
 def obtenerTodoslosProductos():
     return Productos.query.all()

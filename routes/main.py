@@ -174,6 +174,7 @@ def home():
 
     return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4, img5=img5, img_tareas=img_tareas_base64, img_tareas_completadas=img_tareas_completadas_base64, nombre=session.get('usuario'))
 
+
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
 def login():
     mail = current_app.extensions['mail']
@@ -242,7 +243,10 @@ def verificar():
             rol = Rol.query.get(found_user.idrol)
             session["rol"] = rol.descripcion
             flash("Inicio de sesión correcto" )
-            return redirect("/")
+            if session["rol"] == "Administrador":
+                return redirect("/")
+            else:
+                return redirect("tareasCom")
         else:
             flash("Codigo incorrecto")
         return redirect("/login") 
