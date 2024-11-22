@@ -5,6 +5,7 @@ from datetime import timedelta
 from decimal import Decimal
 from models.empleados import Empleado
 from models.empleados import Rol
+from models.tareas import Tarea
 from database import db
 from sqlalchemy import text
 import requests
@@ -105,14 +106,73 @@ def home():
 
     # Crear el gráfico
     img4 = crear_stackplot_base64(*ventas_top, meses=meses, labels=productos_top)
-    
+
+# Gráfico de tareas
+    tareas_por_empleado = db.session.query(
+        Tarea.idempleado,
+        db.func.count(Tarea.idtarea).label('cantidad_tareas')
+    ).group_by(Tarea.idempleado).all()
+
+    empleados_dict = {empleado.idempleado: empleado.nombre for empleado in Empleado.query.all()}
+
+    empleados = [empleados_dict[tarea.idempleado] for tarea in tareas_por_empleado]
+    cantidades = [tarea.cantidad_tareas for tarea in tareas_por_empleado]
+
+    # Generar el gráfico de pastel
+    img_tareas = BytesIO()
+    plt.figure(figsize=(8, 6))
+    plt.pie(cantidades, labels=empleados, autopct='%1.1f%%', startangle=140)
+    plt.axis('equal')  # Para que el gráfico sea un círculo
+    plt.savefig(img_tareas, format='png')
+    img_tareas.seek(0)
+    img_tareas_base64 = base64.b64encode(img_tareas.getvalue()).decode('utf-8')
+    plt.close()
+
+    # Gráfico de tareas completadas
+    # Obtener todos los empleados
+    todos_empleados = {empleado.idempleado: empleado.nombre for empleado in Empleado.query.all()}
+
+    # Obtener el conteo de tareas completadas
+    tareas_completadas_por_empleado = db.session.query(
+        Tarea.idempleado,
+        db.func.count(Tarea.idtarea).label('cantidad_completadas')
+    ).filter(Tarea.estado == True).group_by(Tarea.idempleado).all()
+
+    # Crear un diccionario para contar las tareas completadas
+    tareas_completadas_dict = {tarea.idempleado: tarea.cantidad_completadas for tarea in tareas_completadas_por_empleado}
+
+    # Crear listas para empleados y cantidades
+    empleados = []
+    cantidades_completadas = []
+
+    for empleado_id, nombre in todos_empleados.items():
+        empleados.append(nombre)
+        # Si el empleado no tiene tareas completadas, asignar 0
+        cantidad = tareas_completadas_dict.get(empleado_id, 0)
+        cantidades_completadas.append(cantidad)
+
+    # Generar el gráfico de barras
+    img_tareas_completadas = BytesIO()
+    plt.figure(figsize=(10, 6))
+    plt.bar(empleados, cantidades_completadas, color='skyblue')
+    plt.xlabel('Empleados')
+    plt.ylabel('Cantidad de Tareas Completadas')
+    plt.title('Tareas Completadas por Empleado')
+    plt.xticks(rotation=45)
+    plt.tight_layout()  # Ajusta el gráfico para que no se corten las etiquetas
+    plt.savefig(img_tareas_completadas, format='png')
+    img_tareas_completadas.seek(0)
+    img_tareas_completadas_base64 = base64.b64encode(img_tareas_completadas.getvalue()).decode('utf-8')
+    plt.close()
+
+
     v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
     img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
     img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
     img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
     img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
-    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4,img5=img5, nombre=session.get('usuario'))
 
+    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4, img5=img5, img_tareas=img_tareas_base64, img_tareas_completadas=img_tareas_completadas_base64, nombre=session.get('usuario'))
 
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
 def login():
