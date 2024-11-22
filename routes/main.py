@@ -8,9 +8,6 @@ from models.empleados import Rol
 from database import db
 from sqlalchemy import text
 import requests
-
-import io
-
 import matplotlib
 import io
 from datetime import datetime
@@ -54,11 +51,26 @@ def home():
     
     compras_totales = obtener_compras_totales_por_mes()
     entregas_totales = obtener_entregas_totales_por_mes()
+    #obtencion de graficos de proveedores de maquinas
+    ventas_por_proveedor = obtener_ventas_totales_por_proveedor()
+    nombresProveedorPastel = []
+    totalesProveedoPastel = []
+    for row in ventas_por_proveedor:
+        nombresProveedorPastel.append(row.proveedor)
+        totalesProveedoPastel.append(row.total)
+        
     
+    #obtencion de graficos de proveedores de productos
+    ventas_por_proveedor_producto = obtener_ventas_totales_por_proveedor_producto()
+    nombresProveedorPastelProducto = []
+    totalesProveedoPastelProducto = []
+    for row in ventas_por_proveedor_producto:
+        nombresProveedorPastelProducto.append(row.proveedor)
+        totalesProveedoPastelProducto.append(row.total)
+        
+    #obtencion de                                                                                                                 
     compras_filtradas = filtrar_por_fechas(compras_totales, c_fecha_inicio, c_fecha_fin)
     entregas_filtradas = filtrar_por_fechas(entregas_totales, e_fecha_inicio, e_fecha_fin)
-
-    
     
     meses_compras = [fila[0] for fila in compras_filtradas] 
     totales_compras = [fila[1] for fila in compras_filtradas] 
@@ -71,7 +83,6 @@ def home():
     img2 = BytesIO()
     crear_grafico(meses_entregas, totales_entregas, img2, "Dinero gastado en suministros mensualmente")  
     img2.seek(0) 
-
     
     #obtencion de grafico pastel de proveedores
     img3 = BytesIO()
@@ -168,8 +179,7 @@ def verificar():
             session["email"] = found_user.email
             session["usuario"] = found_user.nombre + " " +  found_user.apellido
             session["empleado_id"] = found_user.idempleado
-            rol = Rol.query.get(found_user.idrol)
-            session["rol"] = rol.descripcion
+            session["rol"] = Rol.query.get(found_user.idrol)
             flash("Inicio de sesión correcto" )
             return redirect("/")
         else:
@@ -241,6 +251,7 @@ def procesar_datos_productos(resultados):
 
     return ventas_por_producto, meses
 
+# Filtrado por fechas
 def filtrar_por_fechas(datos, fecha_inicio, fecha_fin):
     fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
     fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
@@ -250,18 +261,11 @@ def filtrar_por_fechas(datos, fecha_inicio, fecha_fin):
     ]
     return datos_filtrados
 def obtener_ultimo_dia_mes(fecha):
+        # Separar año y mes
         anio, mes = map(int, fecha.split("-"))
+        # Obtener el último día del mes
         _, ultimo_dia = calendar.monthrange(anio, mes)
         return f"{fecha}-{ultimo_dia:02d}"
-
-
-
-
-
-def procesar_datos_productos(resultados):
-    productos = {}
-    meses = sorted(set(row[2] for row in resultados))  # Extraer meses únicos y ordenarlos
-
 
 
 
@@ -273,8 +277,11 @@ def obtener_compras_totales_por_mes():
 def obtener_entregas_totales_por_mes():
     resultados = db.session.execute(text("SELECT * FROM obtener_entregas_totales_por_mes();")).fetchall()
     return resultados
-def obtener_suma_venta_productos():
-    resultados = db.session.execute(text("select * from obtener_productos_mas_vendidos();")).fetchall()
+def obtener_ventas_totales_por_proveedor():
+    resultados = db.session.execute(text("select * from obtener_ventas_maquinas_por_proveedor();")).fetchall()
+    return resultados
+def obtener_ventas_totales_por_proveedor_producto():
+    resultados = db.session.execute(text("select * from obtener_ventas_productos_por_proveedor();")).fetchall()
     return resultados
 def obtener_suma_venta_productos():
     resultados = db.session.execute(text("select * from obtener_productos_mas_vendidos();")).fetchall()
@@ -282,17 +289,10 @@ def obtener_suma_venta_productos():
 
 
 
-def crear_grafico(meses, totales, img, titulo, color_list=None, xlabel='Meses', ylabel='Valores (bs.)', facecolor='#ffffff'):
-    # Definir una lista de colores si no se pasa
-    if color_list is None:
-        color_list = ['#c81d25', '#087e8b', '#0b3954']  # Rojo, azul, azul oscuro (ejemplo)
 
-    # Ajustar el número de colores para que coincida con la cantidad de barras
-    colores = [color_list[i % len(color_list)] for i in range(len(meses))]
-
-    # Crear el gráfico de barras con colores intercalados
+def crear_grafico(meses, totales, img, titulo, color='red', xlabel='Meses', ylabel='Valores (bs.)', facecolor='#ffffff'):
     plt.figure(figsize=(5, 3))
-    plt.bar(meses, totales, color=colores)
+    plt.bar(meses, totales, color=color)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(titulo)
@@ -300,24 +300,18 @@ def crear_grafico(meses, totales, img, titulo, color_list=None, xlabel='Meses', 
     plt.xticks(rotation=45)
     plt.tight_layout()
 
-    # Guardar el gráfico en el archivo img
     plt.savefig(img, format='png')
     plt.close()
 
-
-
-def crear_stackplot_base64(*ventas, meses, labels):
+def grafico_pastel(nombres, cantidades, img, titulo):
     colores = ['#c81d25', '#087e8b', '#0b3954']
-    plt.figure(figsize=(5, 3))
-    plt.stackplot(meses, *ventas, labels=labels, colors=colores)
-    plt.title('Ventas de productos por mes')
-    plt.xlabel('Mes')
-    plt.ylabel('Cantidad de ventas')
-    plt.legend(loc='upper left')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-
-    img = io.BytesIO()
+    if len(nombres) != len(cantidades):
+        raise ValueError("Los arreglos de nombres y cantidades deben tener la misma longitud.")
+    plt.figure(figsize=(8, 8))
+    plt.pie(cantidades, labels=nombres, autopct='%1.1f%%', startangle=140, colors=colores)
+    plt.title(titulo, pad=20, loc="left")
+    plt.axis('equal')
+    
     plt.savefig(img, format='png')
     plt.close()
 
