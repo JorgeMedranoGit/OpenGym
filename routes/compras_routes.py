@@ -143,20 +143,49 @@ def obtenerPrecioProducto(product_id):
     return jsonify({'precio': '0'}) 
 
 
+
 # Ruta para obtener los productos en cada compra
+
+
+# Función para obtener el precio histórico
+def obtener_precio_historico(id_producto, fecha_compra):
+    precio_historico = db.session.execute(
+        text('''
+            SELECT precioventa
+            FROM historialprecios
+            WHERE idp = :id_producto AND fecha <= :fecha_compra
+            ORDER BY fecha DESC
+            LIMIT 1
+        '''),
+        {'id_producto': id_producto, 'fecha_compra': fecha_compra}
+    ).fetchone()
+    
+    if precio_historico:
+        return precio_historico[0]  # Devuelve el precio histórico encontrado
+    return 0  # Precio predeterminado si no se encuentra en el historial
+
+
 @compras_blueprint.route("/compras/detallecompras/<int:id>", methods=['GET'])
 def detallecompras(id):
     detalles = DetalleCompras.query.filter_by(idcompra=id).all()
+    compra = Compras.query.get(id)  # Obtener la fecha de la compra
+    
+    if not compra:
+        return jsonify({"error": "Compra no encontrada"}), 404
     
     resultados = []
     for detalle in detalles:
         producto = Productos.query.get(detalle.idproducto)
         if producto:
+            # Obtener el precio histórico vigente en la fecha de compra
+            precio_historico = obtener_precio_historico(detalle.idproducto, compra.fechacompra)
+            subtotal = precio_historico * detalle.cantidad  # Calcular el subtotal correcto
+            
             resultados.append({
                 "producto": producto.nombre,
                 "cantidad": detalle.cantidad,
-                "subtotal": producto.preciov * detalle.cantidad
+                "subtotal": subtotal
             })
     
-    return jsonify({"resultados": resultados}) 
+    return jsonify({"resultados": resultados})
 

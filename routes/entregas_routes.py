@@ -8,6 +8,7 @@ from models.productos import Productos
 from models.estados import Estados
 from models.proveedores import Proveedores
 from models.entregaestado import EntregaEstado
+from models.historialprecio import HistorialPrecios
 from database import db
 from sqlalchemy import text
 from routes.proveedores_routes import obtenerTodoslosProveedores
@@ -117,10 +118,27 @@ def formEntrega():
             flash("Entrega agregada exitosamente!")
             return redirect("/entregas")
         
+
         # Excepcion
         except:
             flash("No se pudo registrar la entrega ahora, intentelo mas tarde")
             return redirect("/entregas")
+
+
+        productos = request.form.getlist('idp[]')
+        for idp, cantidad, precio in zip(productos, cantidades, preciosCompras):
+            if idp.strip() and int(cantidad) > 0 and float(precio) > 0:
+                detalle = DetalleEntregas(cantidad=int(cantidad), preciocompra=float(precio), identrega=idEntrega, idproducto=idp)
+                db.session.add(detalle)
+                
+
+                producto_db = Productos.query.get(idp)
+                if producto_db:
+                    producto_db.stock += int(cantidad)
+        db.session.commit()
+        flash("Entrega agregada exitosamente!")
+        return redirect("/entregas")
+
 
 @entregas_blueprint.route("/entregas/detalleentrega/<int:id>", methods=['GET'])
 def detallecompras(id):
@@ -155,19 +173,22 @@ def cambiar_estado():
             text('INSERT INTO entregaestado (fechaestado, identrega, idestado) VALUES (:fecha, :entrega_id, :estado_id)'),
             {'fecha': fecha_actual, 'entrega_id': entrega_id, 'estado_id': estado_id}
         )
-        
-        if estado_id == '2':
-            precio_compra_result = db.session.execute(
-                text('SELECT preciocompra, idp FROM detalleentregas WHERE identrega = :entrega_id LIMIT 1'),
-                {'entrega_id': entrega_id}
-            ).fetchone()
-            
-            if precio_compra_result:
-                v_preciocompra = precio_compra_result[0]
-                producto_id = precio_compra_result[1]
 
+        if estado_id == '2':
+            # Obtener todos los productos de la entrega
+            productos_result = db.session.execute(
+                text('SELECT preciocompra, idp FROM detalleentregas WHERE identrega = :entrega_id'),
+                {'entrega_id': entrega_id}
+            ).fetchall()
+            
+            for producto in productos_result:
+                v_preciocompra = producto[0]
+                producto_id = producto[1]
+
+                # Calcular nuevo precio de venta
                 nuevo_precio_venta = v_preciocompra + (v_preciocompra * Decimal(0.30))
 
+                # Obtener precio de venta actual
                 precio_venta_actual_result = db.session.execute(
                     text('SELECT preciov FROM productos WHERE idp = :producto_id'),
                     {'producto_id': producto_id}
@@ -177,11 +198,13 @@ def cambiar_estado():
                     v_precioventa_actual = precio_venta_actual_result[0]
 
                     if v_precioventa_actual != nuevo_precio_venta:
+                        # Actualizar precio de venta en productos
                         db.session.execute(
                             text('UPDATE productos SET preciov = :nuevo_precio WHERE idp = :producto_id'),
                             {'nuevo_precio': nuevo_precio_venta, 'producto_id': producto_id}
                         )
 
+                        # Insertar en historial de precios
                         db.session.execute(
                             text('INSERT INTO historialprecios (precioventa, fecha, idp) VALUES (:nuevo_precio, :fecha_actual, :producto_id)'),
                             {'nuevo_precio': nuevo_precio_venta, 'fecha_actual': fecha_actual, 'producto_id': producto_id}
@@ -190,9 +213,10 @@ def cambiar_estado():
         db.session.commit()
         flash("Estado de la entrega actualizado exitosamente", "success")
     else:
-        flash("No se pudo actualizar el estado de la entrega. Entrega: " + str(entrega_id) + " Estado: " + str(estado_id), "danger")
+        flash(f"No se pudo actualizar el estado de la entrega. Entrega: {entrega_id} Estado: {estado_id}", "danger")
 
     return redirect(url_for("entregas_blueprint.entregaCrud"))
+
 
 
 

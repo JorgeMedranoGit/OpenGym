@@ -73,7 +73,14 @@ def home():
     img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
     img2 = base64.b64encode(img2.getvalue()).decode('utf-8')  
 
-
+    img3 = BytesIO()
+    grafico_pastel(nombresProveedorPastel, totalesProveedoPastel, img3, "Porcentaje de proveedores mas solicitados para maquinas")  
+    img3.seek(0) 
+    
+    #obtencion de grafico pastel de proveedores y productos
+    img5 = BytesIO()
+    grafico_pastel(nombresProveedorPastelProducto, totalesProveedoPastelProducto, img5, "Porcentaje de proveedores mas solicitados para productos")
+    img5.seek(0)
 
 
 
@@ -162,7 +169,8 @@ def verificar():
             session["email"] = found_user.email
             session["usuario"] = found_user.nombre + " " +  found_user.apellido
             session["empleado_id"] = found_user.idempleado
-            session["rol"] = Rol.query.get(found_user.idrol)
+            rol = Rol.query.get(found_user.idrol)
+            session["rol"] = rol.descripcion
             flash("Inicio de sesión correcto" )
             return redirect("/")
         else:
@@ -263,6 +271,12 @@ def obtener_compras_totales_por_mes():
 def obtener_entregas_totales_por_mes():
     resultados = db.session.execute(text("SELECT * FROM obtener_entregas_totales_por_mes();")).fetchall()
     return resultados
+def obtener_ventas_totales_por_proveedor():
+    resultados = db.session.execute(text("select * from obtener_ventas_maquinas_por_proveedor();")).fetchall()
+    return resultados
+def obtener_ventas_totales_por_proveedor_producto():
+    resultados = db.session.execute(text("select * from obtener_ventas_productos_por_proveedor();")).fetchall()
+    return resultados
 def obtener_suma_venta_productos():
     resultados = db.session.execute(text("select * from obtener_productos_mas_vendidos();")).fetchall()
     return resultados
@@ -290,6 +304,17 @@ def crear_grafico(meses, totales, img, titulo, color_list=None, xlabel='Meses', 
     plt.savefig(img, format='png')
     plt.close()
 
+def grafico_pastel(nombres, cantidades, img, titulo):
+    colores = ['#c81d25', '#087e8b', '#0b3954']
+    if len(nombres) != len(cantidades):
+        raise ValueError("Los arreglos de nombres y cantidades deben tener la misma longitud.")
+    plt.figure(figsize=(8, 8))
+    plt.pie(cantidades, labels=nombres, autopct='%1.1f%%', startangle=140, colors=colores)
+    plt.title(titulo, pad=20, loc="left")
+    plt.axis('equal')
+    
+    plt.savefig(img, format='png')
+    plt.close()
 
 
 def crear_stackplot_base64(*ventas, meses, labels):

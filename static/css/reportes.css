@@ -4,14 +4,19 @@
 }
 .img-cuadrado {
     width: auto;
+    width: 450px;
 }
 
 /* Media query para pantallas pequeñas */
 @media (max-width: 600px) {
     .img-rectangulo {
-        width: 370px;
+        width: 350px;
     }
     .img-cuadrado {
-        width: 450px;
+        width: 370px;
+        ;
     }
+}
+input{
+    width: 120px;
 }
