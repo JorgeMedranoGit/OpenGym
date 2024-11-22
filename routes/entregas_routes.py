@@ -52,51 +52,58 @@ def formEntrega():
         return render_template("entregasForm.html", proveedores=proveedores, productos=productos)
 
     if request.method == 'POST':
-        fechapedido = request.form['fechapedido']
-        metodopago = request.form['metodopago']
-        idproveedor = request.form['idproveedor']
-        cantidades = request.form.getlist('cantidad[]')
-        preciosCompras = request.form.getlist('precio[]') 
+        try:
+            fechapedido = request.form['fechapedido']
+            metodopago = request.form['metodopago']
+            idproveedor = request.form['idproveedor']
+            cantidades = request.form.getlist('cantidad[]')
+            preciosCompras = request.form.getlist('precio[]') 
 
 
-        fechapedido_dt = datetime.strptime(fechapedido, '%Y-%m-%dT%H:%M')
+            fechapedido_dt = datetime.strptime(fechapedido, '%Y-%m-%dT%H:%M')
 
-        # Obtener la fecha actual
-        fecha_actual = datetime.now()
+            # Obtener la fecha actual
+            fecha_actual = datetime.now()
 
-        # Comparar fechas
-        if fechapedido_dt > fecha_actual:
-            flash("La fecha de compra no puede ser mayor a la fecha actual.")
+            # Comparar fechas
+            if fechapedido_dt > fecha_actual:
+                flash("La fecha de compra no puede ser mayor a la fecha actual.")
+                return redirect("/entregas")
+
+            if not cantidades or not preciosCompras:
+                flash("Datos ingresados incorrectamente")
+                return redirect("/entregas")
+
+            entregaN = Entregas(fechapedido=fechapedido, metodopago=metodopago, idproveedor=idproveedor)
+            db.session.add(entregaN) 
+            db.session.commit() 
+
+            idEntrega = entregaN.identrega
+
+            estadoN = EntregaEstado(fechaestado=datetime.now(), identrega=idEntrega, idestado=1)
+            db.session.add(estadoN)
+            db.session.commit()
+
+            
+
+            productos = request.form.getlist('idp[]')
+            for idp, cantidad, precio in zip(productos, cantidades, preciosCompras):
+                if idp.strip() and int(cantidad) > 0 and float(precio) > 0:
+                    detalle = DetalleEntregas(cantidad=int(cantidad), preciocompra=float(precio), identrega=idEntrega, idproducto=idp)
+                    db.session.add(detalle)
+
+                    producto_db = Productos.query.get(idp)
+                    if producto_db:
+                        producto_db.stock += int(cantidad)
+            db.session.commit()
+            flash("Entrega agregada exitosamente!")
             return redirect("/entregas")
 
-        if not cantidades or not preciosCompras:
-            flash("Datos ingresados incorrectamente")
+        # Excepcion
+        except:
+            flash("No se pudo registrar la entrega ahora, intentelo mas tarde")
             return redirect("/entregas")
 
-        entregaN = Entregas(fechapedido=fechapedido, metodopago=metodopago, idproveedor=idproveedor)
-        db.session.add(entregaN) 
-        db.session.commit() 
-
-        idEntrega = entregaN.identrega
-
-        estadoN = EntregaEstado(fechaestado=datetime.now(), identrega=idEntrega, idestado=1)
-        db.session.add(estadoN)
-        db.session.commit()
-
-        
-
-        productos = request.form.getlist('idp[]')
-        for idp, cantidad, precio in zip(productos, cantidades, preciosCompras):
-            if idp.strip() and int(cantidad) > 0 and float(precio) > 0:
-                detalle = DetalleEntregas(cantidad=int(cantidad), preciocompra=float(precio), identrega=idEntrega, idproducto=idp)
-                db.session.add(detalle)
-
-                producto_db = Productos.query.get(idp)
-                if producto_db:
-                    producto_db.stock += int(cantidad)
-        db.session.commit()
-        flash("Entrega agregada exitosamente!")
-        return redirect("/entregas")
 
 @entregas_blueprint.route("/entregas/detalleentrega/<int:id>", methods=['GET'])
 def detallecompras(id):

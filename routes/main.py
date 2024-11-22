@@ -8,6 +8,9 @@ from models.empleados import Rol
 from database import db
 from sqlalchemy import text
 import requests
+
+import io
+
 import matplotlib
 from datetime import datetime
 matplotlib.use('Agg')  
@@ -50,26 +53,11 @@ def home():
     
     compras_totales = obtener_compras_totales_por_mes()
     entregas_totales = obtener_entregas_totales_por_mes()
-    #obtencion de graficos de proveedores de maquinas
-    ventas_por_proveedor = obtener_ventas_totales_por_proveedor()
-    nombresProveedorPastel = []
-    totalesProveedoPastel = []
-    for row in ventas_por_proveedor:
-        nombresProveedorPastel.append(row.proveedor)
-        totalesProveedoPastel.append(row.total)
-        
     
-    #obtencion de graficos de proveedores de productos
-    ventas_por_proveedor_producto = obtener_ventas_totales_por_proveedor_producto()
-    nombresProveedorPastelProducto = []
-    totalesProveedoPastelProducto = []
-    for row in ventas_por_proveedor_producto:
-        nombresProveedorPastelProducto.append(row.proveedor)
-        totalesProveedoPastelProducto.append(row.total)
-        
-    #obtencion de                                                                                                                 
     compras_filtradas = filtrar_por_fechas(compras_totales, c_fecha_inicio, c_fecha_fin)
     entregas_filtradas = filtrar_por_fechas(entregas_totales, e_fecha_inicio, e_fecha_fin)
+
+    
     
     meses_compras = [fila[0] for fila in compras_filtradas] 
     totales_compras = [fila[1] for fila in compras_filtradas] 
@@ -82,6 +70,7 @@ def home():
     img2 = BytesIO()
     crear_grafico(meses_entregas, totales_entregas, img2, "Dinero gastado en suministros mensualmente")  
     img2.seek(0) 
+
     
     #obtencion de grafico pastel de proveedores
     img3 = BytesIO()
@@ -98,7 +87,34 @@ def home():
     img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
     img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
     img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
-    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img5=img5, nombre=session.get('usuario'))
+
+
+    v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
+    img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
+    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')  
+
+
+
+
+
+
+
+
+    resultados = obtener_suma_venta_productos()
+    ventas_por_producto, meses = procesar_datos_productos(resultados)
+
+    # Seleccionar los tres productos más vendidos
+    productos_top = sorted(ventas_por_producto.keys(), 
+                           key=lambda p: sum(ventas_por_producto[p]), 
+                           reverse=True)[:3]
+    ventas_top = [ventas_por_producto[producto] for producto in productos_top]
+
+    # Crear el gráfico
+    img4 = crear_stackplot_base64(*ventas_top, meses=meses, labels=productos_top)
+
+
+    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img4=img4, nombre=session.get('usuario'))
+
 
 
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
@@ -222,7 +238,6 @@ def codigo_verificacion():
 
 
 
-# Filtrado por fechas
 def filtrar_por_fechas(datos, fecha_inicio, fecha_fin):
     fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
     fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
@@ -232,11 +247,18 @@ def filtrar_por_fechas(datos, fecha_inicio, fecha_fin):
     ]
     return datos_filtrados
 def obtener_ultimo_dia_mes(fecha):
-        # Separar año y mes
         anio, mes = map(int, fecha.split("-"))
-        # Obtener el último día del mes
         _, ultimo_dia = calendar.monthrange(anio, mes)
         return f"{fecha}-{ultimo_dia:02d}"
+
+
+
+
+
+def procesar_datos_productos(resultados):
+    productos = {}
+    meses = sorted(set(row[2] for row in resultados))  # Extraer meses únicos y ordenarlos
+
 
 
 
@@ -248,18 +270,22 @@ def obtener_compras_totales_por_mes():
 def obtener_entregas_totales_por_mes():
     resultados = db.session.execute(text("SELECT * FROM obtener_entregas_totales_por_mes();")).fetchall()
     return resultados
-def obtener_ventas_totales_por_proveedor():
-    resultados = db.session.execute(text("select * from obtener_ventas_maquinas_por_proveedor();")).fetchall()
-    return resultados
-def obtener_ventas_totales_por_proveedor_producto():
-    resultados = db.session.execute(text("select * from obtener_ventas_productos_por_proveedor();")).fetchall()
+def obtener_suma_venta_productos():
+    resultados = db.session.execute(text("select * from obtener_productos_mas_vendidos();")).fetchall()
     return resultados
 
 
+def crear_grafico(meses, totales, img, titulo, color_list=None, xlabel='Meses', ylabel='Valores (bs.)', facecolor='#ffffff'):
+    # Definir una lista de colores si no se pasa
+    if color_list is None:
+        color_list = ['#c81d25', '#087e8b', '#0b3954']  # Rojo, azul, azul oscuro (ejemplo)
 
-def crear_grafico(meses, totales, img, titulo, color='red', xlabel='Meses', ylabel='Valores (bs.)', facecolor='#ffffff'):
-    plt.figure(figsize=(7, 4))
-    plt.bar(meses, totales, color=color)
+    # Ajustar el número de colores para que coincida con la cantidad de barras
+    colores = [color_list[i % len(color_list)] for i in range(len(meses))]
+
+    # Crear el gráfico de barras con colores intercalados
+    plt.figure(figsize=(5, 3))
+    plt.bar(meses, totales, color=colores)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(titulo)
@@ -267,17 +293,28 @@ def crear_grafico(meses, totales, img, titulo, color='red', xlabel='Meses', ylab
     plt.xticks(rotation=45)
     plt.tight_layout()
 
+    # Guardar el gráfico en el archivo img
     plt.savefig(img, format='png')
     plt.close()
 
-def grafico_pastel(nombres, cantidades, img, titulo):
+
+
+def crear_stackplot_base64(*ventas, meses, labels):
     colores = ['#c81d25', '#087e8b', '#0b3954']
-    if len(nombres) != len(cantidades):
-        raise ValueError("Los arreglos de nombres y cantidades deben tener la misma longitud.")
-    plt.figure(figsize=(8, 8))
-    plt.pie(cantidades, labels=nombres, autopct='%1.1f%%', startangle=140, colors=colores)
-    plt.title(titulo, pad=20, loc="left")
-    plt.axis('equal')
-    
+    plt.figure(figsize=(5, 3))
+    plt.stackplot(meses, *ventas, labels=labels, colors=colores)
+    plt.title('Ventas de productos por mes')
+    plt.xlabel('Mes')
+    plt.ylabel('Cantidad de ventas')
+    plt.legend(loc='upper left')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    img = io.BytesIO()
     plt.savefig(img, format='png')
+    img.seek(0)
     plt.close()
+
+    # Convertir la imagen a Base64
+    img_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    return img_base64
