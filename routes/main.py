@@ -8,8 +8,8 @@ from models.empleados import Rol
 from database import db
 from sqlalchemy import text
 import requests
-import io
 import matplotlib
+import io
 from datetime import datetime
 matplotlib.use('Agg')  
 import calendar
@@ -51,11 +51,26 @@ def home():
     
     compras_totales = obtener_compras_totales_por_mes()
     entregas_totales = obtener_entregas_totales_por_mes()
+    #obtencion de graficos de proveedores de maquinas
+    ventas_por_proveedor = obtener_ventas_totales_por_proveedor()
+    nombresProveedorPastel = []
+    totalesProveedoPastel = []
+    for row in ventas_por_proveedor:
+        nombresProveedorPastel.append(row.proveedor)
+        totalesProveedoPastel.append(row.total)
+        
     
+    #obtencion de graficos de proveedores de productos
+    ventas_por_proveedor_producto = obtener_ventas_totales_por_proveedor_producto()
+    nombresProveedorPastelProducto = []
+    totalesProveedoPastelProducto = []
+    for row in ventas_por_proveedor_producto:
+        nombresProveedorPastelProducto.append(row.proveedor)
+        totalesProveedoPastelProducto.append(row.total)
+        
+    #obtencion de                                                                                                                 
     compras_filtradas = filtrar_por_fechas(compras_totales, c_fecha_inicio, c_fecha_fin)
     entregas_filtradas = filtrar_por_fechas(entregas_totales, e_fecha_inicio, e_fecha_fin)
-
-    
     
     meses_compras = [fila[0] for fila in compras_filtradas] 
     totales_compras = [fila[1] for fila in compras_filtradas] 
@@ -68,11 +83,8 @@ def home():
     img2 = BytesIO()
     crear_grafico(meses_entregas, totales_entregas, img2, "Dinero gastado en suministros mensualmente")  
     img2.seek(0) 
-
-    v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
-    img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
-    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')  
-
+    
+    #obtencion de grafico pastel de proveedores
     img3 = BytesIO()
     grafico_pastel(nombresProveedorPastel, totalesProveedoPastel, img3, "Porcentaje de proveedores mas solicitados para maquinas")  
     img3.seek(0) 
@@ -81,11 +93,6 @@ def home():
     img5 = BytesIO()
     grafico_pastel(nombresProveedorPastelProducto, totalesProveedoPastelProducto, img5, "Porcentaje de proveedores mas solicitados para productos")
     img5.seek(0)
-
-
-
-
-
 
     resultados = obtener_suma_venta_productos()
     ventas_por_producto, meses = procesar_datos_productos(resultados)
@@ -98,10 +105,13 @@ def home():
 
     # Crear el gráfico
     img4 = crear_stackplot_base64(*ventas_top, meses=meses, labels=productos_top)
-
-    flash("Se cargaron los graficos")
-
-    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img4=img4, nombre=session.get('usuario'))
+    
+    v_rol = session['rol'] if session.get('rol') else "Aún no te asignaron un rol"
+    img1 = base64.b64encode(img1.getvalue()).decode('utf-8')  
+    img2 = base64.b64encode(img2.getvalue()).decode('utf-8')
+    img3 = base64.b64encode(img3.getvalue()).decode('utf-8')
+    img5 = base64.b64encode(img5.getvalue()).decode('utf-8')
+    return render_template("index.html", img1=img1, img2=img2, rol=v_rol, img3=img3, img4=img4,img5=img5, nombre=session.get('usuario'))
 
 
 @main_blueprint.route("/login", methods=["POST", "GET"]) 
@@ -224,25 +234,6 @@ def codigo_verificacion():
 
 
 
-
-
-def filtrar_por_fechas(datos, fecha_inicio, fecha_fin):
-    fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
-    fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
-    datos_filtrados = [
-        fila for fila in datos 
-        if fecha_inicio <= datetime.strptime(fila[0], "%Y-%m") <= fecha_fin
-    ]
-    return datos_filtrados
-def obtener_ultimo_dia_mes(fecha):
-        anio, mes = map(int, fecha.split("-"))
-        _, ultimo_dia = calendar.monthrange(anio, mes)
-        return f"{fecha}-{ultimo_dia:02d}"
-
-
-
-
-
 def procesar_datos_productos(resultados):
     productos = {}
     meses = sorted(set(row[2] for row in resultados))  # Extraer meses únicos y ordenarlos
@@ -260,6 +251,22 @@ def procesar_datos_productos(resultados):
     }
 
     return ventas_por_producto, meses
+
+# Filtrado por fechas
+def filtrar_por_fechas(datos, fecha_inicio, fecha_fin):
+    fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
+    fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
+    datos_filtrados = [
+        fila for fila in datos 
+        if fecha_inicio <= datetime.strptime(fila[0], "%Y-%m") <= fecha_fin
+    ]
+    return datos_filtrados
+def obtener_ultimo_dia_mes(fecha):
+        # Separar año y mes
+        anio, mes = map(int, fecha.split("-"))
+        # Obtener el último día del mes
+        _, ultimo_dia = calendar.monthrange(anio, mes)
+        return f"{fecha}-{ultimo_dia:02d}"
 
 
 
@@ -282,17 +289,11 @@ def obtener_suma_venta_productos():
     return resultados
 
 
-def crear_grafico(meses, totales, img, titulo, color_list=None, xlabel='Meses', ylabel='Valores (bs.)', facecolor='#ffffff'):
-    # Definir una lista de colores si no se pasa
-    if color_list is None:
-        color_list = ['#c81d25', '#087e8b', '#0b3954']  # Rojo, azul, azul oscuro (ejemplo)
 
-    # Ajustar el número de colores para que coincida con la cantidad de barras
-    colores = [color_list[i % len(color_list)] for i in range(len(meses))]
 
-    # Crear el gráfico de barras con colores intercalados
+def crear_grafico(meses, totales, img, titulo, color='red', xlabel='Meses', ylabel='Valores (bs.)', facecolor='#ffffff'):
     plt.figure(figsize=(5, 3))
-    plt.bar(meses, totales, color=colores)
+    plt.bar(meses, totales, color=color)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(titulo)
@@ -300,7 +301,6 @@ def crear_grafico(meses, totales, img, titulo, color_list=None, xlabel='Meses', 
     plt.xticks(rotation=45)
     plt.tight_layout()
 
-    # Guardar el gráfico en el archivo img
     plt.savefig(img, format='png')
     plt.close()
 
