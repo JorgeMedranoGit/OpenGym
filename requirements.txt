@@ -7,3 +7,4 @@ psycopg2-binary
 flask_mail
 requests
 matplotlib
+python-dotenv
