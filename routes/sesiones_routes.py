@@ -82,7 +82,7 @@ def sessionCrud():
 
         return redirect(url_for("session_blueprint.sessionCrud"))
 
-    return render_template("session.html")
+    return render_template("session.html", rol = session["rol"])
 
 @session_blueprint.route("/cliente_card/<int:id>", methods=["GET", "POST"])
 def ver_cliente(id):
@@ -326,6 +326,7 @@ def reporte_visitas():
             fecha_inicio=fecha_inicio,
             fecha_fin=fecha_fin,
             es_admin=es_admin,
+            rol = session["rol"],
         )
     except Exception as e:
         flash(f"Error al generar el reporte: {str(e)}", "danger")

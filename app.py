@@ -5,6 +5,13 @@ from config import Config
 from flask_mail import Mail
 from database import init_app, db
 from config import Email
+import os
+from dotenv import load_dotenv
+from config import logging
+
+
+# Resto del código de Flask
+
 
 
 # Si descomentan esto basicamente estan abriendo la caja de pandora XD
@@ -29,16 +36,20 @@ from routes.mantenimientoRutas import mantenimiento_bp
 
 from routes.sesiones_routes import session_blueprint
 
+
 from routes.pagos_routes import pago_blueprint
 
+load_dotenv()
 
+
+logging.configure_logging()
 
 mail = Mail()
 
 # Inicialización de la app.
 app = Flask(__name__)
 # -- Configuración de la base de datos mediante Config() donde se encuentra la base de datos
-app.secret_key = "qc2024"
+app.secret_key = os.environ.get('APP_SECRET_KEY')
 app.config.from_object(Config.Config()) 
 app.config.from_object(Email.Email())
 
@@ -68,6 +79,23 @@ app.register_blueprint(session_blueprint)
 
 app.register_blueprint(pago_blueprint)
 
+
+
+# Manejo de errores para el error 500
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
+
+# Manejo de errores para el error 404
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+# Manejo de excepciones generales
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Aquí puedes registrar el error si lo deseas
+    return render_template('500.html', error=str(e)), 500
 
 
 if __name__ == "__main__":
