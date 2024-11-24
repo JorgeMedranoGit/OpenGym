@@ -20,3 +20,73 @@
 input{
     width: 120px;
 }
+
+
+
+
+
+.custom-card-info {
+    background-color: #faeded; 
+    color: #c12126;  
+    font-weight: bold;          
+    border: none;             
+    border-radius: 10px;  
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);   
+  }
+  
+  .custom-card-info .card-header {
+    background-color: #faeded;
+    border-bottom: none;
+  }
+  
+  .custom-card-info .card-body {
+    padding: 1.5rem;
+  }
+  
+  .custom-card-info .card-title {
+    font-size: 1.25rem;       
+    margin-bottom: 1rem;      
+  }
+  .custom-card-info:hover {
+    transform: scale(1.05);         
+    background-color: #c12126;
+    color: white;    
+    cursor: pointer;            
+  }
+  
+  .custom-card-info:hover .card-header {
+    background-color: #c12126;       
+  }
+  .custom-card-info:hover .linea{
+    border: 1px solid white;
+  }
+  
+  .btn-red{
+    background-color: #faeded;
+    color: #c12126;
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 10px 40px;
+    margin: 20px 5px 5px 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    
+  }
+  
+  .btn-red:hover{
+    background-color: #c12126;
+    color: white;
+    text-decoration: none;
+  }
+
+
+
+  /*Filtros Pablo*/
+
+  .filtro_compras{
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 30px 30px 10px 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }

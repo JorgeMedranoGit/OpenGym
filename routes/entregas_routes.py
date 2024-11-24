@@ -24,38 +24,116 @@ entregas_blueprint = Blueprint('entregas_blueprint', __name__)
 
 # Ruta para listar las entregas
 
-@entregas_blueprint.route("/entregas" , methods=['GET', 'POST'])
+@entregas_blueprint.route("/entregas", methods=['GET', 'POST'])
 def entregaCrud():
-    # Verificacion de inicio de sesion 
+    # Verificación de inicio de sesión
     if "email" not in session:
-       flash("Debes iniciar sesión")
-       return redirect("/login")
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+
     if session["rol"] == "Administrador":
-        # Obtencion de entregas y estados, para listarlos y permitir el cambio de estado en un combobox
-        entregas = obtenerEntregas()
+        # Obtención de entregas y estados, para listarlos y permitir el cambio de estado en un combobox
+        proveedor_id = request.form.get('proveedor_id')
+        print(f"Proveedor seleccionado: {proveedor_id}")  # Debugging
+
+        fecha_inicio = request.form.get('fecha_inicio')
+        fecha_fin = request.form.get('fecha_fin')
+        if fecha_inicio:
+            fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
+        if fecha_fin:
+            fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
+
+        # Obtener entregas aplicando filtros
+        entregas = obtenerEntregas(proveedor_id, fecha_inicio, fecha_fin)
+
+        # Obtener proveedores para el filtro en la plantilla
+        proveedores = db.session.execute(text('SELECT idproveedor, nombre FROM proveedores')).fetchall()
         estados = obtener_todos_los_estados()
 
-        # Funcion para  calcular los totales y extraer los estados de cada entrega, luego agregarlos a una lista
+        # Inicialización de variables para calcular los totales
+        proveedor_mas_solicitado = None
+        producto_mas_solicitado = None
+        total_gastado = 0
+
+        # Diccionarios para contar productos y proveedores
+        proveedor_contador = {}
+        producto_contador = {}
+
+        # Función para calcular los totales y extraer los estados de cada entrega
         for entrega in entregas:
-            id = entrega['identrega']
+            id = entrega['identrega']  # Cambiado de 'entrega['identrega']' a 'entrega.identrega'
+            
+            # Calcular el total de la entrega
             total = db.session.execute(text('SELECT calcular_total_entrega(:idC)'), {'idC': id}).scalar()
-            estado = db.session.execute(text('SELECT devolver_ultimo_estado(:idC)'),{'idC': id}).scalar()
-            entrega['total'] = total if total is not None else 0
-            entrega['estado'] = estado if estado is not None else "Pendiente"
+            total_gastado += total if total else 0
+
+            proveedor_id = entrega['idproveedor'] 
+            if proveedor_id in proveedor_contador:
+                proveedor_contador[proveedor_id] += 1
+            else:
+                proveedor_contador[proveedor_id] = 1
+
+            detalle_entrega = db.session.execute(
+                text('SELECT * FROM detalleentregas WHERE identrega = :identrega'), {'identrega': id}
+            ).fetchall()
+
+            # Calcular el producto más solicitado
+            for detalle in detalle_entrega:
+                producto_id = detalle[1] 
+                cantidad = detalle[0] 
+                
+                if producto_id in producto_contador:
+                    producto_contador[producto_id] += cantidad
+                else:
+                    producto_contador[producto_id] = cantidad
+
+            estado = db.session.execute(text('SELECT devolver_ultimo_estado(:idC)'), {'idC': id}).scalar()
+            entrega['estado'] = estado if estado else "Pendiente"
             entrega['fechaestado'] = db.session.execute(
                 text('SELECT es.fechaestado FROM entregaestado es WHERE identrega = :identrega ORDER BY idestado DESC'),
-                {'identrega': id} 
+                {'identrega': id}
             ).scalar()
-            if entrega['fechaestado'] is not None:
+            if entrega['fechaestado']:
                 entrega['fechaestado'] = entrega['fechaestado'].strftime("%d/%m/%Y")
             else:
-            # Manejo cuando fechaestado es None, asignar un valor por defecto si es necesario
                 entrega['fechaestado'] = "Fecha no disponible"
-        # Envio de las listas creadas previamente
-        return render_template("entregas.html", entregas=entregas, estados = estados, rol = session["rol"])
+
+        if proveedor_contador:
+            proveedor_mas_solicitado = max(proveedor_contador, key=proveedor_contador.get)
+            proveedor = Proveedores.query.get(proveedor_mas_solicitado)
+            proveedor = proveedor.nombre
+
+        if producto_contador:
+            producto_mas_solicitado = db.session.execute(
+                text('''
+                    SELECT p.nombre, SUM(de.cantidad) AS total
+                    FROM detalleentregas de
+                    JOIN productos p ON de.idp = p.idp
+                    GROUP BY p.idp, p.nombre
+                    ORDER BY total DESC
+                    LIMIT 1
+                ''')
+            ).fetchone()
+
+            if producto_mas_solicitado:
+                p_nom = producto_mas_solicitado[0]  
+                p_total = producto_mas_solicitado[1]
+
+                producto_mas_solicitado_dict = {'nombre': p_nom, 'total': p_total}
+            else:
+                producto_mas_solicitado_dict = {'nombre': 'N/A', 'total': 0}
+        else:
+            producto_mas_solicitado_dict = {'nombre': 'N/A', 'total': 0}
+
+        return render_template("entregas.html", entregas=entregas, estados=estados, 
+                               proveedor_mas_solicitado=proveedor, 
+                               producto_mas_solicitado=producto_mas_solicitado_dict,
+                               proveedores = proveedores,
+                               total_gastado=total_gastado, rol=session["rol"])
     else:
-        flash("No tienes permisos suficiente")
+        flash("No tienes permisos suficientes")
         return redirect("tareasCom")
+
 
 
 # Ruta para agregar entregas
@@ -211,11 +289,27 @@ def cambiar_estado():
 
 
 
-def obtenerEntregas():
-    entregas = Entregas.query.order_by(Entregas.identrega.desc()).all()
-
-    resultado = []
+def obtenerEntregas(proveedor_id=None, fecha_inicio=None, fecha_fin=None):
+    # Comenzamos con una consulta base que obtiene todas las entregas
+    query = Entregas.query
     
+    # Filtrar por proveedor si se proporciona
+    if proveedor_id:
+        query = query.filter(Entregas.idproveedor == proveedor_id)
+
+    # Filtrar por fecha de inicio si se proporciona
+    if fecha_inicio:
+        query = query.filter(Entregas.fechapedido >= fecha_inicio)
+
+    # Filtrar por fecha de fin si se proporciona
+    if fecha_fin:
+        query = query.filter(Entregas.fechapedido <= fecha_fin)
+
+    # Ejecutamos la consulta
+    entregas = query.order_by(Entregas.identrega.desc()).all()
+
+    # Formatear los resultados
+    resultado = []
     for entrega in entregas:
         fecha_formateada = entrega.fechapedido.strftime("%d/%m/%Y")
         hora_formateada = entrega.fechapedido.strftime("%H:%M:%S")
@@ -224,9 +318,11 @@ def obtenerEntregas():
             'fechaentrega': fecha_formateada,
             'horaentrega': hora_formateada,
             'metodopago': entrega.metodopago,
-            "proveedor": entrega.proveedor.nombre
+            "proveedor": entrega.proveedor.nombre,
+            "idproveedor": entrega.proveedor._id  # Asegúrate de que la columna sea correcta
         })
     return resultado
+
 
 
 

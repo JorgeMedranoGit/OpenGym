@@ -1,95 +1,111 @@
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 {% extends "base.html" %}
 {% block title %}Compras{% endblock %}
 {% block content %}
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 {% for msg in messages %}
-<p class="alert alert-info">{{msg}}</p>
-{% endfor%}
+<p class="alert alert-info">{{ msg }}</p>
+{% endfor %}
 {% endif %}
 {% endwith %}
 
-<style>
-  .cards-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales */
-    gap: 0px; /* Espacio entre las tarjetas */
-    margin: 0;
-    margin-top: 50px;
-    width: 60%;
-  }
-
-  .container {
-    position: relative;
-    width: 250px;
-    height: 80px;
-    border: 1px black solid;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    background-color: white;
-    padding: 30px 10px 10px 10px;
-    box-sizing: border-box;
-  }
-
-  .red-box {
-    position: absolute;
-    top: -20px;
-    left: 10px;
-    width: 120px;
-    height: 30px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    border: 2px black solid;
-  }
-
-  /* Media query para pantallas pequeñas */
-  @media (max-width: 768px) {
-    .cards-container {
-      grid-template-columns: 1fr; /* 1 columna en pantallas pequeñas */
-    }
-    .container{
-      margin-bottom: 30px;
-    }
-  }
-</style>
-
 <h3>Gestion de compras</h3>
 
-<a class="btn btn-success mt-2" href="/compras/agregar">Registrar compra</a>
+<br>
 
-<div class="cards-container">
+<div class="row">
   {% if rol == "Administrador" %}
-  <div class="container">
-      <div class="red-box" style="background-color: red;"></div>
-      {% if total_compras %}
-      <p>Total de ventas: {{ total_compras }} bs.</p>
-      {% else %}
-      <p>Aún no hay ventas registradas.</p>
-      {% endif %}
+  <div class="col-md-3">
+    <div class="card custom-card-info mb-3">
+      <div class="card-header">Ventas</div>
+      <div class="card-body">
+        <h5 class="card-title">Todas las ventas</h5>
+        {% if total_compras %}
+          <p class="card-text">Total de ventas: {{ total_compras }} bs.</p>
+        {% else %}
+          <p class="card-text">Aún no hay ventas registradas.</p>
+        {% endif %}
+      </div>
+    </div>
   </div>
   {% endif %}
-  
-  <div class="container">
-      <div class="red-box" style="background-color: #ffca47;"></div>
-      {% if total_compras_individual %}
-      <p>Tus ventas: {{ total_compras_individual }} bs.</p>
-      {% else %}
-      <p>No registraste compras</p>
-      {% endif %}
-      
+  <div class="col-md-4">
+    <div class="card custom-card-info mb-3">
+      <div class="card-header">Ventas</div>
+      <div class="card-body">
+        <h5 class="card-title">Tus Ventas</h5>
+        {% if total_compras_individual %}
+          <p class="card-text">Tus ventas: {{ total_compras_individual }} bs.</p>
+        {% else %}
+          <p class="card-text">Aún no registraste compras</p>
+        {% endif %}
+      </div>
+    </div>
   </div>
-  
-  <div class="container">
-      <div class="red-box" style="background-color: #00da77;"></div>
-      <p>Mas vendido: {{ producto_mas_comprado.nombre }} ({{producto_mas_comprado.total_compras}} u.)</p>
+  <div class="col-md-4">
+    <div class="card custom-card-info mb-3">
+      <div class="card-header">Productos</div>
+      <div class="card-body">
+        <h5 class="card-title">Producto más vendido</h5>
+        <p class="card-text">{{ producto_mas_comprado.nombre }} ({{ producto_mas_comprado.total_compras }} u.).</p>
+      </div>
+    </div>
   </div>
 </div>
 
-{% if rol == "Recepcionista" %}
-<h3>Reporte de tus compras</h3>
-{% endif %}
-{% if rol == "Administrador" %}
-<h3>Reporte de todas las compras</h3>
-{% endif %}
+<br>
+
+<a class="btn-red" href="/compras/agregar"><i class="fas fa-shopping-cart"></i> Registrar compra</a>
+
+<br><br>
+
+<div class="filtro_compras">
+  <form method="POST" action="/compras">
+    <div class="row align-items-center">
+      
+      {% if rol == "Administrador" %}
+      <div class="col-12 col-md-3 mb-2">
+        <h5 for="empleado_id">Filtrar por empleado</h5>
+        <select name="empleado_id" id="empleado_id" class="form-control">
+          <option value="">Selecciona un empleado</option>
+          {% for empleado in empleados %}
+            <option value="{{ empleado.idempleado }}" {% if empleado.idempleado == empleado_id %}selected{% endif %}>{{ empleado.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      
+      <div class="col-12 col-md-3 mb-2">
+        <h5 for="cliente_id">Filtrar por cliente</h5>
+        <select name="cliente_id" id="cliente_id" class="form-control">
+          <option value="">Selecciona un cliente</option>
+          {% for cliente in clientes %}
+            <option value="{{ cliente.idcliente }}" {% if cliente.idcliente == cliente_id %}selected{% endif %}>{{ cliente.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3 mb-2">
+        <h5 for="fecha_inicio">Fecha Inicio:</h5>
+        <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ fecha_inicio or '' }}">
+      </div>
+      
+      <div class="col-12 col-md-3 mb-2">
+        <h5 for="fecha_fin">Fecha Fin:</h5>
+        <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ fecha_fin or '' }}">
+      </div>
+
+      <div class="col-12  d-flex justify-content-end">
+        <button type="submit" class="btn-red">Filtrar</button>
+        <a href="/compras" class="btn-red">Limpiar</a>
+      </div>
+    </div>
+    
+  </form>
+</div>
+
+
+<br>
 
 <div class="custom-grid-container">
   {% for compra in compras %}
@@ -108,8 +124,11 @@
   {% endfor %}
   {% if not compras %}
   <p>Aun no se han registrado compras</p>
-  {% endif%}
+  {% endif %}
 </div>
+
+
+
 
 
 
