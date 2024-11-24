@@ -13,7 +13,7 @@
     <select type="number" name="idcliente" class="form-control mt-2" placeholder="Cliente" required>
         <option value="" disabled selected>Seleccione un cliente</option>
         {% for cliente in clientes %}
-            <option value="{{cliente._id}}">{{cliente.nombre}}</option>
+            <option value="{{cliente.idcliente}}">{{cliente.nombre}}</option>
         {% endfor %}
     </select>
 

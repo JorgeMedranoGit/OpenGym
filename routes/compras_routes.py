@@ -33,44 +33,58 @@ def compraCrud():
 
     compras = []
     
-    if session["rol"] == "Administrador":
-        # Si el usuario es Administrador, obtenemos todas las compras
-        compras = obtenerCompras()
-        for compra in compras:
-            id = compra['idcompra']
-            total = db.session.execute(text('SELECT calcular_total_compra(:idC)'), {'idC': id}).scalar()
-            compra['total'] = total if total is not None else 0
-    elif session["rol"] == "Recepcionista":
-        compras = obtenerCompras_emp()
-        for compra in compras:
-            id = compra['idcompra']
-            total = db.session.execute(text('SELECT calcular_total_compra(:idC)'), {'idC': id}).scalar()
-            compra['total'] = total if total is not None else 0
-
+    # Obtener todos los empleados y clientes disponibles para el filtro, tambien las fechas
+    empleados = db.session.execute(text('SELECT idempleado, nombre FROM empleados')).fetchall()
+    clientes = db.session.execute(text('SELECT idcliente, nombre FROM clientes')).fetchall()
+    fecha_inicio = request.form.get('fecha_inicio')
+    fecha_fin = request.form.get('fecha_fin')
     
+    # Convertir las fechas si están presentes
+    if fecha_inicio:
+        fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
+    if fecha_fin:
+        fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
+
+    # Filtros seleccionados
+    empleado_id = request.form.get('empleado_id')
+    cliente_id = request.form.get('cliente_id')
+
+    # Filtrar las compras según el rol y los filtros seleccionados
+    if session["rol"] == "Administrador":
+        compras = obtenerCompras(empleado_id, cliente_id, fecha_inicio, fecha_fin)
+    elif session["rol"] == "Recepcionista":
+        compras = obtenerCompras_emp(empleado_id, cliente_id)
+
+    for compra in compras:
+        id = compra['idcompra']
+        total = db.session.execute(text('SELECT calcular_total_compra(:idC)'), {'idC': id}).scalar()
+        compra['total'] = total if total is not None else 0
 
     # Obtención de totales para el Administrador
     total_compras = db.session.execute(text('SELECT calcular_total_compras_admin()')).scalar()
     total_compras_individual = db.session.execute(text('SELECT calcular_total_compras_individual(:idemp)'), {'idemp': session["empleado_id"]}).scalar()
     
     # Obtener el producto con más compras
-    producto_mas_comprado = db.session.execute(text('''
-        SELECT p.idp, p.nombre, SUM(c.cantidad) AS total_compras
-        FROM detallecompras c
-        JOIN productos p ON c.idproducto = p.idp
-        GROUP BY p.idp, p.nombre
-        ORDER BY total_compras DESC
-        LIMIT 1;
+    producto_mas_comprado = db.session.execute(text(''' 
+        SELECT p.idp, p.nombre, SUM(c.cantidad) AS total_compras 
+        FROM detallecompras c 
+        JOIN productos p ON c.idproducto = p.idp 
+        GROUP BY p.idp, p.nombre 
+        ORDER BY total_compras DESC 
+        LIMIT 1; 
     ''')).fetchone()
 
-    # Envío de la lista al HTML de compras
     return render_template("compras.html", 
                            compras=compras, 
                            total_compras=total_compras, 
                            total_compras_individual=total_compras_individual, 
                            rol=session["rol"],
                            producto_mas_comprado=producto_mas_comprado,
-                           )
+                           empleados=empleados,
+                           clientes=clientes,
+                           empleado_id=empleado_id,
+                           cliente_id=cliente_id)
+
 
 
 # Ruta para agregar una compra
@@ -149,22 +163,45 @@ def formCompra():
 
 
 
-def obtenerCompras():
-    compras = Compras.query.all()
+def obtenerCompras(empleado_id=None, cliente_id=None, fecha_inicio=None, fecha_fin=None):
+    # Comenzamos con una consulta base que obtiene todas las compras
+    query = Compras.query
+    print(f"Empleado seleccionado: {empleado_id}")
+
+    # Filtramos por empleado_id si se proporciona
+    if empleado_id:
+        query = query.filter(Compras.idempleado == empleado_id)  # Asegúrate de filtrar por la columna idempleado
+
+    # Filtramos por cliente_id si se proporciona
+    if cliente_id:
+        query = query.filter(Compras.idcliente == cliente_id)
+
+    # Filtrar por fecha de inicio si se proporciona
+    if fecha_inicio:
+        query = query.filter(Compras.fechacompra >= fecha_inicio)
+
+    # Filtrar por fecha de fin si se proporciona
+    if fecha_fin:
+        query = query.filter(Compras.fechacompra <= fecha_fin)
+
+    # Ejecutamos la consulta
+    compras = query.all()
     resultado = []
     
+    # Formateamos los resultados
     for compra in compras:
         fecha_formateada = compra.fechacompra.strftime("%d/%m/%Y")
         hora_formateada = compra.fechacompra.strftime("%H:%M:%S")
         resultado.append({
             'idcompra': compra.idcompra,
-            'nombreempleado': compra.empleado.nombre,
+            'nombreempleado': compra.empleado.nombre,  # Aquí puedes acceder al nombre del empleado a través de la relación
             'nombrecliente': compra.cliente.nombre,
             'fechacompra': fecha_formateada,
             'horacompra': hora_formateada,
             'metodopago': compra.metodopago
         })
     return resultado
+
 
 def obtenerCompras_emp():
     compras = Compras.query.filter_by(idempleado= session["empleado_id"])

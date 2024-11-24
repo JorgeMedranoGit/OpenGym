@@ -8,8 +8,85 @@
         {% endfor %}
     {% endif %}
 {% endwith %}
-<br><br>
-<a class="btn btn-success mt-2" href="/entregas/agregar">Registrar entrega</a>
+<br>
+<h3>Gestion de entregas</h3>
+<br>
+<div class="row">
+  <div class="col-md-3">
+    <div class="card custom-card-info mb-3">
+      <div class="card-header">Compras</div>
+      <div class="card-body">
+        <h5 class="card-title">Total en compras</h5>
+        {% if total_gastado %}
+          <p class="card-text">{{ total_gastado }} bs.</p>
+        {% else %}
+          <p class="card-text">Aún no hay ventas registradas.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card custom-card-info mb-3">
+      <div class="card-header">Productos</div>
+      <div class="card-body">
+        <h5 class="card-title">Producto más solicitado</h5>
+        {% if producto_mas_solicitado %}
+          <p class="card-text">{{ producto_mas_solicitado.nombre }} ({{producto_mas_solicitado.total}} u.)</p>
+        {% else %}
+          <p class="card-text">Aún no registraste compras</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card custom-card-info mb-3">
+      <div class="card-header">Proveedores</div>
+      <div class="card-body">
+        <h5 class="card-title">Proveedor más solicitado</h5>
+        <p class="card-text">{{ proveedor_mas_solicitado }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+<a class="btn-red" href="/entregas/agregar"><i class="fas fa-shopping-cart"></i> Registrar entrega</a>
+<br><br><br>
+<div class="filtro_compras">
+  <form method="POST" action="/entregas">
+    <div class="row align-items-center">
+
+      <!-- Filtro por proveedor -->
+      <div class="col-12 col-md-3 mb-2">
+        <h5 for="proveedor_id">Filtrar por proveedor</h5>
+        <select name="proveedor_id" id="proveedor_id" class="form-control">
+          <option value="">Selecciona un proveedor</option>
+          {% for proveedorr in proveedores %}
+            <option value="{{ proveedorr.idproveedor }}" {% if proveedorr.proveedor_id == idproveedor %}selected{% endif %}>
+              {{ proveedorr.nombre }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Filtros de fecha -->
+      <div class="col-12 col-md-3 mb-2">
+        <h5 for="fecha_inicio">Fecha Inicio:</h5>
+        <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ fecha_inicio or '' }}">
+      </div>
+
+      <div class="col-12 col-md-3 mb-2">
+        <h5 for="fecha_fin">Fecha Fin:</h5>
+        <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ fecha_fin or '' }}">
+      </div>
+
+      <div class="col-12 d-flex justify-content-end">
+        <button type="submit" class="btn-red">Filtrar</button>
+        <a href="/entregas" class="btn-red">Limpiar</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<br>
 
 <div class="custom-grid-container">
   {% for entrega in entregas %}
