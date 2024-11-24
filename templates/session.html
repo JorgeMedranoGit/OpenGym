@@ -1,88 +1,115 @@
 {% extends "base.html" %}
-{% block title %}Sesiones{% endblock %}
+{% block title %}Gestión de Sesiones{% endblock %}
+
 {% block content %}
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        {% for msg in messages %}
-            <p>{{ msg }}</p>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
-<br><br>
-<form method="POST" action="/session" class="form mt-3">
-    <input type="hidden" name="sesion_id" value="{{ sesion.idsesion if sesion else '' }}">
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">Registrar Visita</h1>
 
-    <select class="form-select" id="tipo_sesion" name="tipo_sesion" required>
-        <option selected for="tipo_sesion">Tipo de Sesión:</option>
-        <option value="visita">Visita</option>
-        <option value="miembro">Miembro</option>
-    </select>
+    <!-- Mensajes de alerta -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {% for msg in messages %}
+                    <p>{{ msg }}</p>
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+    {% endwith %}
 
-    <div class="form-group">
-        <label for="buscarCliente">Buscar Cliente:</label>
-        <input type="text" id="buscarCliente" class="form-control" placeholder="Escribe un nombre...">
-        <ul id="resultadosBusqueda" class="list-group mt-2"></ul>
-    </div>
-    
+    <!-- Formulario principal -->
+    <form method="POST" action="/session" class="card shadow p-4">
+        <!-- Tipo de sesión -->
+        <div class="mb-4">
+            <label for="tipo_sesion" class="form-label">Tipo de Sesión:</label>
+            <select class="form-select" id="tipo_sesion" name="tipo_sesion" required>
+                <option value="" disabled selected>Seleccione un tipo de sesión</option>
+                <option value="visita">Visita</option>
+                <option value="miembro">Miembro</option>
+            </select>
+        </div>
 
-    <div id="visita_fields" style="display: none;">
-        <label for="costo">Costo:</label>
-        <input type="number" name="costo" step="0.01" min="0" required>
-        <label for="metodo_pago">Método de Pago:</label>
-        <select name="metodo_pago" required>
-            <option value="efectivo">Efectivo</option>
-            <option value="tarjeta">Tarjeta</option>
-        </select>
-    </div>
+        <!-- Campos para miembros -->
+        <div id="miembro_fields" class="mb-4" style="display: none;">
+            <label for="buscarCliente" class="form-label">Buscar Cliente:</label>
+            <input type="text" id="buscarCliente" class="form-control" placeholder="Escribe el nombre del cliente...">
+            <ul id="resultadosBusqueda" class="list-group mt-2"></ul>
+        </div>
 
-    <input type="submit" class="btn btn-success mt-2"/>
-</form>
+        <!-- Campos para visitas -->
+        <div id="visita_fields" style="display: none;">
+            <div class="mb-4">
+                <label for="costo" class="form-label">Costo de la Visita:</label>
+                <input type="number" id="costo" name="costo" class="form-control" step="0.01" min="0" placeholder="Ingrese el costo" required>
+            </div>
+            <div class="mb-4">
+                <label for="metodo_pago" class="form-label">Método de Pago:</label>
+                <select id="metodo_pago" name="metodo_pago" class="form-select" required>
+                    <option value="" disabled selected>Seleccione un método</option>
+                    <option value="efectivo">Efectivo</option>
+                    <option value="transferencia">Transferencia</option>
+                    <option value="qr">QR</option>
+                </select>
+            </div>
+        </div>
 
+        <!-- Botón de envío -->
+        <div class="d-grid">
+            <button type="submit" class="btn btn-success">Registrar Sesión</button>
+        </div>
+    </form>
+</div>
+<!-- Script para manejar la lógica de selección de tipo de sesión y búsqueda de cliente -->
 <script>
-    const tipoSesion = document.getElementById('tipo_sesion');
-    const miembroFields = document.getElementById('miembro_fields');
-    const visitaFields = document.getElementById('visita_fields');
-
-    tipoSesion.addEventListener('change', () => {
-        if (tipoSesion.value === 'visita') {
-            visitaFields.style.display = 'block';
-            miembroFields.style.display = 'none';
-        } else if (tipoSesion.value === 'miembro') {
-            visitaFields.style.display = 'none';
-            miembroFields.style.display = 'block';
-        }
-    });
-
-
-    document.getElementById('buscarCliente').addEventListener('input', function () {
-        const query = this.value.trim();
+    document.addEventListener('DOMContentLoaded', () => {
+        const tipoSesion = document.getElementById('tipo_sesion');
+        const miembroFields = document.getElementById('miembro_fields');
+        const visitaFields = document.getElementById('visita_fields');
+        const buscarCliente = document.getElementById('buscarCliente');
         const resultadosBusqueda = document.getElementById('resultadosBusqueda');
 
-        if (query.length > 0) {
-            fetch(`/clientes/buscar?q=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    resultadosBusqueda.innerHTML = '';
-                    if (data.length > 0) {
-                        data.forEach(cliente => {
-                            const li = document.createElement('li');
-                            li.className = 'list-group-item';
-                            li.textContent = `${cliente.nombre} ${cliente.apellido}`;
-                            li.addEventListener('click', () => seleccionarCliente(cliente));
-                            resultadosBusqueda.appendChild(li);
-                        });
-                    } else {
-                        resultadosBusqueda.innerHTML = '<li class="list-group-item">Sin resultados</li>';
-                    }
-                });
-        } else {
-            resultadosBusqueda.innerHTML = '';  
-        }
+        tipoSesion.addEventListener('change', () => {
+            if (tipoSesion.value === 'visita') {
+                visitaFields.style.display = 'block';
+                miembroFields.style.display = 'none';
+                buscarCliente.value = ''; 
+                resultadosBusqueda.innerHTML = '';
+            } else if (tipoSesion.value === 'miembro') {
+                miembroFields.style.display = 'block';
+                visitaFields.style.display = 'none';
+                document.getElementById('costo').value = '';
+                document.getElementById('metodo_pago').value = ''; 
+            }
+        });
+
+        buscarCliente.addEventListener('input', function () {
+            const query = this.value.trim();
+            resultadosBusqueda.innerHTML = '';
+
+            if (query.length > 0) {
+                fetch(`/clientes/buscar?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            data.forEach(cliente => {
+                                const li = document.createElement('li');
+                                li.className = 'list-group-item list-group-item-action';
+                                li.textContent = `${cliente.nombre} ${cliente.apellido}`;
+                                li.addEventListener('click', () => {
+                                    window.location.href = `/cliente_card/${cliente.idcliente}`;
+                                });
+                                resultadosBusqueda.appendChild(li);
+                            });
+                        } else {
+                            resultadosBusqueda.innerHTML = '<li class="list-group-item">Sin resultados</li>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al buscar clientes:', error);
+                        resultadosBusqueda.innerHTML = '<li class="list-group-item text-danger">Error al buscar</li>';
+                    });
+            }
+        });
     });
-
-    function seleccionarCliente(cliente) {
-        alert(`Cliente seleccionado: ${cliente.nombre} ${cliente.apellido}`);
-    }
 </script>
-
 {% endblock %}

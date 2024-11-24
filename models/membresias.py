@@ -9,7 +9,7 @@ class Membresias(db.Model):
     tipomembresia = db.Column(db.String(30), nullable=False)
     costo = db.Column(db.Numeric(8,2), nullable=False)
     habilitado = db.Column(db.Boolean, default=True) 
-    duracion = db.Column(db.Integer, nullable= True)
+    duracion = db.Column(db.Integer, nullable= False)
 
     def __init__(self, tipomembresia, costo, habilitado=True, duracion= None):
         self.tipomembresia = tipomembresia

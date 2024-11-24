@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Renovar Membresía para {{ cliente.nombre }}</h2>
+
+    <!-- Formulario de renovación -->
+    <form method="POST" action="{{ url_for('session_blueprint.renovar_membresia', id=cliente.idcliente) }}">
+        <div class="form-group mb-3">
+            <label for="idmembresia" class="form-label">Selecciona una Membresía:</label>
+            <select id="idmembresia" name="idmembresia" class="form-control" required>
+                <option value="" disabled selected>Selecciona una membresía</option>
+                {% for membresia in membresias %}
+                    <option value="{{ membresia.idmembresia }}">
+                        {{ membresia.tipomembresia }} - Duración: {{ membresia.duracion }} días - Costo: ${{ membresia.costo }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Renovar Membresía</button>
+    </form>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-info mt-4">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}

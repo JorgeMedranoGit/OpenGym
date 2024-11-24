@@ -16,23 +16,27 @@
 <body class="d-flex">
   <div class="sidebar">
     <nav class="flex-column p-3">
+
       {% if rol is defined %}
         {% if rol == "Administrador" %}
           <a class="nav-link d-flex align-items-center mb-2" href="/empleados"><i class="fas fa-users"></i> <span class="ml-2">Empleados</span></a>
-          <a class="nav-link d-flex align-items-center mb-2" href="/comprarmaquinas"><i class="fas fa-tools"></i> <span class="ml-2">Comprar Maquinas</span></a>
-          <a class="nav-link d-flex align-items-center mb-2" href="/verComprasMaquinas"><i class="fas fa-star"></i> <span class="ml-2">Detalles Compras</span></a>
-          <a class="nav-link d-flex align-items-center mb-2" href="/clientes"><i class="fas fa-address-book"></i> <span class="ml-2">Clientes</span></a>
-          <a class="nav-link d-flex align-items-center mb-2" href="/session"><i class="fas fa-address-book"></i> <span class="ml-2">Sesiones de clientes</span></a>
-          <a class="nav-link d-flex align-items-center mb-2" href="/productos"><i class="fas fa-address-book"></i> <span class="ml-2">Productos</span></a>
+          <a class="nav-link d-flex align-items-center mb-2" href="/comprarmaquinas"><i class="fas fa-cart-plus"></i> <span class="ml-2">Comprar Maquinas</span></a>
+          <a class="nav-link d-flex align-items-center mb-2" href="/verComprasMaquinas"><i class="fas fa-cash-register"></i> <span class="ml-2">Detalles Compras</span></a>
+          <a class="nav-link d-flex align-items-center mb-2" href="/session"><i class="fas fa-house-user"></i> <span class="ml-2">Registrar Visitas</span></a>
+          <a class="nav-link d-flex align-items-center mb-2" href="/productos"><i class="fa fa-box"></i><span class="ml-2">Productos</span></a>
           <a class="nav-link d-flex align-items-center mb-2" href="/entregas"><i class="fas fa-truck"></i> <span class="ml-2">Entregas</span></a>
           <a class="nav-link d-flex align-items-center mb-2" href="/proveedores"><i class="fas fa-handshake"></i> <span class="ml-2">Proveedores</span></a>
           <a class="nav-link d-flex align-items-center mb-2" href="/tareas"><i class="fas fa-list"></i> <span class="ml-2">Tareas</span></a>
-          <a class="nav-link d-flex align-items-center mb-2" href="/membresias"><i class="fas fa-star"></i> <span class="ml-2">Membresías</span></a>
-          <a class="nav-link d-flex align-items-center mb-2" href="/mantenimientos"><i class="fas fa-star"></i> <span class="ml-2">Mantenimientos</span></a>
+          <a class="nav-link d-flex align-items-center mb-2" href="/membresias"><i class="fas fa-address-card"></i> <span class="ml-2">Membresías</span></a>
+          <a class="nav-link d-flex align-items-center mb-2" href="/pago_reporte"><i class="fas fa-file-invoice-dollar"></i> <span class="ml-2">Pagos</span></a> 
+          <a class="nav-link d-flex align-items-center mb-2" href="/mantenimientos"><i class="fas fa-tools"></i> <span class="ml-2">Mantenimientos</span></a>
         {% endif %}
         
         {% if rol == "Recepcionista" or rol == "Administrador" %}
-          <a class="nav-link d-flex align-items-center mb-2" href="/compras"><i class="fas fa-shopping-cart"></i> <span class="ml-2">Compras</span></a>
+        <a class="nav-link d-flex align-items-center mb-2" href="/clientes"><i class="fas fa-address-book"></i> <span class="ml-2">Clientes</span></a>
+        <a class="nav-link d-flex align-items-center mb-2" href="/session"><i class="fas fa-house-user"></i> <span class="ml-2">Registrar Visitas</span></a>
+        <a class="nav-link d-flex align-items-center mb-2" href="/reporte_visitas"><i class="fas fa-calendar-check"></i> <span class="ml-2">Visitas</span></a> 
+          <a class="nav-link d-flex align-items-center mb-2" href="/compras"><i class="fas fa-store"></i> <span class="ml-2">Compras</span></a>
         {% endif %}
         
         <a class="nav-link d-flex align-items-center mb-2" href="/tareasCom"><i class="fas fa-tasks"></i> <span class="ml-2">Tareas Asignadas</span></a>

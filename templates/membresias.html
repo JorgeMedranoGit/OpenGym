@@ -13,6 +13,8 @@
     <input type="hidden" name="membresia_id" value="{{ membresia.idmembresia if membresia else '' }}">
     <input type="text" name="tipo_membresia" class="form-control mt-2" placeholder="Membresía" value="{{ membresia.tipomembresia if membresia else '' }}" required>
     <input type="text" name="costoMembresia" class="form-control mt-2" placeholder="Costo de la membresía" value="{{ membresia.costo if membresia else '' }}" required>
+    <input type="number" name="duracionMemebresia" class="form-control mt-2"
+    placeholder="Duracion de la membresia en dias" value="{{ membresia.duracion if membresia else '' }}">
     <input type="submit" class="btn btn-success mt-2" value="{{ 'Actualizar' if membresia else 'Añadir' }}"/>
 </form>
 
@@ -22,6 +24,7 @@
             <th>ID</th>
             <th>Tipo de membresía</th>
             <th>Costo</th>
+            <th>Duracion </th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -32,6 +35,7 @@
                 <td>{{ membresia.idmembresia }}</td>
                 <td>{{ membresia.tipomembresia }}</td>
                 <td>{{ membresia.costo }}</td>
+                <td>{{ membresia.duracion}}</td>
                 <td>
                     <a href="/membresias/editar/{{ membresia.idmembresia }}" class="btn btn-dark">Editar</a>
                     <form action="/membresias/desactivar/{{ membresia.idmembresia }}" method="post" style="display:inline;">
@@ -52,6 +56,7 @@
             <th>ID</th>
             <th>Tipo de membresía</th>
             <th>Costo</th>
+            <th>Duracion</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -62,6 +67,7 @@
                 <td>{{ membresia.idmembresia }}</td>
                 <td>{{ membresia.tipomembresia }}</td>
                 <td>{{ membresia.costo }}</td>
+                <td>{{ membresia.duracion }}</td>
                 <td>
                     <form action="/membresias/reactivar/{{ membresia.idmembresia }}" method="post" style="display:inline;">
                         <button type="submit" class="btn btn-success">Reactivar</button>
