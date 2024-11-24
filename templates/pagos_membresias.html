@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Reporte Pagos{% endblock %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="alert-container">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Reporte de Pagos</h1>
+
+    <div class="row">
+        {% if pagos_hoy %}
+            {% for tipo, total, cantidad in pagos_hoy %}
+            <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-header">{{ tipo or 'Sin Membresía' }}</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Total: ${{ total | round(2) }}</h5>
+                        <p class="card-text">Pagos registrados: {{ cantidad }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <p class="text-muted text-center">No hay pagos registrados en el rango de fechas seleccionado.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    
+    
+
+    <form method="POST" class="row g-3 mb-4">
+        <div class="col-md-5">
+            <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+        </div>
+        <div class="col-md-5">
+            <label for="fecha_fin" class="form-label">Fecha Fin</label>
+            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </form>
+    
+    
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Membresía</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                {% if rol == 'administrador' %}
+                <th>Registrado por</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for pago in pagos %}
+            <tr>
+                <td>{{ pago.fecha }}</td>
+                <td>{{ pago.nombre }} {{ pago.apellido }}</td>
+                <td>{{ pago.tipomembresia or "N/A" }}</td>
+                <td>{{ pago.monto | round(2) }}</td>
+                <td>{{ pago.estado }}</td>
+                {% if rol == 'administrador' %}
+                <td>{{ pago.idempleado }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+    
+{% endblock %}

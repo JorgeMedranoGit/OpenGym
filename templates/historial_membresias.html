@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Membresías{% endblock %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="alert-container">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Historial de Membresías de {{ cliente.nombre }} {{ cliente.apellido }}</h1>
+
+    <!-- Botón para regresar a los detalles del cliente -->
+    <div class="mb-4">
+        <a href="{{ url_for('session_blueprint.ver_cliente', id=cliente.idcliente) }}" class="btn btn-secondary">
+            Volver a los Detalles del Cliente
+        </a>
+    </div>
+
+    <!-- Tabla del Historial de Membresías -->
+    <h3>Historial de Membresías</h3>
+    {% if historial %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tipo de Membresía</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Fecha de Vencimiento</th>
+                    <th>Monto Pagado</th>
+                    <th>Fecha de Pago</th>
+                    <th>Estado de Pago</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in historial %}
+                    <tr>
+                        <td>{{ fila.tipomembresia }}</td>
+                        <td>{{ fila.fechainicio.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ fila.fechavencimiento.strftime('%d/%m/%Y') }}</td>
+                        <td>${{ fila.monto|round(2) }}</td>
+                        <td>{{ fila.fecha.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            {% if fila.estado == 'Pendiente' %}
+                                <span class="text-warning">{{ fila.estado }}</span>
+                            {% elif fila.estado == 'Completado' %}
+                                <span class="text-success">{{ fila.estado }}</span>
+                            {% else %}
+                                <span class="text-danger">{{ fila.estado }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay historial de membresías para este cliente.</p>
+    {% endif %}
+</div>
+{% endblock %}

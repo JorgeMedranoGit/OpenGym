@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Detalles del Cliente{% endblock %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="alert-container">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Detalles del Cliente</h1>
+
+    <div class="mb-4">
+        <a href="{{ url_for('session_blueprint.historial_membresias', id=cliente.idcliente) }}" class="btn btn-info">
+            Ver Historial de Membresías
+        </a>
+    </div>
+    <!-- Información del Cliente -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">{{ cliente.nombre }} {{ cliente.apellido }}</h4>
+            <p><strong>Carnet:</strong> {{ cliente.carnet }}</p>
+            <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+            <p><strong>Estado:</strong> 
+                {% if cliente.activo %}
+                    <span class="text-success">Activo</span>
+                {% else %}
+                    <span class="text-danger">Inactivo</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <h3>Membresías</h3>
+    {% if membresias %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Membresía</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Vencimiento</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for membresia in membresias %}
+                    <tr>
+                        <td>{{ membresia[0] }}</td>
+                        <td>{{ membresia[1] }}</td>
+                        <td>{{ membresia[2] }}</td>
+                        <td>{{ membresia[3] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay membresías vigentes.</p>
+    {% endif %}
+
+    <!-- Historial de Asistencias -->
+    <h2 class="mt-4">Historial de Asistencias</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Hora de Entrada</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for asistencia in asistencias %}
+                <tr>
+                    <td>{{ asistencia.fechasesion }}</td>
+                    <td>{{ asistencia.horaentrada.strftime('%H:%M:%S') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Botón para renovar membresía -->
+    <div class="mt-4">
+        {% if membresia_vencida %}
+            <a href="{{ url_for('session_blueprint.renovar_membresia', id=cliente.idcliente) }}" class="btn btn-warning">Renovar Membresía</a>
+        {% else %}
+            <p>La membresía está activa y no se puede renovar aún.</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-4">
+        {% if puede_registrar_asistencia %}
+            <form method="POST" action="{{ url_for('session_blueprint.registrar_visita', id_cliente=cliente.idcliente) }}">
+                <button type="submit" class="btn btn-success">Registrar Asistencia</button>
+            </form>
+        {% else %}
+            <p>No se puede registrar asistencia. Verifica que la membresía esté activa y vigente.</p>
+        {% endif %}
+
+        {% if membresia_vencida %}
+            <a href="{{ url_for('session_blueprint.renovar_membresia', id=cliente.idcliente) }}" class="btn btn-warning">Renovar Membresía</a>
+        {% else %}
+            <p>La membresía está activa y no se puede renovar aún.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

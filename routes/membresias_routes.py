@@ -14,12 +14,14 @@ def membresiasCrud():
     if request.method == "POST":
         tipomembresia = request.form['tipo_membresia']
         costo = Decimal(request.form['costoMembresia'])
+        duracion = request.form['duracion']
         membresia_id = request.form.get('membresia_id')
         
         if membresia_id:  
             membresia = Membresias.query.get(membresia_id)
             membresia.tipomembresia = tipomembresia
             membresia.costo = costo
+            membresia.duracion = duracion
             db.session.commit()
             flash("Membresía actualizada exitosamente!")
         else:

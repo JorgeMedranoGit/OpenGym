@@ -5,6 +5,7 @@ from models.clientes import Clientes
 from models.detalleMembresia import DetalleMembresia
 from models.membresias import Membresias
 from models.pagos import Pago
+from models.sesiones import Sesion
 from database import db
 
 cliente_blueprint = Blueprint('cliente_blueprint', __name__)
@@ -125,7 +126,7 @@ def clientesCrud():
             Pago.idcliente == Clientes.idcliente,
             Pago.idmembresia == DetalleMembresia.idmembresia
         )
-    ).filter(Clientes.activo == True).all()
+    ).filter(Clientes.activo == True, Clientes.nombre != 'Cliente').all()
 
 
     clientes_inactivos = Clientes.query.filter_by(activo=False).all()
@@ -215,14 +216,49 @@ def actualizar_estado_pago():
 
 @cliente_blueprint.route('/clientes/buscar', methods=['GET'])
 def buscar_clientes():
-    query = request.args.get('q', '')  # Captura el texto ingresado
-    if query:
-        clientes = Clientes.query.filter(Clientes.nombre.ilike(f"%{query}%")).all()
-        resultados = [{"id": cliente.idcliente, "nombre": cliente.nombre, "apellido": cliente.apellido} for cliente in clientes]
-        return jsonify(resultados)
-    return jsonify([]) 
+    query = request.args.get("q", "").strip()
+    if not query:
+        return []
+
+    clientes = Clientes.query.filter(
+        (Clientes.nombre.ilike(f"%{query}%")) | 
+        (Clientes.apellido.ilike(f"%{query}%"))
+    ).all()
+
+    resultados = [
+        {"idcliente": cliente.idcliente, "nombre": cliente.nombre, "apellido": cliente.apellido}
+        for cliente in clientes
+    ]
+    return jsonify(resultados)
+
+
+@cliente_blueprint.route('/clientes/<int:id>', methods=["GET", "POST"])
+def ver_cliente(id):
+    if "email" not in session:
+        flash("Debes iniciar sesión")
+        return redirect(url_for("main_blueprint.login"))
+
+    cliente = Clientes.query.get(id)
+    if not cliente:
+        flash("Cliente no encontrado")
+        return redirect(url_for("cliente_blueprint.clientesCrud"))
+
+    if request.method == "POST":
+        nuevo_estado = not cliente.activo 
+        cliente.activo = nuevo_estado
+        db.session.commit()
+
+        estado = "activo" if cliente.activo else "inactivo"
+        flash(f"El cliente ha sido marcado como {estado}.")
+        return redirect(url_for("session_blueprint.ver_cliente", id=id))
+    sesiones = Sesion.query.filter_by(idcliente=id).all()
+
+    return render_template("asistenciaCliente.html", cliente=cliente, sesiones=sesiones)
+
 
 
 
 def obtener_todos_los_clientes():
     return Clientes.query.all()
+
+

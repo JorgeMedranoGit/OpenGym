@@ -20,12 +20,6 @@ class Empleado(db.Model):
     rol = db.relationship('Rol', backref='empleados')
 
 
-    #para el registro de cliente controlado por el empleado de NEF
-    # detalle_membresias= relationship('DetalleMembresia', back_populates='empleado')
-    #para sesiones
-    # sesiones= relationship('Sesion', back_populates='empleado')
-    #--------------------------------------------------------------
-
 
     def __repr__(self):
         return f'<Empleado {self.nombre} {self.apellido}>'
