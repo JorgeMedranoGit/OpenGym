@@ -4,6 +4,7 @@ from decimal import Decimal
 from flask_sqlalchemy import SQLAlchemy 
 from models.entregas import Entregas
 from models.detalleEntregas import DetalleEntregas
+from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError, NoResultFound
 from models.productos import Productos
 from models.estados import Estados
 from models.proveedores import Proveedores
@@ -14,6 +15,8 @@ from sqlalchemy import text
 from routes.proveedores_routes import obtenerTodoslosProveedores
 from routes.productos_routes import obtenerTodoslosProductos
 from routes.estados_routes import obtener_todos_los_estados
+
+import logging
 
 
 entregas_blueprint = Blueprint('entregas_blueprint', __name__)
@@ -62,7 +65,7 @@ def formEntrega():
     if "usuario" not in session:
         flash("Debes iniciar sesión")
         return redirect("/login")
-    if session["rol"] == "Aministrador":
+    if session["rol"] == "Administrador":
         # Cargar el formulario enviando los proveedores y productos para los comboboxes
         if request.method == 'GET':
             proveedores = obtenerTodoslosProveedores()
@@ -71,64 +74,61 @@ def formEntrega():
 
         # Accion POST
         if request.method == 'POST':
-            try: 
-                # Obtencion de los inputs, [] se usa para las listas
-                fechapedido = request.form['fechapedido']
-                metodopago = request.form['metodopago']
-                idproveedor = request.form['idproveedor']
-                cantidades = request.form.getlist('cantidad[]')
-                preciosCompras = request.form.getlist('precio[]') 
+            # Obtencion de los inputs, [] se usa para las listas
+            fechapedido = request.form['fechapedido']
+            metodopago = request.form['metodopago']
+            idproveedor = request.form['idproveedor']
+            cantidades = request.form.getlist('cantidad[]')
+            preciosCompras = request.form.getlist('precio[]') 
 
-                fechapedido_dt = datetime.strptime(fechapedido, '%Y-%m-%dT%H:%M')
+            fechapedido_dt = datetime.strptime(fechapedido, '%Y-%m-%dT%H:%M')
 
-                # Obtener la fecha actual
-                fecha_actual = datetime.now()
+            # Obtener la fecha actual
+            fecha_actual = datetime.now()
 
-                # Comparar fechas
-                if fechapedido_dt > fecha_actual:
-                    flash("La fecha de compra no puede ser mayor a la fecha actual.")
-                    return redirect("/entregas")
+            # Comparar fechas
+            if fechapedido_dt > fecha_actual:
+                flash("La fecha de compra no puede ser mayor a la fecha actual.")
+                return redirect("/entregas")
 
-                # Validacion de formulario
-                if not cantidades or not preciosCompras:
-                    flash("Datos ingresados incorrectamente")
-                    return redirect("/entregas")
-                
-                # Insercion de la entrega
-                entregaN = Entregas(fechapedido=fechapedido, metodopago=metodopago, idproveedor=idproveedor)
-                db.session.add(entregaN) 
-                db.session.commit() 
-
-                # Insercion del estado, inicializado como pendiente (idestado = 1)
-                idEntrega = entregaN.identrega
-
-                estadoN = EntregaEstado(fechaestado=datetime.now(), identrega=idEntrega, idestado=1)
-                db.session.add(estadoN)
-                db.session.commit()
-
-                
-                # Insercion del detalle iterando sobre idp
-                productos = request.form.getlist('idp[]')
-                for idp, cantidad, precio in zip(productos, cantidades, preciosCompras):
-                    if idp.strip() and int(cantidad) > 0 and float(precio) > 0:
-                        detalle = DetalleEntregas(cantidad=int(cantidad), preciocompra=float(precio), identrega=idEntrega, idproducto=idp)
-                        db.session.add(detalle)
-
-                        producto_db = Productos.query.get(idp)
-                        if producto_db:
-                            producto_db.stock += int(cantidad)
-                db.session.commit()
-                flash("Entrega agregada exitosamente!")
+            # Validacion de formulario
+            if not cantidades or not preciosCompras:
+                flash("Datos ingresados incorrectamente")
                 return redirect("/entregas")
             
+            # Insercion de la entrega
+            entregaN = Entregas(fechapedido=fechapedido, metodopago=metodopago, idproveedor=idproveedor)
+            db.session.add(entregaN) 
+            db.session.commit() 
 
-            # Excepcion
-            except:
-                flash("No se pudo registrar la entrega ahora, intentelo mas tarde")
-                return redirect("/entregas")
+            # Insercion del estado, inicializado como pendiente (idestado = 1)
+            idEntrega = entregaN.identrega
+
+            estadoN = EntregaEstado(fechaestado=datetime.now(), identrega=idEntrega, idestado=1)
+            db.session.add(estadoN)
+            db.session.commit()
+
+            
+            # Insercion del detalle iterando sobre idp
+            productos = request.form.getlist('idp[]')
+            for idp, cantidad, precio in zip(productos, cantidades, preciosCompras):
+                if idp.strip() and int(cantidad) > 0 and float(precio) > 0:
+                    detalle = DetalleEntregas(cantidad=int(cantidad), preciocompra=float(precio), identrega=idEntrega, idproducto=idp)
+                    db.session.add(detalle)
+
+                    producto_db = Productos.query.get(idp)
+                    if producto_db:
+                        producto_db.stock += int(cantidad)
+            db.session.commit()
+            flash("Entrega agregada exitosamente!")
+            return redirect("/entregas")
+            
         else:
-            flash("No tienes permisos suficiente")
+            flash("No tienes permisos suficientes")
             return redirect("tareasCom")
+    else:
+        flash("No tienes permisos suficientes")
+        return redirect("/tareasCom")  
 
 
 @entregas_blueprint.route("/entregas/detalleentrega/<int:id>", methods=['GET'])
@@ -228,3 +228,64 @@ def obtenerEntregas():
         })
     return resultado
 
+
+
+
+@entregas_blueprint.errorhandler(TypeError)
+def handle_type_error(error):
+    logging.exception("Error de tipo: %s", error)
+    flash("Se produjo un error de tipo, revisa los datos ingresados.")
+    return redirect("/entregas")
+
+@entregas_blueprint.errorhandler(AttributeError)
+def handle_attribute_error(error):
+    logging.exception("Error de atributo: %s", error)
+    flash("Se produjo un error al acceder a un atributo, por favor verifica los datos.")
+    return redirect("/entregas")
+
+@entregas_blueprint.errorhandler(PermissionError)
+def handle_permission_error(error):
+    logging.exception("Error de permiso: %s", error)
+    flash("No tienes permiso para realizar esta acción.")
+    return redirect("/entregas")
+
+@entregas_blueprint.errorhandler(ValueError)
+def handle_value_error(error):
+    db.session.rollback()
+    logging.exception("Error de conversión de datos: %s", error)
+    flash("Error de datos ingresados, revisa los valores y vuelve a intentarlo.")
+    return redirect("/entregas")
+
+@entregas_blueprint.errorhandler(IntegrityError)
+def handle_integrity_error(error):
+    db.session.rollback()
+    logging.exception("Error de integridad en la base de datos: %s", error)
+    flash("Error al registrar la entrega, datos de integridad inválidos.")
+    return redirect("/entregas")
+
+@entregas_blueprint.errorhandler(OperationalError)
+def handle_operational_error(error):
+    db.session.rollback()
+    logging.exception("Error de conexión a la base de datos: %s", error)
+    flash("No se pudo conectar a la base de datos, por favor intenta más tarde.")
+    return redirect("/entregas")
+
+@entregas_blueprint.errorhandler(NoResultFound)
+def handle_no_result_found(error):
+    db.session.rollback()
+    logging.exception("Producto o empleado no encontrado: %s", error)
+    flash("El producto o empleado especificado no existe.")
+    return redirect("/entregas")
+
+@entregas_blueprint.errorhandler(SQLAlchemyError)
+def handle_sqlalchemy_error(error):
+    db.session.rollback()
+    logging.exception("Error general de SQLAlchemy: %s", error)
+    flash("Se produjo un error al registrar la entrega, por favor intenta más tarde.")
+    return redirect("/entregas")
+
+@entregas_blueprint.errorhandler(Exception)
+def handle_generic_exception(error):
+    logging.exception("Otro error del servidor: %s", error)
+    flash("No se pudo registrar la entrega, intentelo más tarde.")
+    return redirect("/entregas")

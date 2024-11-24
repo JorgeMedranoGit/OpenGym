@@ -2,6 +2,7 @@ from flask import Blueprint, Flask, redirect, url_for, render_template, request,
 from datetime import timedelta
 from decimal import Decimal
 from flask_sqlalchemy import SQLAlchemy 
+from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError, NoResultFound
 from models.compras import Compras
 from models.detalleCompra import DetalleCompras
 from models.productos import Productos
@@ -14,6 +15,7 @@ import matplotlib
 from datetime import datetime
 matplotlib.use('Agg')  
 import matplotlib.pyplot as plt
+import logging
 
 from io import BytesIO
 import base64
@@ -86,66 +88,66 @@ def formCompra():
             return render_template("comprasForm.html", clientes=clientes, empleados=empleados, productos=productos, rol = session["rol"])
 
     if request.method == 'POST':
-        try:
-            fechacompra = request.form['fechacompra']
-            metodopago = request.form['metodopago']
-            idempleado = request.form['idempleado']
-            idcliente = request.form['idcliente']
-
-            productos = request.form.getlist('producto[]')
-            cantidades = request.form.getlist('cantidad[]')
-
-            # Convertir fechacompra a objeto datetime
-            fecha_compra_dt = datetime.strptime(fechacompra, '%Y-%m-%dT%H:%M')
-
-            # Obtener la fecha actual
-            fecha_actual = datetime.now()
-
-            # Comparar fechas
-            if fecha_compra_dt > fecha_actual:
-                flash("La fecha de compra no puede ser mayor a la fecha actual.")
-                return redirect("/compras")
         
-        # Aquí puedes continuar con el procesamiento si la fecha es válida
+        fechacompra = request.form['fechacompra']
+        metodopago = request.form['metodopago']
+        idempleado = request.form['idempleado']
+        idcliente = request.form['idcliente']
 
-            if not cantidades or not productos:
-                flash("Datos ingresados incorrectamente")
-                return redirect("/compras")
+        productos = request.form.getlist('producto[]')
+        cantidades = request.form.getlist('cantidad[]')
 
-            stock_ok = True
-            for producto, cantidad in zip(productos, cantidades):
-                if producto.strip() and int(cantidad) > 0:
-                    producto_db = Productos.query.get(producto) 
-                    if producto_db and producto_db.stock < int(cantidad):
-                        stock_ok = False
-                        break
-            
-            if not stock_ok:
-                flash("No se pudo registrar la compra, stock insuficientes.")
-                return redirect("/compras")
+        # Convertir fechacompra a objeto datetime
+        fecha_compra_dt = datetime.strptime(fechacompra, '%Y-%m-%dT%H:%M')
 
-            compraN = Compras(fechacompra=fechacompra, metodopago=metodopago, idcliente=idcliente, idempleado=idempleado)
-            db.session.add(compraN) 
-            db.session.commit()
+        # Obtener la fecha actual
+        fecha_actual = datetime.now()
 
-            idCompra = compraN.idcompra 
-
-            for producto, cantidad in zip(productos, cantidades):
-                if producto.strip() and int(cantidad) > 0:
-                    detalle = DetalleCompras(cantidad=int(cantidad), idcompra=idCompra, idproducto=producto)
-                    db.session.add(detalle)
-
-                    # Restar del stock
-                    producto_db = Productos.query.get(producto)
-                    if producto_db:
-                        producto_db.stock -= int(cantidad)
-
-            db.session.commit()
-            flash("Compra agregada exitosamente!")
+        # Comparar fechas
+        if fecha_compra_dt > fecha_actual:
+            flash("La fecha de compra no puede ser mayor a la fecha actual.")
             return redirect("/compras")
-        except:
-            flash("No se pudo registrar la compra, intentelo mas tarde")
+    
+    # Aquí puedes continuar con el procesamiento si la fecha es válida
+
+        if not cantidades or not productos:
+            flash("Datos ingresados incorrectamente")
             return redirect("/compras")
+
+        stock_ok = True
+        for producto, cantidad in zip(productos, cantidades):
+            if producto.strip() and int(cantidad) > 0:
+                producto_db = Productos.query.get(producto) 
+                if producto_db and producto_db.stock < int(cantidad):
+                    stock_ok = False
+                    break
+        
+        if not stock_ok:
+            flash("No se pudo registrar la compra, stock insuficientes.")
+            return redirect("/compras")
+
+        compraN = Compras(fechacompra=fechacompra, metodopago=metodopago, idcliente=idcliente, idempleado=idempleado)
+        db.session.add(compraN) 
+        db.session.commit()
+
+        idCompra = compraN.idcompra 
+
+        for producto, cantidad in zip(productos, cantidades):
+            if producto.strip() and int(cantidad) > 0:
+                detalle = DetalleCompras(cantidad=int(cantidad), idcompra=idCompra, idproducto=producto)
+                db.session.add(detalle)
+
+                # Restar del stock
+                producto_db = Productos.query.get(producto)
+                if producto_db:
+                    producto_db.stock -= int(cantidad)
+
+        db.session.commit()
+        flash("Compra agregada exitosamente!")
+        return redirect("/compras")
+    
+
+
 
 def obtenerCompras():
     compras = Compras.query.all()
@@ -237,4 +239,75 @@ def detallecompras(id):
             })
     
     return jsonify({"resultados": resultados})
+
+
+
+
+
+
+
+
+
+
+# Logging
+@compras_blueprint.errorhandler(TypeError)
+def handle_type_error(error):
+    logging.exception("Error de tipo: %s", error)
+    flash("Se produjo un error de tipo, revisa los datos ingresados.")
+    return redirect("/compras")
+
+@compras_blueprint.errorhandler(AttributeError)
+def handle_attribute_error(error):
+    logging.exception("Error de atributo: %s", error)
+    flash("Se produjo un error al acceder a un atributo, por favor verifica los datos.")
+    return redirect("/compras")
+
+@compras_blueprint.errorhandler(PermissionError)
+def handle_permission_error(error):
+    logging.exception("Error de permiso: %s", error)
+    flash("No tienes permiso para realizar esta acción.")
+    return redirect("/compras")
+
+@compras_blueprint.errorhandler(ValueError)
+def handle_integrity_error(error):
+    db.session.rollback()
+    logging.exception("Error de conversión de datos: %s", error)
+    flash("Error de datos ingresados, revisa los valores y vuelve a intentarlo.")
+    return redirect("/compras")
+
+@compras_blueprint.errorhandler(IntegrityError)
+def handle_integrity_error(error):
+    db.session.rollback()
+    logging.exception("Error de integridad en la base de datos: %s", error)
+    flash("Error al registrar la compra, datos de integridad inválidos.")
+    return redirect("/compras")
+
+@compras_blueprint.errorhandler(OperationalError)
+def handle_operational_error(error):
+    db.session.rollback()
+    logging.exception("Error de conexión a la base de datos: %s", error)
+    flash("No se pudo conectar a la base de datos, por favor intenta más tarde.")
+    return redirect("/compras")
+
+@compras_blueprint.errorhandler(NoResultFound)
+def handle_no_result_found(error):
+    db.session.rollback()
+    logging.exception("Producto o empleado no encontrado: %s", error)
+    flash("El producto o empleado especificado no existe.")
+    return redirect("/compras")
+
+@compras_blueprint.errorhandler(SQLAlchemyError)
+def handle_sqlalchemy_error(error):
+    db.session.rollback()
+    logging.exception("Error general de SQLAlchemy: %s", error)
+    flash("Se produjo un error al registrar la compra, por favor intenta más tarde.")
+    return redirect("/compras")
+
+@compras_blueprint.errorhandler(Exception)
+def handle_generic_exception(error):
+    logging.exception("Otro error del servidor: %s", error)
+    flash("No se pudo registrar la compra, intentelo más tarde.")
+    return redirect("/compras")
+
+
 
