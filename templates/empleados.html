@@ -39,9 +39,18 @@
     </div>
 
     <!-- Botón de envío -->
-    <input type="submit" class="btn btn-success mt-2" value="{{ 'Actualizar' if empleado else 'Añadir' }}"/>
+    <div class="row mt-2">
+        <div class="col">
+            <input type="submit" class="btn btn-success" value="{{ 'Actualizar' if empleado else 'Añadir' }}"/>
+        </div>
+        <div class="col">
+            <a href="{{ url_for('empleados_blueprint.empleados_eliminados') }}" class="btn btn-danger">Ver empleados eliminados</a>
+        </div>
+    </div>
+    
 </form>
 
+    
 <script>
     document.getElementById('empleadoForm').addEventListener('submit', function(event) {
         // Obtiene el valor del campo de email

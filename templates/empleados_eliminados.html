@@ -1,0 +1,47 @@
+{% extends "base.html" %} 
+{% block title %}Empleados Eliminados{% endblock %} 
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p class="alert alert-info">{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Tabla de empleados eliminados -->
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Dirección</th>
+            <th>Carnet</th>
+            <th>Teléfono</th>
+            <th>Sueldo</th>
+            <th>Opciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for empleado in empleados %}
+        <tr>
+            <td>{{ empleado.idempleado }}</td>
+            <td>{{ empleado.nombre }}</td>
+            <td>{{ empleado.apellido }}</td>
+            <td>{{ empleado.direccion }}</td>
+            <td>{{ empleado.carnet }}</td>
+            <td>{{ empleado.telefono }}</td>
+            <td>{{ empleado.sueldo }}</td>
+            <td>
+                <!-- Enlace para restaurar el empleado -->
+                <a href="{{ url_for('empleados_blueprint.restaurar_empleado', empleado_id=empleado.idempleado) }}" class="btn btn-success">
+                    Restaurar
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
