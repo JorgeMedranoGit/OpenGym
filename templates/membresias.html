@@ -3,9 +3,13 @@
 {% block content %}
 {% with messages = get_flashed_messages() %}
     {% if messages %}
+    <div class="container mt-3">
         {% for msg in messages %}
-            <p>{{ msg }}</p>
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <p>{{ msg }}</p>
+            </div>
         {% endfor %}
+    </div>
     {% endif %}
 {% endwith %}
 <br><br>
@@ -15,10 +19,10 @@
     <input type="text" name="costoMembresia" class="form-control mt-2" placeholder="Costo de la membresía" value="{{ membresia.costo if membresia else '' }}" required>
     <input type="number" name="duracionMemebresia" class="form-control mt-2"
     placeholder="Duracion de la membresia en dias" value="{{ membresia.duracion if membresia else '' }}">
-    <input type="submit" class="btn btn-success mt-2" value="{{ 'Actualizar' if membresia else 'Añadir' }}"/>
+    <input type="submit" class="btn btn-red" value="{{ 'Actualizar' if membresia else 'Añadir' }}"/>
 </form>
 
-<table class="table table-striped mt-3">
+<!-- <table class="table table-striped mt-3">
     <thead>
         <tr>
             <th>ID</th>
@@ -46,11 +50,31 @@
             {% endif %}
         {% endfor %}
     </tbody>
-</table>
+</table> -->
+
+<div class="custom-grid-container">
+    {% for membresia in membresias %}
+        {% if membresia.habilitado %}
+            <div class="custom-card">
+                <div class="custom-card-summary">
+                    <p><strong>Tipo membresia:</strong> {{ membresia.tipomembresia }}</p>
+                    <p><strong>Costo:</strong> {{ membresia.costo }}</p>
+                    <p><strong>Duracion:</strong> {{ membresia.duracion }} dias</p>
+                    <div class="custom-card-actions">
+                        <a href="/membresias/editar/{{ membresia.idmembresia }}" class="btn btn-dark">Editar</a>
+                        <form action="/membresias/desactivar/{{ membresia.idmembresia }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger">Desactivar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
 
 
 <h2>Membresias desactivadas</h2>
-<table class="table table-striped mt-3">
+<!-- <table class="table table-striped mt-3">
     <thead>
         <tr>
             <th>ID</th>
@@ -77,5 +101,27 @@
             {% endif %}
         {% endfor %}
     </tbody>
-</table>
+</table> -->
+<div class="custom-grid-container">
+    {% for membresia in membresias %}
+        {% if not membresia.habilitado %}
+            <div class="custom-card">
+                <div class="custom-card-summary">
+                    <p><strong>Tipo membresia:</strong> {{ membresia.tipomembresia }}</p>
+                    <p><strong>Costo:</strong> {{ membresia.costo }}</p>
+                    <p><strong>Duracion:</strong> {{ membresia.duracion }} dias</p>
+                    <div class="custom-card-actions">
+                        <form action="/membresias/reactivar/{{ membresia.idmembresia }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-red">Reactivar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+
+
+
 {% endblock %}

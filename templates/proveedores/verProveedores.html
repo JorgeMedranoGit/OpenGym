@@ -23,14 +23,15 @@
 <!-- Contenedor para las sugerencias -->
 <div id="suggestions" class="list-group" style="display: none;"></div>
 
-<div class="container mt-3">
+<div class="custom-grid-container">
     {% for proveedor in proveedores %}
-    <div class="dynamic-div" data-id="{{proveedor._id}}" data-name="{{proveedor.nombre}}">
-        <div class="summary">
+    <div class="custom-card" data-id="{{proveedor._id}}" data-name="{{proveedor.nombre}}">
+        <div class="custom-card-summary">
             <strong>ID:&nbsp;</strong>{{proveedor._id}}<strong>&nbsp;
-                <strong>&nbsp;Nombre:&nbsp;</strong>{{proveedor.nombre }}
+                &nbsp;Nombre:&nbsp;</strong>{{proveedor.nombre }}
+                <h5><strong>Detalles</strong> <i class="fas fa-angle-down"></i></h5>
         </div>
-        <div class="details">
+        <div class="custom-card-details" id="details-{{ proveedor._id }}" style="display: none;">
             <p><strong>ID:&nbsp;</strong>{{proveedor._id}}</p>
             <p><strong>Numero:&nbsp;</strong>{{ proveedor.nombre }}</p>
             <p><strong>Tipo:&nbsp;</strong>{{ proveedor.telefono }}</p>
@@ -45,9 +46,24 @@
 </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function(){
+        const tarjetas = document.querySelectorAll('.custom-card');
+        tarjetas.forEach(tarjeta => {
+            tarjeta.addEventListener('click', function() {
+                console.log("Si quiere ebtrar pero no puede...")
+                const id = this.dataset.id; 
+                const detailsDiv = document.getElementById(`details-${id}`); 
+      
+                if (detailsDiv.style.display === "none" || detailsDiv.style.display === "") {
+                    detailsDiv.style.display = "block";
+                } else {
+                    detailsDiv.style.display = "none";
+                }
+            });
+          });
+    })
     document.getElementById('search-input').addEventListener('input', function() {
         const query = this.value;
-
         if (query.length > 0) {
             fetch(`/proveedores/buscar?nombre=${query}`)
                 .then(response => response.json())

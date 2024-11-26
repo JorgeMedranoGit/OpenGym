@@ -24,11 +24,21 @@ def reporte_pago():
     fecha_fin = request.form.get('fecha_fin')
 
     try:
-        # Convertir fechas a objetos `date`
         if request.method == "POST" and fecha_inicio and fecha_fin:
-            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
-            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+            try:
+                fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+                fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+
+                # Validar el orden lógico de fechas
+                if fecha_inicio > fecha_fin:
+                    flash("La fecha de inicio no puede ser posterior a la fecha de fin.", "danger")
+                    return redirect(url_for("pago_blueprint.reporte_pago"))
+
+            except ValueError:
+                flash("Por favor, ingresa fechas válidas en formato YYYY-MM-DD.", "danger")
+                return redirect(url_for("pago_blueprint.reporte_pago"))
         else:
+            # Rango predeterminado si no se proporcionan fechas
             fecha_inicio = fecha_fin = date.today()
 
         # Base de filtros
