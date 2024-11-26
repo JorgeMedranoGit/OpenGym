@@ -11,7 +11,46 @@ from sqlalchemy import text
 from database import db
 
 maquinas_blueprint = Blueprint('maquinas_blueprint', __name__)
+@maquinas_blueprint.route("/maquinasImpres", methods=["POST", "GET"])
+def printMaq():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+    if session['rol'] != "Administrador":
+        return redirect("/tareasCom")
+    inicio = request.args.get('fechaInicio')
+    fin = request.args.get('fechaFin')
+    print(request.args.get('fechaInicio'))
+    print(request.args.get('fechaFin'))
+    if inicio == "" or fin == "":
+        print("Mostrar todos los detalles")
+        result = db.session.execute(text("select * from obtener_resumen_compras_totales();"))
+    else:
+        print("Mostrar los detalles filtrados")
+        result = db.session.execute(text("SELECT * FROM obtener_resumen_compras(:fecha_inicio, :fecha_fin)"),{'fecha_inicio': inicio, 'fecha_fin': fin})
+    compras = result.fetchall()
+    tbody = []
+    for fila in compras:
+        fila_html = "<tr>"
+        for valor in fila:
+            fila_html += f"<td>{valor}</td>"
+        fila_html += "</tr>"
+        tbody.append(fila_html)
+    thead_html = "<th>Fecha</th><th>ID</th><th>Nombre</th><th>Codigo</th><th>Total</th>"
+    tbody_html = "".join(tbody)
+    suma_total = 0.0
+    for fila in compras:
+        suma_total += fila[4]
 
+    print("Suma total:", suma_total)
+
+
+    suma_total = "<tr><td></td><td></td><td></td><td></td><td>" + str(suma_total) + "</td></tr>"
+
+    session['thead'] = thead_html
+    session['tbody'] = tbody_html
+    session['extra'] = suma_total
+    return redirect('/imprimir')
 @maquinas_blueprint.route("/maquinas", methods=["POST", "GET"])
 def maquinas():
     if "usuario" not in session:

@@ -9,14 +9,15 @@
 {% endif %}
 {% endwith %}
 <h1>Proveedores</h1>
-<a href="/addProveedores" class="btn btn-success">Agregar proveedor</a>
-<a href="/verProveedoresDeshabilitados" class="btn btn-danger">Ver Deshabilitados</a>
+<button class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
+    class="fas fa-bars"></i></button>
+<a href="/addProveedores" class="btn btn-red">Agregar proveedor</a>
+<a href="/verProveedoresDeshabilitados" class="btn btn-red">Ver Deshabilitados</a>
 
 <!-- Formulario de búsqueda -->
 <form id="search-form" class="mb-3 mt-3">
     <div class="input-group">
         <input type="text" id="search-input" class="form-control" placeholder="Buscar proveedor por nombre" aria-label="Buscar proveedor">
-        <button class="btn btn-primary" type="submit">Buscar</button>
     </div>
 </form>
 
@@ -36,13 +37,16 @@
             <p><strong>Numero:&nbsp;</strong>{{ proveedor.nombre }}</p>
             <p><strong>Tipo:&nbsp;</strong>{{ proveedor.telefono }}</p>
             <p><strong>Estado:&nbsp;</strong>{{ proveedor.correo }}</p>
-            <a href="/proveedores/editar/{{ proveedor._id }}" class="btn btn-dark">Editar</a>
+            <a href="/proveedores/editar/{{ proveedor._id }}" class="btn btn-red">Editar</a>
             <form action="/proveedores/eliminar/{{ proveedor._id }}" method="post" style="display:inline;">
-                <button type="submit" class="btn btn-danger">Eliminar</button>
+                <button type="submit" class="btn btn-red">Eliminar</button>
             </form>
         </div>
     </div>
     {% endfor %}
+    {% if not proveedores %}
+    <p>Aun no se han registrado proveedores</p>
+    {% endif %}
 </div>
 
 <script>
@@ -86,6 +90,22 @@
         } else {
             document.getElementById('suggestions').style.display = 'none'; // Ocultar si no hay texto
         }
+    });
+    document.addEventListener("DOMContentLoaded", function() {
+        const tarjetas = document.querySelectorAll('.custom-card');
+
+        tarjetas.forEach(tarjeta => {
+        tarjeta.addEventListener('click', function() {
+            const id = this.dataset.id; 
+            const detailsDiv = document.getElementById(`details-${id}`); 
+
+            if (detailsDiv.style.display === "none" || detailsDiv.style.display === "") {
+            detailsDiv.style.display = "block";
+            } else {
+            detailsDiv.style.display = "none";
+            }
+        });
+        });
     });
 </script>
 {% endblock %}

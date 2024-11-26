@@ -9,37 +9,42 @@
 {% endif %}
 {% endwith %}
 <h1>Proveedores</h1>
-<a href="/proveedores" class="btn btn-primary">Volver a Habilitados</a>
+<button class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
+    class="fas fa-bars"></i></button>
+<a href="/proveedores" class="btn btn-red">Volver a Habilitados</a>
 
 <!-- Formulario de búsqueda -->
 <form id="search-form" class="mb-3 mt-3">
     <div class="input-group">
         <input type="text" id="search-input" class="form-control" placeholder="Buscar proveedor por nombre" aria-label="Buscar proveedor">
-        <button class="btn btn-primary" type="submit">Buscar</button>
     </div>
 </form>
 
 <!-- Contenedor para las sugerencias -->
 <div id="suggestions" class="list-group" style="display: none;"></div>
 
-<div class="container mt-3">
+<div class="custom-grid-container">
     {% for proveedor in proveedores %}
-    <div class="dynamic-div" data-id="{{proveedor._id}}" data-name="{{proveedor.nombre}}">
-        <div class="summary">
-            <strong>ID:&nbsp;</strong>{{proveedor._id}}<strong>&nbsp;
-                <strong>&nbsp;Nombre:&nbsp;</strong>{{proveedor.nombre }}
+    <div class="custom-card" data-id="{{proveedor._id}}">
+        <div class="custom-card-summary">
+            <strong>ID:&nbsp;</strong>{{proveedor._id}}
+            <strong>&nbsp;Nombre:&nbsp;</strong>{{ proveedor.nombre }}
+            <h5><strong>Ver Mas:</strong> <i class="fas fa-angle-down"></i></h5>
         </div>
-        <div class="details">
+        <div class="custom-card-details" id="details-{{ proveedor._id }}" style="display: none;">
             <p><strong>ID:&nbsp;</strong>{{proveedor._id}}</p>
             <p><strong>Numero:&nbsp;</strong>{{ proveedor.nombre }}</p>
             <p><strong>Tipo:&nbsp;</strong>{{ proveedor.telefono }}</p>
             <p><strong>Estado:&nbsp;</strong>{{ proveedor.correo }}</p>
             <form action="/proveedores/habilitar/{{ proveedor._id }}" method="post" style="display:inline;">
-                <button type="submit" class="btn btn-danger">Rehabilitar</button>
+                <button type="submit" class="btn btn-red">Habilitar</button>
             </form>
         </div>
     </div>
     {% endfor %}
+    {% if not proveedores %}
+    <p>Aun no se han registrado proveedores</p>
+    {% endif %}
 </div>
 
 <script>
@@ -55,11 +60,21 @@
                     if (data.length > 0) {
                         suggestions.style.display = 'block'; // Mostrar sugerencias
                         data.forEach(proveedor => {
-                            const item = document.createElement('a');
-                            item.href = `/proveedores/editar/${proveedor.id}`; // Enlace a la edición
-                            item.className = 'list-group-item list-group-item-action';
-                            item.textContent = proveedor.nombre;
-                            suggestions.appendChild(item);
+                            const form = document.createElement('form');
+                            form.method = 'POST'; // Establece el método a POST
+                            form.action = `/proveedores/habilitar/${proveedor.id}`; // URL a la que se enviará el formulario
+                            form.className = 'list-group-item list-group-item-action'; // Clases para estilos
+
+                            const button = document.createElement('button');
+                            button.type = 'submit'; // Establece el tipo de botón a submit
+                            button.textContent = proveedor.nombre; // Texto del botón
+                            button.className = 'btn btn-danger'; // Clases para estilos, puedes ajustar según necesites
+
+                            // Agrega el botón al formulario
+                            form.appendChild(button);
+                            
+                            // Agrega el formulario a las sugerencias
+                            suggestions.appendChild(form);
                         });
                     } else {
                         suggestions.style.display = 'none'; // Ocultar si no hay sugerencias
@@ -68,6 +83,22 @@
         } else {
             document.getElementById('suggestions').style.display = 'none'; // Ocultar si no hay texto
         }
+    });
+    document.addEventListener("DOMContentLoaded", function() {
+        const tarjetas = document.querySelectorAll('.custom-card');
+
+        tarjetas.forEach(tarjeta => {
+        tarjeta.addEventListener('click', function() {
+            const id = this.dataset.id; 
+            const detailsDiv = document.getElementById(`details-${id}`); 
+
+            if (detailsDiv.style.display === "none" || detailsDiv.style.display === "") {
+            detailsDiv.style.display = "block";
+            } else {
+            detailsDiv.style.display = "none";
+            }
+        });
+        });
     });
 </script>
 {% endblock %}
