@@ -10,56 +10,62 @@
 {% endwith %}
 
 <h1>Compras de Maquinas</h1>
-
-<div class="mb-3">
-    <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
-    <input type="date" id="fechaInicio" class="form-control">
-</div>
-<div class="mb-3">
-    <label for="fechaFin" class="form-label">Fecha de Fin</label>
-    <input type="date" id="fechaFin" class="form-control">
-</div>
-<button class="btn btn-primary" onclick="filtrarCompras()">Filtrar</button>
-
-{% if compras %}
-    {% for compra in compras %}
-        <div class="dynamic-div" data-id="{{ compra.idcompra }}" data-name="{{ compra.proveedor }}">
-            <div class="summary">
-                <strong>ID Compra:&nbsp;</strong>{{ compra.idcompra }}<strong>&nbsp;Proveedor:&nbsp;</strong>{{ compra.proveedor }}
-                <strong>&nbsp;Total:&nbsp;</strong>{{ compra.Gastos }}<strong>&nbsp;Fecha:&nbsp;</strong><data>{{ compra.fecha }}</data>
-            </div>
-            <div class="details">
-                <h3>Detalles de compra:&nbsp;{{ compra.idcompra }}</h3>
-                <h4>Fecha:&nbsp;{{ compra.fecha }} Proveedor:&nbsp;{{ compra.proveedor }}</h4>
-                {% for detalle in detalleCompras %}
-                    {% if detalle.idcompra == compra.idcompra %}
-                        <p><strong>Maquina:&nbsp;</strong>{{ detalle.nombre }}:
-                        &nbsp;{{ detalle.codigo }}&nbsp;<strong>Cantidad:&nbsp;</strong>{{ detalle.total }}</p>
-                        <p><strong>Tipo&nbsp;</strong>{{ detalle.tipo }}</p>
-                        <p><strong>Subtotal&nbsp;</strong>{{ detalle.gastos }}</p>
-                        <p><strong>Estado&nbsp;</strong>{{ detalle.estado }}
-                        {% if detalle.estado == "Comprado" %}
-                        <a href="/confirmarEntregaDetalle/{{ detalle.iddetalle }}" class="btn btn-dark">Confirmar Entrega</a>
-                        {% endif %}</p>
-                        <a href="/verDetalleCompra/{{ detalle.iddetalle }}" class="btn btn-dark">Ver Mas</a>
-                    {% endif %}
-                {% endfor %}
-            </div>
+<button class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
+    class="fas fa-bars"></i></button>
+<div class="filtro_compras">
+    <div class="row align-items-center">
+        <div class="col-12 col-md-3 mb-2">
+            <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
+            <input type="date" id="fechaInicio" class="form-control">
         </div>
+        <div class="col-12 col-md-3 mb-2">
+            <label for="fechaFin" class="form-label">Fecha de Fin</label>
+            <input type="date" id="fechaFin" class="form-control">
+        </div>
+        <button class="btn btn-red" onclick="filtrarCompras()">Filtrar</button>
+        <button class="btn btn-red" onclick="limpiarCompras()">Limpiar</button>
+    </div>
+</div>
+<button onclick="imprimir()"><i class="fa fa-print"></i> Imprimir</button>
+<div class="custom-grid-container">
+    {% for compra in compras %}
+    <div class="custom-card" data-id="{{compra.idcompra}}" data-name="{{ compra.proveedor }}">
+        <div class="custom-card-summary">
+            <strong>ID Compra:&nbsp;</strong>{{ compra.idcompra }}<strong>&nbsp;Proveedor:&nbsp;</strong>{{ compra.proveedor }}
+            <strong>&nbsp;Total:&nbsp;</strong>{{ compra.Gastos }}<strong>&nbsp;Fecha:&nbsp;</strong><data>{{ compra.fecha }}</data>
+        </div>
+        <div class="custom-card-details" id="details-{{ compra.idcompra }}" style="display: none;">
+            <h3>Detalles de compra:&nbsp;{{ compra.idcompra }}</h3>
+            <h4>Fecha:&nbsp;{{ compra.fecha }} Proveedor:&nbsp;{{ compra.proveedor }}</h4>
+            {% for detalle in detalleCompras %}
+                {% if detalle.idcompra == compra.idcompra %}
+                    <h5><strong>Maquina:&nbsp;</strong>{{ detalle.nombre }}:
+                    &nbsp;{{ detalle.codigo }}&nbsp;<strong>Cantidad:&nbsp;</strong>{{ detalle.total }}</h5>
+                    <p><strong>Tipo&nbsp;</strong>{{ detalle.tipo }}</p>
+                    <p><strong>Subtotal&nbsp;</strong>{{ detalle.gastos }}</p>
+                    <p><strong>Estado&nbsp;</strong>{{ detalle.estado }}</p>
+                    {% if detalle.estado == "Comprado" %}
+                    <a href="/confirmarEntregaDetalle/{{ detalle.iddetalle }}" class="btn btn-red">Confirmar Entrega</a>
+                    {% endif %}
+                    <a href="/verDetalleCompra/{{ detalle.iddetalle }}" class="btn btn-red">Ver Mas</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
     {% endfor %}
-    {% else %}
-        <p>No hay compras registradas.</p>
+    {% if not compras %}
+    <p>Aun no se han registrado compras</p>
     {% endif %}
     
 <script>
     function filtrarCompras() {
         const fechaInicio = new Date(document.getElementById('fechaInicio').value);
         const fechaFin = new Date(document.getElementById('fechaFin').value);
-        const compras = document.querySelectorAll('.dynamic-div');
+        const compras = document.querySelectorAll('.custom-card');
 
         compras.forEach(compra => {
-            const fechaCompra = new Date(compra.querySelector('.summary data').textContent);
-            console.log(new Date(compra.querySelector('.summary data').textContent));
+            const fechaCompra = new Date(compra.querySelector('.custom-card-summary data').textContent);
+            console.log(new Date(compra.querySelector('.custom-card-summary data').textContent));
             if (fechaCompra >= fechaInicio && fechaCompra <= fechaFin) {
                 compra.style.display = 'block'; // Mostrar compra
             } else {
@@ -67,6 +73,40 @@
             }
         });
     }
+    function imprimir() {
+        const fechaInicio = document.getElementById('fechaInicio').value;
+        const fechaFin = document.getElementById('fechaFin').value;
+
+        // Construir la URL con los parámetros de fecha
+        const url = `/maquinasImpres?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
+
+        // Redirigir a la nueva URL
+        window.location.href = url;
+    }
+    function limpiarCompras() {
+        const fechaInicio = document.getElementById('fechaInicio');
+        const fechaFin = document.getElementById('fechaFin');
+        const compras = document.querySelectorAll('.custom-card');
+        compras.forEach(compra => {
+            compra.style.display = 'block';
+        });
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        const tarjetas = document.querySelectorAll('.custom-card');
+
+        tarjetas.forEach(tarjeta => {
+        tarjeta.addEventListener('click', function() {
+            const id = this.dataset.id; 
+            const detailsDiv = document.getElementById(`details-${id}`); 
+
+            if (detailsDiv.style.display === "none" || detailsDiv.style.display === "") {
+            detailsDiv.style.display = "block";
+            } else {
+            detailsDiv.style.display = "none";
+            }
+        });
+        });
+    });
 </script>
 
 {% endblock %}

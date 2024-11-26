@@ -9,29 +9,47 @@
 {% endif %}
 {% endwith %}
 <h1>Detalles de Compra</h1>
-<button
-    class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
+<button class="btn btn-primary toggle-sidebar-btn position-absolute top-0 end-0 d-md-none"><i
         class="fas fa-bars"></i></button>
-        {% if maquinas %}
+        <div class="custom-grid-container">
             {% for maquina in maquinas %}
-                <div class="dynamic-div" data-id="{{ maquina.codigo }}" data-name="{{ maquina.codigo }}">
-                    <div class="summary">
-                        <strong>ID Maquina:&nbsp;</strong>{{ maquina.idmaquina }}<strong>&nbsp;Nombre:&nbsp;</strong>{{ maquina.nombre }}
-                        <strong>&nbsp;</strong>{{ maquina.codigo }}
-                    </div>
-                    <div class="details">
-                        <p><strong>Maquina:&nbsp;</strong>{{ maquina.nombre }}:
+            <div class="custom-card" data-id="{{maquina.idmaquina}}">
+                <div class="custom-card-summary">
+                    <strong>ID Maquina:&nbsp;</strong>{{ maquina.idmaquina }}<strong>&nbsp;Nombre:&nbsp;</strong>{{ maquina.nombre }}
+                    <strong>&nbsp;</strong>{{ maquina.codigo }}
+                    <h5><strong>Productos</strong> <i class="fas fa-angle-down"></i></h5>
+                </div>
+                <div class="custom-card-details" id="details-{{ maquina.idmaquina }}" style="display: none;">
+                    <p><strong>Maquina:&nbsp;</strong>{{ maquina.nombre }}:
                         &nbsp;{{ maquina.codigo }}&nbsp;<strong>Cantidad:&nbsp;</strong>{{ maquina.total }}</p>
                         <p><strong>Tipo&nbsp;</strong>{{ maquina.tipo }}</p>
-                        <p><strong>Estado&nbsp;</strong>{{ maquina.estado }}
+                        <p><strong>Estado&nbsp;</strong>{{ maquina.estado }}</p>
                         {% if maquina.estado == "Comprado" %}
                             <a href="/confirmarEntregaMaquina/{{ detalle.iddetalle }}" class="btn btn-dark">Confirmar Entrega</a>
-                        {% endif %}</p>
-                    </div>
+                        {% endif %}
                 </div>
+            </div>
             {% endfor %}
-        {% else %}
-            <p>No hay maquinas registradas.</p>
-        {% endif %}
+            {% if not maquinas %}
+            <p>Aun no se han registrado compras</p>
+            {% endif %}
+        </div>
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+        const tarjetas = document.querySelectorAll('.custom-card');
 
+        tarjetas.forEach(tarjeta => {
+        tarjeta.addEventListener('click', function() {
+            const id = this.dataset.id; 
+            const detailsDiv = document.getElementById(`details-${id}`); 
+
+            if (detailsDiv.style.display === "none" || detailsDiv.style.display === "") {
+            detailsDiv.style.display = "block";
+            } else {
+            detailsDiv.style.display = "none";
+            }
+        });
+        });
+    });
+</script>
 {% endblock %}

@@ -57,7 +57,6 @@
         var valido = true;
         const nombreSelect = document.getElementById('nombre');
         const errorNombre = document.getElementById('errorNombre');
-        const idEmpleadoInput = document.getElementById('idEmpleado');
         const errorIdEmpleado = document.getElementById('errorIdEmpleado');
         const cantidadInput = document.getElementById('cantidad');
         const errorCantidad = document.getElementById('errorCantidad');
@@ -71,7 +70,6 @@
         const errorCodigoMaquina = document.getElementById('errorCodigoMaquina');
         // Limpiar mensajes de error
         errorNombre.textContent = '';
-        errorIdEmpleado.textContent = '';
         errorCantidad.textContent = '';
         errorPrecioUnitario.textContent = '';
         errorProveedor.textContent = "";
@@ -86,12 +84,12 @@
         const correoProveedor = document.getElementById('correoProveedor').value.trim();
         // Validar campos requeridos
         if (nombreSelect.value === '0') {
-            if(nuevoNombre === ''){
+            if(nuevoNombre.trim() === ''){
                 errorNombre.textContent = "Por favor, ingrese un nombre de máquina.";
                 valido = false;
             }
             else{
-                if(codigoMaquina == ""){
+                if(codigoMaquina.trim() == ""){
                     errorCodigoMaquina.textContent = "Por favor, ingrese un codigo de máquina.";
                     valido = false;
                 }
@@ -100,10 +98,6 @@
         if (proveedorSelect.value === '0' && nuevoProveedorNombre === '' && productosSeleccionados.length === 0) {
             console.log("Por favor, ingrese un nombre de proveedor.")
             errorProveedor.textContent = "Por favor, ingrese un nombre de proveedor.";
-            valido = false;
-        }
-        if (idEmpleadoInput.value.trim() === '') {
-            errorIdEmpleado.textContent = "Por favor, ingrese el ID del empleado.";
             valido = false;
         }
         if (cantidadInput.value.trim() === '' || isNaN(cantidadInput.value) || parseInt(cantidadInput.value ) <= 0) {
@@ -495,12 +489,6 @@
     </div>
     <div id="resultadosBusqueda">
 
-    </div>
-    <div class="mb-3">
-        <label for="idEmpleado" class="form-label">ID del Empleado</label>
-        <input class="form-control" type="text" id="idEmpleado" name="idEmpleado" placeholder="ID del empleado"
-            value="{{ maquina.idempleado if maquina else '' }}" required>
-        <div class="text-danger" id="errorIdEmpleado"></div>
     </div>
 
     <div class="mb-3">
