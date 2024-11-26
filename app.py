@@ -36,8 +36,9 @@ from routes.mantenimientoRutas import mantenimiento_bp
 
 from routes.sesiones_routes import session_blueprint
 
-
 from routes.pagos_routes import pago_blueprint
+
+from routes.impresion_route import impresion_blueprint
 
 load_dotenv()
 
@@ -78,6 +79,8 @@ app.register_blueprint(mantenimiento_bp)
 app.register_blueprint(session_blueprint)
 
 app.register_blueprint(pago_blueprint)
+
+app.register_blueprint(impresion_blueprint)
 
 
 

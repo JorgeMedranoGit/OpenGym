@@ -32,6 +32,9 @@ def entregaCrud():
         return redirect("/login")
 
     if session["rol"] == "Administrador":
+        session['thead'] = None
+        session['tbody'] = None
+        session['extra'] = None
         # Obtención de entregas y estados, para listarlos y permitir el cambio de estado en un combobox
         proveedor_id = request.form.get('proveedor_id')
         print(f"Proveedor seleccionado: {proveedor_id}")  # Debugging
@@ -49,7 +52,28 @@ def entregaCrud():
         # Obtener proveedores para el filtro en la plantilla
         proveedores = db.session.execute(text('SELECT idproveedor, nombre FROM proveedores')).fetchall()
         estados = obtener_todos_los_estados()
+        claves = list(entregas[0].keys()) if entregas else []
+        valores = [list(entrega.values()) for entrega in entregas]
 
+        thead = []
+        tbody = []
+
+        # Construir la cabecera de la tabla
+        for clave in claves:
+            thead.append(f"<th>{clave}</th>")
+        
+        # Construir el cuerpo de la tabla
+        for fila in valores:
+            fila_html = "<tr>"
+            for valor in fila:
+                fila_html += f"<td>{valor}</td>"
+            fila_html += "</tr>"
+            tbody.append(fila_html)
+
+        # Guardar HTML en la sesión
+        session['thead'] = "<tr>" + "".join(thead) + "</tr>"
+        session['tbody'] = "".join(tbody)
+        session['extra']=''
         # Inicialización de variables para calcular los totales
         proveedor_mas_solicitado = None
         producto_mas_solicitado = None
@@ -98,10 +122,13 @@ def entregaCrud():
             else:
                 entrega['fechaestado'] = "Fecha no disponible"
 
+        proveedor = "N/A"
+
         if proveedor_contador:
             proveedor_mas_solicitado = max(proveedor_contador, key=proveedor_contador.get)
-            proveedor = Proveedores.query.get(proveedor_mas_solicitado)
-            proveedor = proveedor.nombre
+            proveedor_obj = Proveedores.query.get(proveedor_mas_solicitado)
+            if proveedor_obj:
+                proveedor = proveedor_obj.nombre
 
         if producto_contador:
             producto_mas_solicitado = db.session.execute(
@@ -220,10 +247,11 @@ def detallecompras(id):
             resultados.append({
                 "producto": producto.nombre,
                 "cantidad": detalle.cantidad,
-                "subtotal": producto.preciov * detalle.preciocompra
+                "subtotal": detalle.cantidad * detalle.preciocompra  # Cálculo correcto
             })
     
     return jsonify({"resultados": resultados}) 
+
 
 
 @entregas_blueprint.route("/entregas/cambiar_estado", methods=['POST'])
@@ -290,38 +318,48 @@ def cambiar_estado():
 
 
 def obtenerEntregas(proveedor_id=None, fecha_inicio=None, fecha_fin=None):
-    # Comenzamos con una consulta base que obtiene todas las entregas
+    # Consulta base para obtener entregas
     query = Entregas.query
     
-    # Filtrar por proveedor si se proporciona
     if proveedor_id:
         query = query.filter(Entregas.idproveedor == proveedor_id)
-
-    # Filtrar por fecha de inicio si se proporciona
+    
     if fecha_inicio:
         query = query.filter(Entregas.fechapedido >= fecha_inicio)
-
-    # Filtrar por fecha de fin si se proporciona
+    
     if fecha_fin:
         query = query.filter(Entregas.fechapedido <= fecha_fin)
 
-    # Ejecutamos la consulta
+    # Obtener entregas ordenadas
     entregas = query.order_by(Entregas.identrega.desc()).all()
 
-    # Formatear los resultados
     resultado = []
     for entrega in entregas:
+        # Obtener detalles de la entrega
+        detalles = DetalleEntregas.query.filter_by(identrega=entrega.identrega).all()
+        
+        # Calcular el subtotal de la entrega
+        subtotal_entrega = sum(detalle.cantidad * detalle.preciocompra for detalle in detalles)
+        print(subtotal_entrega)
+        # Formatear fecha y hora
         fecha_formateada = entrega.fechapedido.strftime("%d/%m/%Y")
         hora_formateada = entrega.fechapedido.strftime("%H:%M:%S")
+        
+        # Añadir datos al resultado
         resultado.append({
             'identrega': entrega.identrega,
             'fechaentrega': fecha_formateada,
             'horaentrega': hora_formateada,
             'metodopago': entrega.metodopago,
-            "proveedor": entrega.proveedor.nombre,
-            "idproveedor": entrega.proveedor._id  # Asegúrate de que la columna sea correcta
+            'proveedor': entrega.proveedor.nombre,
+            'idproveedor': entrega.proveedor._id,  # Asegúrate de que la columna sea correcta
+            'subtotal': subtotal_entrega  # Agregar el subtotal calculado
         })
     return resultado
+
+
+
+
 
 
 

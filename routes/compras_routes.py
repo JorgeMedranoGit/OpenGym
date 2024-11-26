@@ -1,4 +1,4 @@
-from flask import Blueprint, Flask, redirect, url_for, render_template, request, session, flash, jsonify, send_file
+from flask import Blueprint, Flask, json, redirect, url_for, render_template, request, session, flash, jsonify, send_file
 from datetime import timedelta
 from decimal import Decimal
 from flask_sqlalchemy import SQLAlchemy 
@@ -23,8 +23,6 @@ import base64
 
 compras_blueprint = Blueprint('compras_blueprint', __name__)
 
-
-
 @compras_blueprint.route("/compras", methods=['GET', 'POST'])
 def compraCrud():
     if "email" not in session:
@@ -32,7 +30,9 @@ def compraCrud():
         return redirect("/login")
 
     compras = []
-    
+    session['thead'] = None
+    session['tbody'] = None
+    session['extra'] = None
     # Obtener todos los empleados y clientes disponibles para el filtro, tambien las fechas
     empleados = db.session.execute(text('SELECT idempleado, nombre FROM empleados')).fetchall()
     clientes = db.session.execute(text('SELECT idcliente, nombre FROM clientes')).fetchall()
@@ -74,6 +74,42 @@ def compraCrud():
         LIMIT 1; 
     ''')).fetchone()
 
+    claves = list(compras[0].keys()) if compras else []
+    valores = [list(compra.values()) for compra in compras]
+
+    thead = []
+    tbody = []
+
+    # Recorre los elementos directamente, sin usar índices
+    for clave in claves:
+        thead.append("<th>" + clave + "</th>")
+
+    for fila in valores:
+        fila_html = "<tr>"
+        for valor in fila:
+            fila_html += f"<td>{valor}</td>"
+        fila_html += "</tr>"
+        tbody.append(fila_html)
+
+    thead_html = "<tr>" + "".join(thead) + "</tr>"
+    tbody_html = "".join(tbody)
+
+    suma_total = 0.0
+
+    for fila in valores:
+        total_str = fila[-1]
+        total_float = float(total_str)
+        suma_total += total_float
+
+    print("Suma total:", suma_total)
+
+    suma_total = "<tr><td></td><td></td><td></td><td></td><td></td><td></td><td>" + str(suma_total) + "</td></tr>"
+
+    session['thead'] = thead_html
+    session['tbody'] = tbody_html
+    session['extra'] = suma_total
+
+
     return render_template("compras.html", 
                            compras=compras, 
                            total_compras=total_compras, 
@@ -83,7 +119,8 @@ def compraCrud():
                            empleados=empleados,
                            clientes=clientes,
                            empleado_id=empleado_id,
-                           cliente_id=cliente_id)
+                           cliente_id=cliente_id,
+                           resultado=json.dumps(compras))
 
 
 
@@ -158,9 +195,7 @@ def formCompra():
 
         db.session.commit()
         flash("Compra agregada exitosamente!")
-        return redirect("/compras")
-    
-
+        return redirect("/compras")    
 
 
 def obtenerCompras(empleado_id=None, cliente_id=None, fecha_inicio=None, fecha_fin=None):

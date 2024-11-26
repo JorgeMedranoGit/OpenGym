@@ -56,6 +56,8 @@
 <br>
 
 <a class="btn-red" href="/compras/agregar"><i class="fas fa-shopping-cart"></i> Registrar compra</a>
+  
+<a class="btn-red" href="/imprimir"><i class="fa fa-print"></i> Imprimir</a>
 
 <br><br>
 
@@ -180,7 +182,32 @@
 
   
 </script>
+<script>
+  window.onload = function() {
+      // Verificar si hay contenido para imprimir
+      const contenidoTabla = localStorage.getItem('contenidoTabla');
+      if (contenidoTabla) {
+          // Mostrar el contenido en el contenedor oculto
+          document.getElementById('contenedorImpresion').innerHTML = contenidoTabla;
 
+          // Crear una nueva ventana para la impresión
+          var ventanaImpresion = window.open('', '', 'width=800,height=600');
+          ventanaImpresion.document.write('<html><head><title>Impresión</title></head><body>');
+          ventanaImpresion.document.write(document.getElementById('contenedorImpresion').innerHTML); // Contenido a imprimir
+          ventanaImpresion.document.write('</body></html>');
+          ventanaImpresion.document.close(); // Cerrar el documento HTML para que se renderice
 
+          // Esperar a que la ventana de impresión esté lista
+          ventanaImpresion.focus();
+          ventanaImpresion.print(); // Mostrar el cuadro de impresión
+          ventanaImpresion.onafterprint = function() {
+              ventanaImpresion.close(); // Cerrar la ventana de impresión
+          };
+
+          // Limpiar el contenido de localStorage
+          localStorage.removeItem('contenidoTabla');
+      }
+  }
+</script>
   
 {% endblock %}

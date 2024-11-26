@@ -4,101 +4,44 @@
 {% with messages = get_flashed_messages() %}
     {% if messages %}
         {% for msg in messages %}
-            <p class="alert alert-info">{{msg}}</p>
+            <p class="alert alert-info">{{ msg }}</p>
         {% endfor %}
     {% endif %}
 {% endwith %}
-<br><br>
-<form action="/empleados" method="post" class="form mt-3" id="empleadoForm">
-    <input type="hidden" name="empleado_id" class="form-control mt-2" value="{{ empleado.idempleado if empleado else '' }}">
 
-    <!-- Nombre: solo letras, no permite números ni caracteres especiales -->
-    <input type="text" name="nombre" class="form-control mt-2" placeholder="Nombre" value="{{ empleado.nombre if empleado else '' }}" required minlength="2" maxlength="50" pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ]+">
-    
-    <!-- Apellido: solo letras, no permite números ni caracteres especiales -->
-    <input type="text" name="apellido" class="form-control mt-2" placeholder="Apellido" value="{{ empleado.apellido if empleado else '' }}" required minlength="2" maxlength="50" pattern="[A-Za-zÁáÉéÍíÓóÚúÑñ]+">
-    
-    <!-- Dirección: no requerida pero se valida la longitud -->
-    <input type="text" name="direccion" class="form-control mt-2" placeholder="Dirección" value="{{ empleado.direccion if empleado else '' }}" maxlength="100">
+<h3>Gestión de empleados</h3>
 
-    <!-- Carnet: requerido y longitud válida -->
-    <input type="text" name="carnet" class="form-control mt-2" placeholder="Carnet" value="{{ empleado.carnet if empleado else '' }}" required pattern="[A-Za-z0-9]{5,20}">
+<div class="row">
+    {% for empleado in empleados %}
+        <div class="col-md-4">
+            <div class="card custom-card mb-3">
+                <div class="card-header">Empleado ID: {{ empleado.idempleado }}</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ empleado.nombre }} {{ empleado.apellido }}</h5>
+                    <p><strong>Dirección:</strong> {{ empleado.direccion or 'No registrada' }}</p>
+                    <p><strong>Carnet:</strong> {{ empleado.carnet }}</p>
+                    <p><strong>Teléfono:</strong> {{ empleado.telefono or 'No registrado' }}</p>
+                    <p><strong>Sueldo:</strong> {{ empleado.sueldo }} Bs.</p>
+                    <div class="d-flex justify-content-between">
+                        <a href="/empleados/editar/{{ empleado.idempleado }}" class="btn btn-dark">Editar</a>
+                        <form action="/empleados/eliminar/{{ empleado.idempleado }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                        {% if empleado.idrol is not none %}
+                            <a href="/empleados/actualizar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Actualizar Rol</a>
+                        {% else %}
+                            <a href="/empleados/asignar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Asignar Rol</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% if not empleados %}
+        <p>No se encontraron empleados.</p>
+    {% endif %}
+</div>
 
-    <!-- Teléfono: formato de Bolivia (+591 y luego 8 dígitos) -->
-    <input type="text" name="telefono" class="form-control mt-2" placeholder="Teléfono" value="{{ empleado.telefono if empleado else '' }}" pattern="^\+591[0-9]{8}$" title="Formato: +591 seguido de 8 dígitos (ej. +59170123456)">
+<a href="/empleados/nuevo" class="btn btn-success mt-3">Añadir nuevo empleado</a>
 
-    <!-- Sueldo: número con decimales permitido -->
-    <input type="number" step="0.01" name="sueldo" class="form-control mt-2" placeholder="Sueldo" value="{{ empleado.sueldo if empleado else '' }}" min="0" max="1000000">
-
-    <!-- Email: obligatorio y con formato válido -->
-    <input type="email" name="email" class="form-control mt-2" placeholder="Email" value="{{ empleado.email if empleado else '' }}" required id="emailInput">
-
-    <!-- Mensaje de error para el email -->
-    <div id="emailError" style="color: red; display: none;">
-        <p>Por favor ingresa un correo electrónico válido. Debe contener un "@" y un dominio válido (por ejemplo: ejemplo@dominio.com).</p>
-    </div>
-
-    <!-- Botón de envío -->
-    <input type="submit" class="btn btn-success mt-2" value="{{ 'Actualizar' if empleado else 'Añadir' }}"/>
-</form>
-
-<script>
-    document.getElementById('empleadoForm').addEventListener('submit', function(event) {
-        // Obtiene el valor del campo de email
-        var emailInput = document.getElementById('emailInput');
-        var emailError = document.getElementById('emailError');
-        
-        // Expresión regular para validar el formato del email (debe tener "@" y un punto)
-        var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-        // Verifica si el email es válido
-        if (!emailPattern.test(emailInput.value)) {
-            // Si no es válido, muestra el error y previene el envío del formulario
-            emailError.style.display = 'block';
-            event.preventDefault();
-        } else {
-            // Si es válido, oculta el mensaje de error
-            emailError.style.display = 'none';
-        }
-    });
-</script>
-
-<table class="table table-striped mt-3">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Dirección</th>
-            <th>Carnet</th>
-            <th>Teléfono</th>
-            <th>Sueldo</th>
-            <th>Opciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for empleado in empleados %}
-        <tr>
-            <td>{{ empleado.idempleado }}</td>
-            <td>{{ empleado.nombre }}</td>
-            <td>{{ empleado.apellido }}</td>
-            <td>{{ empleado.direccion }}</td>
-            <td>{{ empleado.carnet }}</td>
-            <td>{{ empleado.telefono }}</td>
-            <td>{{ empleado.sueldo }}</td>
-            <td>
-                <a href="/empleados/editar/{{ empleado.idempleado }}" class="btn btn-dark">Editar</a>
-                <form action="/empleados/eliminar/{{ empleado.idempleado }}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                </form>
-                {% if empleado.idrol is not none %}
-                    <a href="/empleados/actualizar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Actualizar rol</a>
-                {% else %}
-                    <a href="/empleados/asignar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Asignar rol</a>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 {% endblock %}

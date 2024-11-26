@@ -8,7 +8,7 @@
         {% endfor%}
     {% endif %}
 {% endwith %}
-<br><br>
+<br><h3>Gestion de productos</h3><br>
 <form action="/productos" method="post" class="form mt-3">
     <input type="hidden" name="producto_id" class="form-control mt-2" value="{{ producto._id if producto else '' }}">
     <input type="text" name="nombreProduc" class="form-control mt-2" placeholder="Nombre del Producto" value="{{ producto.nombre if producto else '' }}" required>
@@ -18,32 +18,24 @@
 </form>
 
 
-<table class="table table-striped mt-3">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Stock</th>
-            <th>Opciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for producto in productos %}
-        <tr>
-            <td>{{ producto._id }}</td>
-            <td>{{ producto.nombre }}</td>
-            <td>{{ producto.preciov }}</td>
-            <td>{{ producto.stock }}</td>
-            <td>
-                
-                <a href="/productos/editar/{{ producto._id }}" class="btn btn-dark">Editar</a>
-                <form action="/productos/eliminar/{{ producto._id }}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="custom-grid-container">
+    {% for producto in productos %}
+    <div class="custom-card" data-id="{{ producto._id }}">
+      <div class="custom-card-summary">
+        <p><strong>ID:</strong>&nbsp;{{ producto._id }}</p>
+        <p><strong>Nombre:</strong>&nbsp;{{ producto.nombre }}</p>
+        <p><strong>Precio:</strong>&nbsp;{{ producto.preciov }}</p>
+        <p><strong>Stock:</strong>&nbsp;{{ producto.stock }}</p>
+      </div>
+      <div class="custom-card-estado">
+        <a href="/productos/editar/{{ producto._id }}" class="btn btn-dark">Editar</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  {% if not productos %}
+  <p>Aún no se han registrado productos</p>
+  {% endif %}
+  
 {% endblock %}
