@@ -7,6 +7,8 @@ from models.membresias import Membresias
 from models.detalleMembresia import DetalleMembresia
 from sqlalchemy import and_,desc,text
 from database import db
+from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError, NoResultFound
+import logging
 
 session_blueprint = Blueprint('session_blueprint', __name__)
 
@@ -286,10 +288,28 @@ def reporte_visitas():
         hoy = date.today()
         filtros = [Sesion.fechasesion == hoy]
 
+        # Validar fechas si están presentes
+        if fecha_inicio and fecha_fin:
+            try:
+                fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+                fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
+
+                # Verificar el orden lógico de las fechas
+                if fecha_inicio > fecha_fin:
+                    flash("La fecha de inicio no puede ser posterior a la fecha de fin.", "danger")
+                    return redirect(url_for("session_blueprint.reporte_visitas"))
+
+                # Aplicar filtro de rango de fechas
+                filtros = [Sesion.fechasesion.between(fecha_inicio, fecha_fin)]
+
+            except ValueError:
+                flash("Formato de fecha inválido. Asegúrate de usar el formato YYYY-MM-DD.", "danger")
+                return redirect(url_for("session_blueprint.reporte_visitas"))
+
         if not es_admin:
             filtros.append(Sesion.idempleado == empleado_id)
 
-        # Filtrar por rango de fechas (si se seleccionó)
+        # Filtrar por rango de fechas 
         if fecha_inicio and fecha_fin:
             filtros = [Sesion.fechasesion.between(fecha_inicio, fecha_fin)]
 
@@ -331,3 +351,61 @@ def reporte_visitas():
     except Exception as e:
         flash(f"Error al generar el reporte: {str(e)}", "danger")
         return redirect(url_for("session_blueprint.sessionCrud"))
+
+
+@session_blueprint.errorhandler(TypeError)
+def handle_type_error(error):
+    logging.exception("Error de tipo en operaciones de sesión: %s", error)
+    flash("Error en los datos ingresados. Verifica la información proporcionada.", "danger")
+    return redirect(request.referrer or url_for("session_blueprint.sessionCrud"))
+
+@session_blueprint.errorhandler(AttributeError)
+def handle_attribute_error(error):
+    logging.exception("Error de atributo en operaciones de sesión: %s", error)
+    flash("Hubo un error al acceder a un atributo. Por favor, revisa los datos.", "danger")
+    return redirect(request.referrer or url_for("session_blueprint.sessionCrud"))
+
+@session_blueprint.errorhandler(PermissionError)
+def handle_permission_error(error):
+    logging.exception("Error de permisos: %s", error)
+    flash("No tienes permisos para realizar esta acción.", "danger")
+    return redirect(url_for("main_blueprint.home"))
+
+@session_blueprint.errorhandler(ValueError)
+def handle_value_error(error):
+    logging.exception("Error de valor en operaciones de sesión: %s", error)
+    flash("Error en los datos ingresados. Por favor, verifica los valores.", "danger")
+    return redirect(request.referrer or url_for("session_blueprint.sessionCrud"))
+
+@session_blueprint.errorhandler(IntegrityError)
+def handle_integrity_error(error):
+    db.session.rollback()
+    logging.exception("Error de integridad en la base de datos: %s", error)
+    flash("Error al procesar la operación. Datos de integridad inválidos.", "danger")
+    return redirect(request.referrer or url_for("session_blueprint.sessionCrud"))
+
+@session_blueprint.errorhandler(OperationalError)
+def handle_operational_error(error):
+    db.session.rollback()
+    logging.exception("Error operativo de la base de datos: %s", error)
+    flash("No se pudo conectar a la base de datos. Inténtalo más tarde.", "danger")
+    return redirect(url_for("main_blueprint.home"))
+
+@session_blueprint.errorhandler(NoResultFound)
+def handle_no_result_found(error):
+    logging.exception("Resultado no encontrado: %s", error)
+    flash("No se encontró el recurso solicitado. Verifica los datos.", "danger")
+    return redirect(url_for("main_blueprint.home"))
+
+@session_blueprint.errorhandler(SQLAlchemyError)
+def handle_sqlalchemy_error(error):
+    db.session.rollback()
+    logging.exception("Error general de SQLAlchemy: %s", error)
+    flash("Se produjo un error en la base de datos. Por favor, intenta más tarde.", "danger")
+    return redirect(request.referrer or url_for("session_blueprint.sessionCrud"))
+
+@session_blueprint.errorhandler(Exception)
+def handle_generic_exception(error):
+    logging.exception("Error inesperado: %s", error)
+    flash("Ocurrió un error inesperado. Por favor, intenta más tarde.", "danger")
+    return redirect(url_for("main_blueprint.home"))
