@@ -9,7 +9,7 @@
     {% endif %}
 {% endwith %}
 <br>
-<h3>Gestion de entregas</h3>
+
 <br>
 <div class="row">
   <div class="col-md-3">
@@ -49,6 +49,7 @@
   </div>
 </div>
 <a class="btn-red" href="/entregas/agregar"><i class="fas fa-shopping-cart"></i> Registrar entrega</a>
+<a class="btn-red" href="/imprimir"><i class="fa fa-print"></i> Imprimir</a>
 <br><br><br>
 <div class="filtro_compras">
   <form method="POST" action="/entregas">
@@ -94,8 +95,7 @@
       <div class="custom-card-summary">
           <strong>Fecha:&nbsp;</strong>{{ entrega.fechaentrega }}
           <strong>&nbsp;Hora:&nbsp;</strong>{{ entrega.horaentrega }}
-          <strong>&nbsp;Total:&nbsp;</strong>{{ entrega.total }}
-          <p><strong>Empleado:</strong>&nbsp;{{ entrega.nombreempleado }}</p>
+          <strong>&nbsp;Total:&nbsp;</strong>{{ entrega.subtotal }}
           <p><strong>Proveedor:</strong>&nbsp;{{ entrega.proveedor }}</p>
           <p><strong>Método de pago:</strong>&nbsp;{{ entrega.metodopago }}</p>
           <p><strong>Estado actual:</strong>&nbsp;{{ entrega.estado }}</p>

@@ -71,43 +71,36 @@
         }
     });
 </script>
+<h3>Gestión de empleados</h3>
 
-<table class="table table-striped mt-3">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Dirección</th>
-            <th>Carnet</th>
-            <th>Teléfono</th>
-            <th>Sueldo</th>
-            <th>Opciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for empleado in empleados %}
-        <tr>
-            <td>{{ empleado.idempleado }}</td>
-            <td>{{ empleado.nombre }}</td>
-            <td>{{ empleado.apellido }}</td>
-            <td>{{ empleado.direccion }}</td>
-            <td>{{ empleado.carnet }}</td>
-            <td>{{ empleado.telefono }}</td>
-            <td>{{ empleado.sueldo }}</td>
-            <td>
-                <a href="/empleados/editar/{{ empleado.idempleado }}" class="btn btn-dark">Editar</a>
-                <form action="/empleados/eliminar/{{ empleado.idempleado }}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                </form>
-                {% if empleado.idrol is not none %}
-                    <a href="/empleados/actualizar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Actualizar rol</a>
-                {% else %}
-                    <a href="/empleados/asignar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Asignar rol</a>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="row">
+    {% for empleado in empleados %}
+        <div class="col-md-4">
+            <div class="card custom-card mb-3">
+                <div class="card-header">Empleado ID: {{ empleado.idempleado }}</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ empleado.nombre }} {{ empleado.apellido }}</h5>
+                    <p><strong>Dirección:</strong> {{ empleado.direccion or 'No registrada' }}</p>
+                    <p><strong>Carnet:</strong> {{ empleado.carnet }}</p>
+                    <p><strong>Teléfono:</strong> {{ empleado.telefono or 'No registrado' }}</p>
+                    <p><strong>Sueldo:</strong> {{ empleado.sueldo }} Bs.</p>
+                    <div class="d-flex justify-content-between">
+                        <a href="/empleados/editar/{{ empleado.idempleado }}" class="btn btn-dark">Editar</a>
+                        <form action="/empleados/eliminar/{{ empleado.idempleado }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                        {% if empleado.idrol is not none %}
+                            <a href="/empleados/actualizar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Actualizar Rol</a>
+                        {% else %}
+                            <a href="/empleados/asignar_rol/{{ empleado.idempleado }}" class="btn btn-warning">Asignar Rol</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    {% if not empleados %}
+        <p>No se encontraron empleados.</p>
+    {% endif %}
+</div>
 {% endblock %}

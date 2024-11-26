@@ -247,7 +247,7 @@ def verificar():
             if session["rol"] == "Administrador":
                 return redirect("/")
             else:
-                return redirect("tareasCom")
+                return redirect("/tareasCom")
         else:
             flash("Codigo incorrecto")
         return redirect("/login") 

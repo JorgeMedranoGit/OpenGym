@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imprimir</title>
+  <!-- Incluye Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0; /* Asegúrate de que no haya padding */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #f0f0f0;
+    }
+
+    .image-container {
+      width: 100%; /* Ancho completo */
+      height: auto; /* Ajusta la altura automáticamente */
+      overflow: hidden; /* Oculta el contenido que se desborda */
+      display: flex; /* Para centrar la imagen */
+      justify-content: center; /* Centra horizontalmente */
+      margin-bottom: 10px; /* Espacio entre la imagen y la tabla */
+    }
+
+    .image-container img {
+      width: 500px; /* Ancho fijo de la imagen */
+      height: auto; /* Mantiene la relación de aspecto */
+      background-color: black;
+    }
+
+    .paper {
+      width: 90vw;
+      height: calc(90vw * (11 / 8.5));  /* Tamaño reducido */
+      max-width: 7in;  /* Reducción del tamaño máximo */
+      max-height: 9in;
+      background-color: white;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      padding: 10px;  /* Menos padding */
+      overflow: hidden; /* Cambiado a hidden para evitar scroll en impresión */
+      position: relative; /* Para controlar el posicionamiento en impresión */
+    }
+
+    button {
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    
+    table {
+      width: 100%; /* Asegúrate de que la tabla ocupa el 100% del contenedor */
+      margin: 0; /* Eliminar margen */
+      table-layout: fixed; /* Fija el diseño de la tabla */
+    }
+
+    th, td {
+      word-wrap: break-word; /* Permite que el texto largo se divida */
+      padding: 0.5rem; /* Espaciado interno más pequeño */
+    }
+
+    @media print {
+      body {
+        margin: 0; /* Eliminar márgenes al imprimir */
+        padding: 0; /* Eliminar padding al imprimir */
+      }
+
+      body *:not(.printed):not(.printed *) {
+        display: none;
+      }
+
+      .printed,
+      .printed * {
+        visibility: visible;
+        transform-origin: top center;
+      }
+
+      .paper {
+        width: 7in;
+        height: 9in;
+        box-shadow: none;
+        margin: 0;
+        padding: 0; /* Cambiar padding a 0 en impresión */
+        overflow: auto; /* Permitir scroll en impresión si es necesario */
+        position: absolute; /* Posicionamiento absoluto para controlar la ubicación */
+        top: 0; /* Alinear al borde superior */
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <button class="btn btn-primary" onclick="window.history.back()">Volver</button>
+  <button class="btn btn-primary" onclick="window.print()">Imprimir</button>
+  
+  <div class="paper printed">
+    <div class="image-container">
+        <img src="{{ url_for('static', filename='images/logoMin.png') }}" alt="Logo">
+    </div>
+
+    <div>
+        <p><strong>Fecha del Reporte:</strong> {{ fecha }}</p>
+        <p><strong>Generado por:</strong> {{ empleado }}</p>
+    </div>
+
+    <table class="table table-bordered table-sm"> <!-- 'table-sm' para tabla pequeña -->
+        <thead class="thead-dark">
+            {{ claves|safe }}
+        </thead>
+        <tbody>
+            {{ valores|safe }}
+            {{ extra|safe }}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
