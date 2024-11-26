@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Reporte Visitas{% endblock %}
 
-{% with messages = get_flashed_messages(with_categories=true) %}
+{% with messages = get_flashed_messages(with_categories=True) %}
     {% if messages %}
         <div class="container mt-3">
-            {% for category, message in messages %}
+            {% for category, msg in messages %}
                 <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
+                    <p>{{ msg }}</p>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
@@ -14,29 +14,30 @@
     {% endif %}
 {% endwith %}
 
+
 {% block content %}
 <div class="container mt-4">
     <h1 class="mb-4 text-center">Reporte de Visitas</h1>
 
     <!-- Filtros -->
     <form method="POST" class="row g-3 align-items-center mb-4">
-        <div class="col-auto">
+        <div class="col-12 col-md-3 mb-2">
             <label for="fecha_inicio" class="form-label">Fecha Inicio:</label>
-            <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+            <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ fecha_inicio or '' }}">
         </div>
-        <div class="col-auto">
+        <div class="col-12 col-md-3 mb-2">
             <label for="fecha_fin" class="form-label">Fecha Fin:</label>
-            <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+            <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ fecha_fin or '' }}">
         </div>
-        <div class="col-auto mt-4">
-            <button type="submit" class="btn btn-primary">Filtrar</button>
+        <div class="col-12 col-md-3 mb-2">
+            <button type="submit" class="btn btn-red">Filtrar</button>
         </div>
     </form>
 
     <!-- Tarjetas Resumen -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card text-white bg-info mb-3">
+            <div class="card custom-card-info mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Total Miembros</h5>
                     <p class="card-text display-6">{{ total_miembros }}</p>
@@ -44,7 +45,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card text-white bg-success mb-3">
+            <div class="card custom-card-info mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Total Visitas Regulares</h5>
                     <p class="card-text display-6">{{ total_visitas_regulares }}</p>
@@ -53,8 +54,40 @@
         </div>
     </div>
 
-    <!-- Tabla de Detalles -->
-    <div class="table-responsive">
+    
+
+    <div class="custom-grid-container">
+        {% for visita in visitas %}
+                <div class="custom-card">
+                    <div class="custom-card-summary">
+                        <p><strong>Tipo sesion:</strong> {{ visita.tipo_sesion }}</p>
+                        <p><strong>Fecha de sesion:</strong> {{ visita.fechasesion }}</p>
+                        <p><strong>Costo:</strong> {{ visita.costo | round(2) }} Bs</p>
+                        <p><strong>Nombre:</strong> {{ visita.nombre or 'Visita Regular' }} {{ visita.apellido or '' }}</p>
+                        <p><strong>Tipo de membresia:</strong> {{ visita.tipomembresia or 'N/A' }}</p>
+                        {% if es_admin %}
+                            <p><strong>Id Empleado:</strong> {{ visita.idempleado}}</p>
+                        {% endif %}
+                    </div>
+                </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Tabla de Detalles -->
+    <!-- <div class="table-responsive">
         <table class="table table-striped table-bordered align-middle">
             <thead class="table-dark">
                 <tr>
@@ -85,6 +118,4 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
-</div>
-{% endblock %}
+    </div> -->

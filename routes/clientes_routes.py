@@ -7,6 +7,9 @@ from models.membresias import Membresias
 from models.pagos import Pago
 from models.sesiones import Sesion
 from database import db
+from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
+from sqlalchemy.orm.exc import NoResultFound
+import logging
 
 cliente_blueprint = Blueprint('cliente_blueprint', __name__)
 
@@ -31,11 +34,16 @@ def clientesCrud():
         if not apellido or len(apellido) < 3:
             errores.append("El apellido es obligatorio y debe tener al menos 3 caracteres.")
             flash("datos incorrectos")
-        if not carnet.isdigit() or len(carnet) != 8:
-            errores.append("El carnet debe ser un número de 8 dígitos.")
+        if not carnet.isdigit() or not (7 <= len(carnet) <= 9):
+            errores.append("El carnet debe ser un número de 7 a 9 dígitos.")
             flash("datos incorrectos")
-        if not telefono.isdigit() or len(telefono) < 7:
-            errores.append("El teléfono debe ser un número válido con al menos 7 dígitos.")
+
+        carnet_existente = Clientes.query.filter_by(carnet=carnet, activo=True).first()
+        if carnet_existente and (not cliente_id or int(cliente_id) != carnet_existente.idcliente):
+            errores.append("El carnet ya está registrado en otro cliente activo.")
+            flash("El carnert ya ha sido registrado")
+        if not telefono.isdigit() or len(telefono) != 8 :
+            errores.append("El teléfono debe tener 8 digitos")
             flash("datos incorrectos")
 
         if errores:
@@ -126,7 +134,9 @@ def clientesCrud():
             Pago.idcliente == Clientes.idcliente,
             Pago.idmembresia == DetalleMembresia.idmembresia
         )
-    ).filter(Clientes.activo == True, Clientes.nombre != 'Cliente').all()
+    ).filter(Clientes.activo == True, Clientes.nombre != 'Cliente').order_by(
+        Clientes.idcliente.desc()
+    ).all()
 
 
     clientes_inactivos = Clientes.query.filter_by(activo=False).all()
@@ -263,3 +273,59 @@ def obtener_todos_los_clientes():
     return Clientes.query.all()
 
 
+@cliente_blueprint.errorhandler(TypeError)
+def handle_type_error(error):
+    logging.exception("Error de tipo en la gestión de clientes: %s", error)
+    flash("Se produjo un error de tipo, revisa los datos ingresados.")
+    return redirect("/clientes")
+
+@cliente_blueprint.errorhandler(AttributeError)
+def handle_attribute_error(error):
+    logging.exception("Error de atributo en la gestión de clientes: %s", error)
+    flash("Se produjo un error al acceder a un atributo. Verifica los datos proporcionados.")
+    return redirect("/clientes")
+
+@cliente_blueprint.errorhandler(PermissionError)
+def handle_permission_error(error):
+    logging.exception("Error de permiso en la gestión de clientes: %s", error)
+    flash("No tienes permiso para realizar esta acción.")
+    return redirect("/clientes")
+
+@cliente_blueprint.errorhandler(ValueError)
+def handle_value_error(error):
+    logging.exception("Error de valor en la gestión de clientes: %s", error)
+    flash("Error en los datos ingresados. Por favor revisa los valores proporcionados.")
+    return redirect("/clientes")
+
+@cliente_blueprint.errorhandler(IntegrityError)
+def handle_integrity_error(error):
+    db.session.rollback()
+    logging.exception("Error de integridad en la base de datos al gestionar clientes: %s", error)
+    flash("Error al registrar o modificar datos. Verifica los valores ingresados.")
+    return redirect("/clientes")
+
+@cliente_blueprint.errorhandler(OperationalError)
+def handle_operational_error(error):
+    db.session.rollback()
+    logging.exception("Error operativo de la base de datos al gestionar clientes: %s", error)
+    flash("No se pudo conectar a la base de datos. Inténtalo más tarde.")
+    return redirect("/clientes")
+
+@cliente_blueprint.errorhandler(NoResultFound)
+def handle_no_result_found(error):
+    logging.exception("Cliente no encontrado: %s", error)
+    flash("El cliente especificado no existe.")
+    return redirect("/clientes")
+
+@cliente_blueprint.errorhandler(SQLAlchemyError)
+def handle_sqlalchemy_error(error):
+    db.session.rollback()
+    logging.exception("Error general de SQLAlchemy al gestionar clientes: %s", error)
+    flash("Se produjo un error al realizar la operación. Por favor, inténtalo más tarde.")
+    return redirect("/clientes")
+
+@cliente_blueprint.errorhandler(Exception)
+def handle_generic_exception(error):
+    logging.exception("Error genérico en la gestión de clientes: %s", error)
+    flash("Ocurrió un error inesperado. Por favor, inténtalo más tarde.")
+    return redirect("/clientes")

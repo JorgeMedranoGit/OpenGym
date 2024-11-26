@@ -1,6 +1,19 @@
 {% extends "base.html" %}
-
+{% block title %}Clientes{% endblock %}
 {% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="container mt-3">
+            {% for msg in messages %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <p>{{ msg }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+
 <div class="container">
 
     {% if session['email'] %}
@@ -11,9 +24,9 @@
 
     <h1>Gestión de Clientes</h1>
 
-    <button class="btn btn-outline-dark" id="btnAgregarCliente">Agregar Cliente</button>
+    <!-- <button class="btn btn-outline-dark" id="btnAgregarCliente">Agregar Cliente</button> -->
 
-    <div id="formularioCliente" style="display: none; margin-top: 20px;">
+    <div id="formularioCliente"></div>
         <h2>Registrar Nuevo Cliente</h2>
         <form action="{{ url_for('cliente_blueprint.clientesCrud') }}" method="POST">
             <input type="hidden" name="cliente_id" value="{{ cliente.idcliente if cliente else '' }}">
@@ -55,9 +68,10 @@
                     name="carnet" 
                     value="{{ cliente.carnet if cliente else '' }}" 
                     required 
-                    pattern="\d{8}" 
-                    title="El carnet debe contener exactamente 8 dígitos." 
-                    placeholder="Ejemplo: 12345678">
+                    minlength="7" 
+                    maxlength="9"
+                    title="El carnet debe contener de 7 a 9 dígitos." 
+                    placeholder="Ejemplo: 123456789">
             </div>
             <div class="form-group">
                 <label for="telefono">Teléfono:</label>
@@ -68,10 +82,10 @@
                     name="telefono" 
                     value="{{ cliente.telefono if cliente else '' }}" 
                     required 
-                    pattern="\d{7,15}" 
-                    maxlength="15" 
-                    title="El teléfono debe contener entre 7 y 15 dígitos." 
-                    placeholder="Ejemplo: 123456789">
+                    pattern="\d{8}" 
+                    maxlength="8" 
+                    title="El teléfono debe contener 8 dígitos." 
+                    placeholder="Ejemplo: 12345678">
             </div>        
             <div class="form-group">
                 <label for="tipo_suscripcion">Tipo de Suscripción:</label>
@@ -116,7 +130,7 @@
 
 
     <h2>Clientes</h2>
-    <table class="table table-bordered">
+    <!--<table class="table table-bordered">
         <thead>
             <tr>
                 <th>Nombre</th>
@@ -162,7 +176,38 @@
                 </tr>
             {% endfor %}
         </tbody>
-    </table>
+    </table>-->
+    <div class="custom-grid-container">
+        {% for cliente, tipomembresia, estado_pago in clientes %}    
+            <div class="custom-card">
+                <div class="custom-card-summary">
+                    <p> <strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong></p>
+                    <p><strong>Carnet:</strong> {{ cliente.carnet }}</p>
+                    <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+                    <p><strong>Tipo de Membresía:</strong> {{ tipomembresia if tipomembresia else 'Sesión' }}</p>
+                    <p><strong>Estado:</strong> {{ 'Activo' if cliente.activo else 'Vencido' }}</p>
+                    <p><strong>Estado de Pago:</strong></p>
+                    <td>
+                        {% if estado_pago == "Pendiente" %}
+                            <form action="{{ url_for('cliente_blueprint.actualizar_estado_pago') }}" method="POST">
+                                <input type="hidden" name="idcliente" value="{{ cliente.idcliente }}">
+                                <input type="hidden" name="estado" value="Pagado">
+                                <button type="submit" class="btn btn-secondary">Pendiente</button>
+                            </form>
+                        {% else %}
+                            <span class="btn btn-info">Pagado</span>
+                        {% endif %}
+                    </td>
+                    <div class="custom-card-actions">
+                        <a href="{{ url_for('cliente_blueprint.editarCliente', id=cliente.idcliente) }}" class="btn btn-dark">Editar</a>
+                        <form action="{{ url_for('cliente_blueprint.desactivarCliente', id=cliente.idcliente) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-red">Desactivar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
 <script>
@@ -172,10 +217,12 @@
     const tipoSuscripcion = document.getElementById('tipo_suscripcion');
     const membresiaOptions = document.getElementById('membresia-options');
 
-    btnAgregarCliente.addEventListener('click', () => {
-        formularioCliente.style.display = 'block';
-        formularioCliente.querySelector('form').reset(); 
-        document.getElementById('cliente_id').value = ''; 
+    
+
+
+    document.getElementById('btnAgregarCliente').addEventListener('click', function () {
+        const formularioCliente = document.getElementById('formularioCliente');
+        formularioCliente.style.display = formularioCliente.style.display === 'none' ? 'block' : 'none';
     });
 
     tipoSuscripcion.addEventListener('change', function () {

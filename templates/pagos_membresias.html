@@ -17,11 +17,11 @@
     <div class="row">
         {% if pagos_hoy %}
             {% for tipo, total, cantidad in pagos_hoy %}
-            <div class="col-md-4">
-                <div class="card text-white bg-primary mb-3">
+            <div class="col-md-3">
+                <div class="card custom-card-info mb-3">
                     <div class="card-header">{{ tipo or 'Sin Membresía' }}</div>
                     <div class="card-body">
-                        <h5 class="card-title">Total: ${{ total | round(2) }}</h5>
+                        <h5 class="card-title">Total: {{ total | round(2) }} Bs</h5>
                         <p class="card-text">Pagos registrados: {{ cantidad }}</p>
                     </div>
                 </div>
@@ -37,23 +37,25 @@
     
     
 
-    <form method="POST" class="row g-3 mb-4">
-        <div class="col-md-5">
-            <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
-            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
-        </div>
-        <div class="col-md-5">
-            <label for="fecha_fin" class="form-label">Fecha Fin</label>
-            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    <form method="POST">
+        <div class="row align-items-center">
+            <div class="col-12 col-md-3 mb-2">
+                <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+            </div>
+            <div class="col-12 col-md-3 mb-2">
+                <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+            </div>
+            <div class="col-12 col-md-3 mb-2">
+                <button type="submit" class="btn-red">Filtrar</button>
+            </div>
         </div>
     </form>
     
     
 
-    <table class="table table-bordered">
+    <!-- <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Fecha</th>
@@ -80,7 +82,24 @@
             </tr>
             {% endfor %}
         </tbody>
-    </table>
+    </table> -->
+
+
+    <div class="custom-grid-container">
+        {% for pago in pagos %}
+                <div class="custom-card">
+                    <div class="custom-card-summary">
+                        <p><strong>Fecha:</strong> {{ pago.fecha }}</p>
+                        <p> <strong>{{ pago.nombre }} {{ pago.apellido }}</strong></p>
+                        <p><strong>Tipo membresia: </strong> {{ pago.tipomembresia or "N/A" }}</p>
+                        <p><strong>Monto:</strong> {{ pago.monto }} Bs</p>
+                        {% if rol == 'administrador' %}
+                        <p><strong>Id Empleado:</strong> {{ pago.idempleado }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+        {% endfor %}
+    </div>
 </div>
     
 {% endblock %}
