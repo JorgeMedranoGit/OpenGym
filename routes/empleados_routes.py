@@ -51,12 +51,12 @@ def eliminar_empleado(empleado_id):
         flash("Debes iniciar sesión")
         return redirect("/login")
     eliminar_empleado_por_id(empleado_id)
-    flash('Empleado eliminado correctamente')
+    flash('Empleado eliminado correctamente (borrado lógico)')
     return redirect('/empleados')
 
 
 def obtener_todos_los_empleados():
-    return Empleado.query.all()
+    return Empleado.query.filter_by(elimlogico=1).all()
 
 def obtener_empleado_por_id(empleado_id):
     return Empleado.query.get(empleado_id)
@@ -126,7 +126,41 @@ def actualizar_rol(empleado_id):
 def encriptar_contrasena_defecto():
     return generate_password_hash("123456")
 
+def eliminar_empleado_por_id(empleado_id):
+    empleado = Empleado.query.get(empleado_id)
+    if empleado:
+        empleado.elimlogico = 0 
+        db.session.commit()
 
 
+@empleados_blueprint.route('/empleados/eliminados', methods=['GET'])
+def empleados_eliminados():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+    
+    empleados_eliminados = Empleado.query.filter_by(elimlogico=0).all()
+    return render_template('empleados_eliminados.html', empleados=empleados_eliminados, rol=session["rol"])
+
+@empleados_blueprint.route('/empleados/restaurar/<int:empleado_id>', methods=['GET', 'POST'])
+def restaurar_empleado(empleado_id):
+    if "usuario" not in session:
+        flash("Debes iniciar sesión")
+        return redirect("/login")
+    
+    try:
+        empleado = Empleado.query.get(empleado_id)
+        if empleado:
+            empleado.elimlogico = 1  # Restaurar el empleado
+            db.session.commit()
+            flash('Empleado restaurado correctamente')
+        else:
+            flash('Empleado no encontrado')
+    except Exception as e:
+        app.logger.error(f"Error al restaurar empleado con ID {empleado_id}: {e}")
+        flash('Hubo un error al restaurar el empleado')
+    
+    # Redirigir a la página de empleados
+    return redirect('/empleados')
 
 
