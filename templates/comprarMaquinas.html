@@ -16,7 +16,7 @@
         event.preventDefault(); // Evitar el envío del formulario
 
         if (productosSeleccionados.length === 0) {
-            alert('No hay productos seleccionados para comprar.');
+            
             return;
         }
 
@@ -38,19 +38,16 @@
         })
             .then(response => response.json())
             .then(data => {
-                alert('Compra realizada con éxito');
-                window.location.href = "/comprarmaquinas";
+                window.location.href = "/verComprasMaquinas";
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Hubo un error al realizar la compra.');
             });
     }
     function validarFormulario(event) {
         const select = document.getElementById('nombre');
         if (select.value === '0') {
             event.preventDefault(); // Evita el envío del formulario
-            alert('Por favor, selecciona un nombre válido.'); // Mensaje de alerta
         }
     }
     function validarFormularioAgregar() {
@@ -153,14 +150,13 @@
                     // Obtener el texto del proveedor seleccionado
                     textoSeleccionado = proveedorSeleccionado.text;
                 }
-                console.log(textoSeleccionado)
+                console.log("Proveedor Seleccionado")
 
             }
             const producto = {
                 idNombre: nombreSelect.value,
                 nombre: nombreSelect.value === '0' ? nuevoNombre : nombreSelect.options[nombreSelect.selectedIndex].text,
                 codnom: nombreSelect.value === '0' ? nuevoCodigoNombre : "conocido",
-                idEmpleado: idEmpleadoInput.value,
                 cantidad: parseInt(cantidadInput.value),
                 precioUnitario: parseFloat(precioUnitarioInput.value),
                 tipoMaquina: tipoMaquinaInput.value // Agregar tipo de máquina
@@ -551,7 +547,6 @@
             productosSeleccionados.push(producto);
             mostrarProductos();
         } else {
-            alert("Cantidad y precio unitario son requeridos.");
         }
     }
 </script>
