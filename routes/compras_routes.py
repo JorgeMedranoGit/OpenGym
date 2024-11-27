@@ -53,7 +53,7 @@ def compraCrud():
     if session["rol"] == "Administrador":
         compras = obtenerCompras(empleado_id, cliente_id, fecha_inicio, fecha_fin)
     elif session["rol"] == "Recepcionista":
-        compras = obtenerCompras_emp(empleado_id, cliente_id)
+        compras = obtenerCompras(session['empleado_id'], cliente_id, fecha_inicio, fecha_fin)
 
     for compra in compras:
         id = compra['idcompra']
